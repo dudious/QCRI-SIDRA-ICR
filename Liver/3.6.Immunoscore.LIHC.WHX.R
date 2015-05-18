@@ -1,6 +1,6 @@
 #################################################################
 ###
-### This script calculated the Immunoscore for TP53 mutated patients
+### This script calculated the Immunoscore 
 ###
 ###
 #################################################################
@@ -23,16 +23,11 @@ library("plyr")
 library("estimate")
 source ("./1 CODE/R tools/read.gct.R")
 
-dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/")
+dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/",showWarnings=FALSE)
 
 ## Load Data
 
 load ("./3 ANALISYS/Mutations/LIHC/Mutation.Data.split.RDATA")
-
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv",header=FALSE) # select source data
-colnames (Consensus.class) <- c("PatientID","Group")
-rownames(Consensus.class) <- Consensus.class[,1]
-
 load ("./2 DATA/SUBSETS/LIHC/TCGA.LIHC.RNASeq.subset.ISGS.RData")
 RNASeq.subset <- as.matrix(RNASeq.subset)
 
@@ -64,47 +59,5 @@ estimate.gct <- estimate.gct[rownames(immunoscore),]
 immunoscore <- cbind (immunoscore,estimate.gct)
 write.csv (immunoscore,file=("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.LIHC.ISGS.csv"))
 
-# add immunoscore to mutation data
-Mutation.All <- merge(Mutation.All,immunoscore[,"scaled.IS",drop=FALSE],by.x="Patient_ID",by.y="row.names",all.x=TRUE, all.y=FALSE)
-row.names(Mutation.All) <- Mutation.All$Row.names
-Mutation.All$Row.names <- NULL
 
-# order by ICR group and immunoscore 
-Mutation.All <- Mutation.All[order(factor(Mutation.All$Group,levels = c("ICR4","ICR3","ICR2","ICR1")),-Mutation.All$scaled.IS),]    # if sorting withing cluster add ,RNASeq.subset$scaled.IS 
-
-# Select TP53 mutations
-Mutation.All.TP53 <- Mutation.All[Mutation.All$Hugo_Symbol == "TP53",]
-dim (Mutation.All.TP53) #64 TP53 mutations
-Mutation.All.TP53 <- unique (Mutation.All.TP53) #64 mutations
-
-Mutation.Any.TP53 <- Mutation.Any[Mutation.Any$Hugo_Symbol == "TP53",]
-dim (Mutation.Any.TP53) #64 TP53 mutations
-Mutation.Any.TP53 <- unique (Mutation.Any.TP53) #64 mutations
-
-Mutation.Missense.TP53 <- Mutation.Missense[Mutation.Missense$Hugo_Symbol == "TP53",]
-dim (Mutation.Missense.TP53) #64 TP53 mutations
-Mutation.Missense.TP53 <- unique (Mutation.Missense.TP53) #64 mutations
-
-Mutation.Nonsense.TP53 <- Mutation.Nonsense[Mutation.Nonsense$Hugo_Symbol == "TP53",]
-dim (Mutation.Nonsense.TP53) #64 TP53 mutations
-Mutation.Nonsense.TP53 <- unique (Mutation.Nonsense.TP53) #64 mutations
-
-#TP53 imunoscore by cluster and by type of mutation
-
-TP53.IS.All <- aggregate (Mutation.All.TP53[,c("scaled.IS"),drop=FALSE],by=list(Mutation.All.TP53$Cluster),FUN=mean)
-colnames (TP53.IS.any) <- c("Cluster","TP53.All")
-TP53.IS.Any <- aggregate (Mutation.Any.TP53[,c("scaled.IS"),drop=FALSE],by=list(Mutation.Any.TP53$Cluster),FUN=mean)
-colnames (TP53.IS.any) <- c("Cluster","TP53.Any")
-TP53.IS.Missense <- aggregate (Mutation.Missense.TP53[,c("scaled.IS"),drop=FALSE],by=list(Mutation.Missense.TP53$Cluster),FUN=mean)
-colnames (TP53.IS.any) <- c("Cluster","TP53.Missense")
-TP53.IS.Nonsense <- aggregate (Mutation.Nonsense.TP53[,c("scaled.IS"),drop=FALSE],by=list(Mutation.Nonsense.TP53$Cluster),FUN=mean)
-colnames (TP53.IS.any) <- c("Cluster","TP53.Nonsense")
-
-#TP53.IS.Silent <- aggregate (Mutation.Silent[,c("scaled.IS"),drop=FALSE],by=list(Mutation.other$Group),FUN=mean) #(only 1 silent mutations)
-#colnames (TP53.IS.Silent) <- c("Cluster","TP53.Silent")
-TP53.IS.other <- aggregate (Mutation.other[,c("scaled.IS"),drop=FALSE],by=list(Mutation.other$Group),FUN=mean)
-colnames (TP53.IS.other) <- c("Cluster","TP53.other")
-
-TP53.IS <- cbind (TP53.IS.any,TP53.IS.Missense,TP53.IS.Nonsense,TP53.IS.other)
-TP53.IS <- TP53.IS[,-c(3,5,7)]
  

@@ -36,7 +36,7 @@ colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
 
 # Add Class to mutation data
-Mutation.selected.data <- merge(Mutation.selected.data,Consensus.class,by="Patient_ID",all.x=TRUE, all.y=FALSE)
+Mutation.selected.data$Cluster <- Consensus.class$Cluster [match(Mutation.selected.data$Patient_ID,Consensus.class$Patient_ID)]
 Mutation.selected.data <- Mutation.selected.data [-which(is.na(Mutation.selected.data$Cluster)),]
 
 # split mutation types

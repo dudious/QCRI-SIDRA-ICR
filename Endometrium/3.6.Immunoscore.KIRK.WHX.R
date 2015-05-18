@@ -26,20 +26,20 @@ source ("./1 CODE/R tools/read.gct.R")
 dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/",showWarnings=FALSE)
 
 ## Load Data
-load ("./2 DATA/SUBSETS/SKCM/TCGA.SKCM.RNASeq.subset.ISGS.RData")
+load ("./2 DATA/SUBSETS/KIRC/TCGA.KIRC.RNASeq.subset.ISGS.RData")
 RNASeq.subset <- as.matrix(RNASeq.subset)
 
-load ("./2 DATA/TCGA RNAseq/RNASeq_SKCM_EDASeq/SKCM.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData")
-write.table(RNASeq.NORM_Log2,file="./2 DATA/TCGA RNAseq/RNASeq_SKCM_EDASeq/SKCM.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.txt",sep="\t",quote=FALSE)
+load ("./2 DATA/TCGA RNAseq/RNASeq_KIRC_EDASeq/KIRC.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData")
+write.table(RNASeq.NORM_Log2,file="./2 DATA/TCGA RNAseq/RNASeq_KIRC_EDASeq/KIRC.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.txt",sep="\t",quote=FALSE)
 
 # Calculate estimate score
-filterCommonGenes(input.f="./2 DATA/TCGA RNAseq/RNASeq_SKCM_EDASeq/SKCM.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.txt",
-                  output.f="./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.SKCM.estimate.input.gct",
+filterCommonGenes(input.f="./2 DATA/TCGA RNAseq/RNASeq_KIRC_EDASeq/KIRC.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.txt",
+                  output.f="./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.KIRC.estimate.input.gct",
                   id=c("GeneSymbol","EntrezID"))
-estimateScore("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.SKCM.estimate.input.gct",
-              "./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.SKCM.estimate.score.gct",
+estimateScore("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.KIRC.estimate.input.gct",
+              "./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.KIRC.estimate.score.gct",
               platform= "illumina")
-estimate.gct<-read.table("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.SKCM.estimate.score.gct",skip=2 , header = TRUE)#skip=2 tolgo le prime 2 righe
+estimate.gct<-read.table("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/TCGA.KIRC.estimate.score.gct",skip=2 , header = TRUE)#skip=2 tolgo le prime 2 righe
 
 # Calculate Immunoscore
 RNASeq.subset.scaled <- scale (RNASeq.subset,scale=FALSE)
@@ -56,7 +56,7 @@ rownames(immunoscore) <- gsub("\\.","-",rownames(immunoscore))
 mode(estimate.gct) <- "numeric"
 estimate.gct <- estimate.gct[rownames(immunoscore),]
 immunoscore <- cbind (immunoscore,estimate.gct)
-write.csv (immunoscore,file=("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.SKCM.ISGS.csv"))
+write.csv (immunoscore,file=("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.KIRC.ISGS.csv"))
 
 
  
