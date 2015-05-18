@@ -23,7 +23,9 @@ setwd("~/Dropbox/BREAST_QATAR/")
  if(length(missing.packages)) install.packages(missing.packages)
 library("ggplot2")
 library("plyr")
-#dir.create("./3 ANALISYS/Mutations/SKCM")
+
+dir.create ("./3 ANALISYS/Mutations/SKCM/",showWarnings=FALSE)
+
 ## Load Data
 ## download data from TCGA site (what dataset)
 Mutation.data <- read.csv ("./2 DATA/TCGA Mutations/SKCM/Somatic_Mutations/BI__IlluminaGA_DNASeq_automated/Level_2/broad.mit.edu__IlluminaGA_automated_DNA_sequencing_level2.maf",sep ="\t")
@@ -94,62 +96,13 @@ Mutation.Frequency.Patient$Freq.Other <- Count.Other.Patient$freq [match(rowname
 
 write.csv (Mutation.Frequency.Patient,file="./3 ANALISYS/Mutations/SKCM/Mutations.TCGA.SKCM.Patient.by.Cluster.csv")
 
-#Prepare Data for Boxplots
-
-numMuts.SGall <- data.frame(count=Count.All.Patient$freq,cluster=Count.All.Patient$Cluster,mut.type = "All")
-
-numMuts.Missense <- cbind(Count.Missense.Patient[,c("freq","Cluster")],mut.type = "Missense")
-numMuts.Nonsense <- cbind(Count.Nonsense.Patient[,c("freq","Cluster")],mut.type = "Nonsense")
-numMuts.Silent <- cbind(Count.Silent.Patient[,c("freq","Cluster")],mut.type = "Silent")
-numMuts.Other <- cbind(Count.Other.Patient[,c("freq","Cluster")],mut.type = "Other")
-numMuts.SGtype <- rbind(numMuts.Missense,numMuts.Silent,numMuts.Nonsense,numMuts.Other)
-rownames(numMuts.SGtype) <- NULL
-colnames(numMuts.SGtype) = c( "count", "cluster", "mut.type")
+## Count the number of samples in the mutation table per cluster (N)
+muts.uniquesamples = Mutation.All[which(!duplicated(Mutation.All$Patient_ID)),c("Patient_ID","Cluster") ] 
+sample.cluster.count = as.data.frame(table(muts.uniquesamples$Cluster))
+colnames (sample.cluster.count) = c("Cluster","N")
+#Save as R object
+save (Mutation.Frequency.Gene,Mutation.Frequency.Patient,sample.cluster.count,file="./3 ANALISYS/Mutations/SKCM/Mutation.Data.Frequencies.RDATA")
 
 
-# Choose the types of mutations
-#muts.count.type = count(Mutation.selected.data[,c("Patient_ID","Variant_Classification","Cluster")])
-#numMuts.SGtype = data.frame(count=muts.count.type$freq, cluster= muts.count.type$Cluster, mut.type = muts.count.type$Variant_Classification)
-#numMuts.SGtype = numMuts.SGtype[numMuts.SGtype$mut.type %in% c("Missense","Silent","Nonsense","Other"),]
-
-# Combine
-numMuts.SGall = rbind(numMuts.SGall, numMuts.SGtype)
-
-meds <- ddply(numMuts.SGall, .(mut.type, cluster), summarize, med = median(count)) ## median
-mean.n <- function(x){ return(c(y = 0 , label = round(mean(x),2))) } ## mean
-
-png("./4 FIGURES/Mutation Plots/Mutations.TCGA.SKCM.All.SA.WHX.png", height = 1000, width= 1000)   #set filename
-  cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
-  colors = c("blue", "green", "orange", "red")
-  gg = ggplot(numMuts.SGall, aes(cluster, count, fill=cluster)) +
-        stat_boxplot(geom ='errorbar') +
-        geom_boxplot() +
-        geom_jitter(position=position_jitter(width=0.1,height=0.1))
-        #, aes(color="lightgray")) 
-  gg = gg + ylab("Number of mutations per sample") +
-            scale_x_discrete(limits=cluster.order) +
-            facet_grid(.~mut.type,
-                      scales = "free",
-                      space="free") +
-           xlab("Clusters") + theme_bw() 
-  gg = gg + scale_fill_manual(values = colors) +
-            scale_y_continuous(breaks = seq(0, 300, 100), limits = c(0, 250)) 
-  gg = gg + theme(strip.text.x = element_text(size = 20, colour = "black"),
-                  legend.position = "none",
-                  axis.text.x = element_text(size = 12, vjust=1),
-                  axis.title.x = element_text(size = 18, vjust = -1),
-                  axis.text.y = element_text(size = 18, vjust=1),
-                  axis.title.y = element_text(size = 18, vjust = 1))
-  gg = gg + geom_text(data = meds,
-                      aes(y = 0, label = round(med,2)),
-                      size = 7, vjust = 1.2)
-  gg = gg + stat_summary(fun.data = mean.n,
-                         geom = "text",
-                         fun.y = mean,
-                         colour = "black",
-                         vjust = 3.7,
-                         size = 7)
-print(gg)
-dev.off()
 
 

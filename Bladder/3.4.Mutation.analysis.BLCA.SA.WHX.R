@@ -23,12 +23,14 @@ setwd("~/Dropbox/BREAST_QATAR/")
  if(length(missing.packages)) install.packages(missing.packages)
 library("ggplot2")
 library("plyr")
-#dir.create("./3 ANALISYS/Mutations/SKCM")
+
+dir.create ("./3 ANALISYS/Mutations/BLCA/")
+
 ## Load Data
 ## download data from TCGA site (what dataset)
-Mutation.data <- read.csv ("./2 DATA/TCGA Mutations/SKCM/Somatic_Mutations/BI__IlluminaGA_DNASeq_automated/Level_2/broad.mit.edu__IlluminaGA_automated_DNA_sequencing_level2.maf",sep ="\t")
+Mutation.data <- read.csv ("./2 DATA/TCGA Mutations/BLCA/Somatic_Mutations/BI__IlluminaGA_DNASeq_curated/Level_2/broad.mit.edu__IlluminaGA_curated_DNA_sequencing_level2.maf",sep ="\t")
 Mutation.selected.data <- data.frame(Hugo_Symbol = Mutation.data$Hugo_Symbol, Variant_Classification = Mutation.data$Variant_Classification, Patient_ID = substr(Mutation.data$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/SKCM/SKCM.TCGA.EDASeq.k7.ISGS.reps5000/SKCM.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv",header=TRUE) # select source data
+Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/BLCA/BLCA.TCGA.EDASeq.k7.ISGS.reps5000/BLCA.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv",header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
@@ -44,7 +46,7 @@ Mutation.Nonsense <- Mutation.selected.data[Mutation.selected.data$Variant_Class
 Mutation.Other <- Mutation.selected.data[Mutation.selected.data$Variant_Classification %in% c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins","Nonstop_Mutation","RNA","Splice_Site"),]
 Mutation.Any <- unique (Mutation.selected.data[c("Patient_ID","Hugo_Symbol","Cluster")])
 Mutation.All <- Mutation.selected.data
-save (Mutation.All,Mutation.Missense,Mutation.Silent,Mutation.Nonsense,Mutation.Other,Mutation.Any,file="./3 ANALISYS/Mutations/SKCM/Mutation.Data.split.RDATA")
+save (Mutation.All,Mutation.Missense,Mutation.Silent,Mutation.Nonsense,Mutation.Other,Mutation.Any,file="./3 ANALISYS/Mutations/BLCA/Mutation.Data.split.RDATA")
 
 #Gene mutation frequency by Cluster table
 count.gene.bycluster <- function (Mutation.x){
@@ -68,7 +70,7 @@ Mutation.Frequency.Gene$Freq.Nonsense <- Count.Nonsense.Gene$freq [match(rowname
 Mutation.Frequency.Gene$Freq.Silent <- Count.Silent.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Silent.Gene))]
 Mutation.Frequency.Gene$Freq.Other <- Count.Other.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Other.Gene))]
 
-write.csv (Mutation.Frequency.Gene,file="./3 ANALISYS/Mutations/SKCM/Mutations.TCGA.SKCM.Gene.by.Cluster.csv")
+write.csv (Mutation.Frequency.Gene,file="./3 ANALISYS/Mutations/BLCA/Mutations.TCGA.BLCA.Gene.by.Cluster.csv")
 
 #Patient mutation frequency by Cluster table
 count.Patient.bycluster <- function (Mutation.x){
@@ -92,64 +94,15 @@ Mutation.Frequency.Patient$Freq.Nonsense <- Count.Nonsense.Patient$freq [match(r
 Mutation.Frequency.Patient$Freq.Silent <- Count.Silent.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Silent.Patient))]
 Mutation.Frequency.Patient$Freq.Other <- Count.Other.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Other.Patient))]
 
-write.csv (Mutation.Frequency.Patient,file="./3 ANALISYS/Mutations/SKCM/Mutations.TCGA.SKCM.Patient.by.Cluster.csv")
+write.csv (Mutation.Frequency.Patient,file="./3 ANALISYS/Mutations/BLCA/Mutations.TCGA.BLCA.Patient.by.Cluster.csv")
 
-#Prepare Data for Boxplots
-
-numMuts.SGall <- data.frame(count=Count.All.Patient$freq,cluster=Count.All.Patient$Cluster,mut.type = "All")
-
-numMuts.Missense <- cbind(Count.Missense.Patient[,c("freq","Cluster")],mut.type = "Missense")
-numMuts.Nonsense <- cbind(Count.Nonsense.Patient[,c("freq","Cluster")],mut.type = "Nonsense")
-numMuts.Silent <- cbind(Count.Silent.Patient[,c("freq","Cluster")],mut.type = "Silent")
-numMuts.Other <- cbind(Count.Other.Patient[,c("freq","Cluster")],mut.type = "Other")
-numMuts.SGtype <- rbind(numMuts.Missense,numMuts.Silent,numMuts.Nonsense,numMuts.Other)
-rownames(numMuts.SGtype) <- NULL
-colnames(numMuts.SGtype) = c( "count", "cluster", "mut.type")
+## Count the number of samples in the mutation table per cluster (N)
+muts.uniquesamples = Mutation.All[which(!duplicated(Mutation.All$Patient_ID)),c("Patient_ID","Cluster") ] 
+sample.cluster.count = as.data.frame(table(muts.uniquesamples$Cluster))
+colnames (sample.cluster.count) = c("Cluster","N")
+#Save as R object
+save (Mutation.Frequency.Gene,Mutation.Frequency.Patient,sample.cluster.count,file="./3 ANALISYS/Mutations/BLCA/Mutation.Data.Frequencies.RDATA")
 
 
-# Choose the types of mutations
-#muts.count.type = count(Mutation.selected.data[,c("Patient_ID","Variant_Classification","Cluster")])
-#numMuts.SGtype = data.frame(count=muts.count.type$freq, cluster= muts.count.type$Cluster, mut.type = muts.count.type$Variant_Classification)
-#numMuts.SGtype = numMuts.SGtype[numMuts.SGtype$mut.type %in% c("Missense","Silent","Nonsense","Other"),]
-
-# Combine
-numMuts.SGall = rbind(numMuts.SGall, numMuts.SGtype)
-
-meds <- ddply(numMuts.SGall, .(mut.type, cluster), summarize, med = median(count)) ## median
-mean.n <- function(x){ return(c(y = 0 , label = round(mean(x),2))) } ## mean
-
-png("./4 FIGURES/Mutation Plots/Mutations.TCGA.SKCM.All.SA.WHX.png", height = 1000, width= 1000)   #set filename
-  cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
-  colors = c("blue", "green", "orange", "red")
-  gg = ggplot(numMuts.SGall, aes(cluster, count, fill=cluster)) +
-        stat_boxplot(geom ='errorbar') +
-        geom_boxplot() +
-        geom_jitter(position=position_jitter(width=0.1,height=0.1))
-        #, aes(color="lightgray")) 
-  gg = gg + ylab("Number of mutations per sample") +
-            scale_x_discrete(limits=cluster.order) +
-            facet_grid(.~mut.type,
-                      scales = "free",
-                      space="free") +
-           xlab("Clusters") + theme_bw() 
-  gg = gg + scale_fill_manual(values = colors) +
-            scale_y_continuous(breaks = seq(0, 300, 100), limits = c(0, 250)) 
-  gg = gg + theme(strip.text.x = element_text(size = 20, colour = "black"),
-                  legend.position = "none",
-                  axis.text.x = element_text(size = 12, vjust=1),
-                  axis.title.x = element_text(size = 18, vjust = -1),
-                  axis.text.y = element_text(size = 18, vjust=1),
-                  axis.title.y = element_text(size = 18, vjust = 1))
-  gg = gg + geom_text(data = meds,
-                      aes(y = 0, label = round(med,2)),
-                      size = 7, vjust = 1.2)
-  gg = gg + stat_summary(fun.data = mean.n,
-                         geom = "text",
-                         fun.y = mean,
-                         colour = "black",
-                         vjust = 3.7,
-                         size = 7)
-print(gg)
-dev.off()
 
 

@@ -19,7 +19,7 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-cancer = "LIHC"
+cancer = "UCEC"
 gene = "TP53"
 
 ## Ines RNASeq Clustering k = 4
@@ -27,8 +27,8 @@ num.clusters = 4
 clusters = rep(paste0("ICR", 1:num.clusters))
 
 ## Read the mutation frequency file 
-load ("./3 ANALISYS/Mutations/LIHC/Mutation.Data.Frequencies.RDATA")
-#load ("./3 ANALISYS/Mutations/LIHC/Mutation.Data.split.RDATA")
+load ("./3 ANALISYS/Mutations/UCEC/Mutation.Data.Frequencies.RDATA")
+#load ("./3 ANALISYS/Mutations/UCEC/Mutation.Data.split.RDATA")
 
 #Prepare Data for Boxplots
 
@@ -48,7 +48,7 @@ numMuts.SGall = numMuts.SGall[complete.cases(numMuts.SGall),]
 meds <- ddply(numMuts.SGall, .(mut.type, cluster), summarize, med = median(count)) ## median
 mean.n <- function(x){ return(c(y = 0 , label = round(mean(x),2))) } ## mean
 
-png("./4 FIGURES/Mutation Plots/Mutations.TCGA.LIHC.All.SA.WHX.png", height = 1000, width= 1000)   #set filename
+png("./4 FIGURES/Mutation Plots/Mutations.TCGA.UCEC.All.SA.WHX.png", height = 1000, width= 1000)   #set filename
 cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
 colors = c("blue", "green", "orange", "red")
 gg = ggplot(numMuts.SGall, aes(cluster, count, fill=cluster)) +

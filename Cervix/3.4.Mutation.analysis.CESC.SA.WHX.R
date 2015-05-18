@@ -24,13 +24,13 @@ setwd("~/Dropbox/BREAST_QATAR/")
 library("ggplot2")
 library("plyr")
 
-dir.create ("./3 ANALISYS/Mutations/LIHC/",showWarnings=FALSE)
+dir.create ("./3 ANALISYS/Mutations/CESC/",showWarnings=FALSE)
 
 ## Load Data
 ## download data from TCGA site (what dataset)
-Mutation.data <- read.csv ("./2 DATA/TCGA Mutations/LIHC/Somatic_Mutations/BCM__Mixed_DNASeq_curated/Level_2/hgsc.bcm.edu__Mixed_curated_DNA_sequencing_level2.maf",sep ="\t")
+Mutation.data <- read.csv ("./2 DATA/TCGA Mutations/CESC/Somatic_Mutations/WUSM__IlluminaGA_DNASeq_curated/Level_2/genome.wustl.edu__IlluminaGA_curated_DNA_sequencing_level2.maf",sep ="\t")
 Mutation.selected.data <- data.frame(Hugo_Symbol = Mutation.data$Hugo_Symbol, Variant_Classification = Mutation.data$Variant_Classification, Patient_ID = substr(Mutation.data$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv",header=TRUE) # select source data
+Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/CESC/CESC.TCGA.EDASeq.k7.ISGS.reps5000/CESC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv",header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
@@ -46,7 +46,7 @@ Mutation.Nonsense <- Mutation.selected.data[Mutation.selected.data$Variant_Class
 Mutation.Other <- Mutation.selected.data[Mutation.selected.data$Variant_Classification %in% c("Frame_Shift_Del","Frame_Shift_Ins","In_Frame_Del","In_Frame_Ins","Nonstop_Mutation","RNA","Splice_Site"),]
 Mutation.Any <- unique (Mutation.selected.data[c("Patient_ID","Hugo_Symbol","Cluster")])
 Mutation.All <- Mutation.selected.data
-save (Mutation.All,Mutation.Missense,Mutation.Silent,Mutation.Nonsense,Mutation.Other,Mutation.Any,file="./3 ANALISYS/Mutations/LIHC/Mutation.Data.split.RDATA")
+save (Mutation.All,Mutation.Missense,Mutation.Silent,Mutation.Nonsense,Mutation.Other,Mutation.Any,file="./3 ANALISYS/Mutations/CESC/Mutation.Data.split.RDATA")
 
 #Gene mutation frequency by Cluster table
 count.gene.bycluster <- function (Mutation.x){
@@ -70,7 +70,7 @@ Mutation.Frequency.Gene$Freq.Nonsense <- Count.Nonsense.Gene$freq [match(rowname
 Mutation.Frequency.Gene$Freq.Silent <- Count.Silent.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Silent.Gene))]
 Mutation.Frequency.Gene$Freq.Other <- Count.Other.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Other.Gene))]
 
-write.csv (Mutation.Frequency.Gene,file="./3 ANALISYS/Mutations/LIHC/Mutations.TCGA.LIHC.Gene.by.Cluster.csv")
+write.csv (Mutation.Frequency.Gene,file="./3 ANALISYS/Mutations/CESC/Mutations.TCGA.CESC.Gene.by.Cluster.csv")
 
 #Patient mutation frequency by Cluster table
 count.Patient.bycluster <- function (Mutation.x){
@@ -94,14 +94,14 @@ Mutation.Frequency.Patient$Freq.Nonsense <- Count.Nonsense.Patient$freq [match(r
 Mutation.Frequency.Patient$Freq.Silent <- Count.Silent.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Silent.Patient))]
 Mutation.Frequency.Patient$Freq.Other <- Count.Other.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Other.Patient))]
 
-write.csv (Mutation.Frequency.Patient,file="./3 ANALISYS/Mutations/LIHC/Mutations.TCGA.LIHC.Patient.by.Cluster.csv")
+write.csv (Mutation.Frequency.Patient,file="./3 ANALISYS/Mutations/CESC/Mutations.TCGA.CESC.Patient.by.Cluster.csv")
 
 ## Count the number of samples in the mutation table per cluster (N)
 muts.uniquesamples = Mutation.All[which(!duplicated(Mutation.All$Patient_ID)),c("Patient_ID","Cluster") ] 
 sample.cluster.count = as.data.frame(table(muts.uniquesamples$Cluster))
 colnames (sample.cluster.count) = c("Cluster","N")
 #Save as R object
-save (Mutation.Frequency.Gene,Mutation.Frequency.Patient,sample.cluster.count,file="./3 ANALISYS/Mutations/LIHC/Mutation.Data.Frequencies.RDATA")
+save (Mutation.Frequency.Gene,Mutation.Frequency.Patient,sample.cluster.count,file="./3 ANALISYS/Mutations/CESC/Mutation.Data.Frequencies.RDATA")
 
 
 
