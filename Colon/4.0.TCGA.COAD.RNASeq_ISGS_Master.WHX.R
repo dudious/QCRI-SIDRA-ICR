@@ -20,22 +20,22 @@
  
   
 # Load data files 
-  ClinicalData.subset <- read.csv ("./3 ANALISYS/CLINICAL DATA/TCGA.LIHC.RNASeq_subset_clinicaldata.csv")                       # Clinical data including IMS
+  ClinicalData.subset <- read.csv ("./3 ANALISYS/CLINICAL DATA/TCGA.COAD.RNASeq.hiseq_subset_clinicaldata.csv")                       # Clinical data including IMS
   rownames(ClinicalData.subset) <- ClinicalData.subset$X 
   ClinicalData.subset$X <-NULL
-  load ("./2 DATA/SUBSETS/LIHC/TCGA.LIHC.RNASeq.subset.ISGS.RData")
-  CC.RNASeq <- read.csv ("~/Dropbox/BREAST_QATAR/3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")     # Cluster assignment
+  load ("./2 DATA/SUBSETS/COAD/TCGA.COAD.RNASeq.hiseq.subset.ISGS.RData")
+  CC.RNASeq <- read.csv ("~/Dropbox/BREAST_QATAR/3 ANALISYS/CLUSTERING/RNAseq/COAD/COAD.TCGA.EDASeq.k7.ISGS.reps5000/COAD.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")     # Cluster assignment
   rownames(CC.RNASeq) <- CC.RNASeq$X 
   CC.RNASeq$X <- NULL
   colnames(CC.RNASeq) <- c("PatientID","Cluster.ISGS.RNSeq")
   CC.RNASeq$PatientID <-NULL
-  immunoscore <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.LIHC.ISGS.csv")                                                     # Immunoscore
+  immunoscore <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.COAD.hiseq.ISGS.csv")                                                     # Immunoscore
   rownames(immunoscore) <- immunoscore$X
   immunoscore$X <- NULL
-  mutation.freq <- read.csv ("./3 ANALISYS/Mutations/LIHC/Mutations.TCGA.LIHC.Patient.by.Cluster.csv")                               # mutation frequencies
+  mutation.freq <- read.csv ("./3 ANALISYS/Mutations/COAD/Mutations.TCGA.COAD.Patient.by.Cluster.csv")                               # mutation frequencies
   rownames(mutation.freq) <- mutation.freq$Patient_ID
   mutation.freq <-  mutation.freq[,c("Freq.All","Freq.Missense")]
-  TP53.patients <- read.csv ("./3 ANALISYS/Mutations/LIHC/TP53mutations.bypatient.csv")                                                        # TP53 
+  TP53.patients <- read.csv ("./3 ANALISYS/Mutations/COAD/TP53mutations.bypatient.csv")                                                        # TP53 
   rownames(TP53.patients) <- TP53.patients$Patient_ID
   TP53.patients$Patient_ID <- NULL
   TP53.patients$X <- NULL
@@ -58,5 +58,5 @@
   Master.file$Row.names <- NULL
 
 # export data to txt and excel
-write.csv (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.LIHC.RNASeq_subset_ISGS.Master.csv",row.names = TRUE);
-write.xlsx (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.LIHC.RNASeq_subset_ISGS.Master.xlsx", sheetName ="RNASeq ISGS.Master data", row.names=TRUE)
+write.csv (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.COAD.RNASeq_subset_ISGS.Master.csv",row.names = TRUE);
+write.xlsx (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.COAD.RNASeq_subset_ISGS.Master.xlsx", sheetName ="RNASeq ISGS.Master data", row.names=TRUE)
