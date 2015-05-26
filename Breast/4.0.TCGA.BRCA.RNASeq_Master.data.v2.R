@@ -17,25 +17,30 @@
   library (xlsx) #xlsx needs java installed
   library (Hmisc)
   setwd("~/Dropbox/BREAST_QATAR/")
- 
+
+# Set Parameters
+  Geneset <- "DBGS1"       # SET GENESET HERE !!!!!!!!!!!!!!
+  K <- 4          
   
 # Load data files 
-  ClinicalData.subset <- read.csv ("./3 ANALISYS/CLINICAL DATA/TCGA.SKCM.RNASeq_subset_clinicaldata.csv")                       # Clinical data including IMS
+  ClinicalData.subset <- read.csv ("./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.RNASeq_subset_clinicaldata.csv")                       # Clinical data including IMS
   rownames(ClinicalData.subset) <- ClinicalData.subset$X 
   ClinicalData.subset$X <-NULL
-  load ("./2 DATA/SUBSETS/SKCM/TCGA.SKCM.RNASeq.subset.ISGS.RData")
-  CC.RNASeq <- read.csv ("~/Dropbox/BREAST_QATAR/3 ANALISYS/CLUSTERING/RNAseq/SKCM/SKCM.TCGA.EDASeq.k7.ISGS.reps5000/SKCM.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")     # Cluster assignment
+  load (paste0("./2 DATA/SUBSETS/BRCA/TCGA.BRCA.RNASeq.subset.",Geneset,".RData"))
+  CC.RNASeq <- read.csv (paste0("./3 ANALISYS/CLUSTERING/RNAseq/BRCA/BRCA.TCGA.EDASeq.k7.",
+                                Geneset,".reps5000/BRCA.TCGA.EDASeq.k7.",
+                                Geneset,".reps5000.k=4.consensusClass.ICR.csv"))                                                # Cluster assignment
   rownames(CC.RNASeq) <- CC.RNASeq$X 
   CC.RNASeq$X <- NULL
-  colnames(CC.RNASeq) <- c("PatientID","Cluster.ISGS.RNSeq")
+  colnames(CC.RNASeq) <- c("PatientID",paste0("Cluster.",Geneset,".RNSeq"))
   CC.RNASeq$PatientID <-NULL
-  immunoscore <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.SKCM.ISGS.csv")                                                     # Immunoscore
+  immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.BRCA.",Geneset,".csv"))                            # Immunoscore
   rownames(immunoscore) <- immunoscore$X
   immunoscore$X <- NULL
-  mutation.freq <- read.csv ("./3 ANALISYS/Mutations/SKCM/Mutations.TCGA.SKCM.Patient.by.Cluster.csv")                               # mutation frequencies
+  mutation.freq <- read.csv (paste0("./3 ANALISYS/Mutations/BRCA/Mutations.TCGA.BRCA.",Geneset,".Patient.by.Cluster.csv"))      # mutation frequencies
   rownames(mutation.freq) <- mutation.freq$Patient_ID
   mutation.freq <-  mutation.freq[,c("Freq.All","Freq.Missense")]
-  TP53.patients <- read.csv ("./3 ANALISYS/Mutations/SKCM/TP53mutations.bypatient.csv")                                                        # TP53 
+  TP53.patients <- read.csv (paste0("./3 ANALISYS/Mutations/BRCA/Mutations.TCGA.BRCA.",Geneset,".Patient.by.Cluster.csv"))      # TP53 
   rownames(TP53.patients) <- TP53.patients$Patient_ID
   TP53.patients$Patient_ID <- NULL
   TP53.patients$X <- NULL
@@ -58,5 +63,5 @@
   Master.file$Row.names <- NULL
 
 # export data to txt and excel
-write.csv (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.SKCM.RNASeq_subset_ISGS.Master.csv",row.names = TRUE);
-write.xlsx (Master.file, file = "./3 ANALISYS/MASTER FILES/TCGA.SKCM.RNASeq_subset_ISGS.Master.xlsx", sheetName ="RNASeq ISGS.Master data", row.names=TRUE)
+write.csv (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.BRCA.RNASeq_subset_",Geneset,".Master.csv"),row.names = TRUE);
+write.xlsx (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.BRCA.RNASeq_subset_",Geneset,".Master.xlsx"), sheetName ="RNASeq ISGS.Master data", row.names=TRUE)

@@ -22,20 +22,20 @@ required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
-library("GMD")
+#library("GMD")
 
 # Load Data
 Geneset <- "ISGS" # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4             # SET K here
 
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.csv",header=FALSE) # select source data
+Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/SKCM-TP/SKCM-TP.TCGA.EDASeq.k7.ISGS.reps5000/SKCM-TP.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.csv",header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/LIHC/TCGA.LIHC.RNASeq.subset.",Geneset,".RData"))
+load (paste0("./2 DATA/SUBSETS/SKCM-TP/TCGA.SKCM-TP.RNASeq.subset.",Geneset,".RData"))
 RNASeq.subset <- as.matrix(RNASeq.subset)
 
-## Ines code
-load ("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/ConsensusClusterObject.Rdata")
+## Code to reorder within cluster, expression data not used
+load ("./3 ANALISYS/CLUSTERING/RNAseq/SKCM-TP/SKCM-TP.TCGA.EDASeq.k7.ISGS.reps5000/ConsensusClusterObject.Rdata")
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 hhc <- ConsensusClusterObject[[K]]$consensusTree
@@ -57,7 +57,7 @@ row.names(RNASeq.subset) <- RNASeq.subset$Row.names
 RNASeq.subset$Row.names <- NULL
 RNASeq.subset$PatientID <- NULL
 
-#Rename ICR clusters (redo from high=ICR4 to low =ICR1 after checking heatmap)
+#Rename ICR clusters
 Cluster.order <- data.frame(Group=RNASeq.subset[,ncol(RNASeq.subset)], avg=rowMeans (RNASeq.subset[,1:(ncol(RNASeq.subset)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
 Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
@@ -65,7 +65,7 @@ Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,file="./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")       
+write.csv (Consensus.class,file="./3 ANALISYS/CLUSTERING/RNAseq/SKCM-TP/SKCM-TP.TCGA.EDASeq.k7.ISGS.reps5000/SKCM-TP.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")       
 
 #Update Cluster names
 RNASeq.subset$Group <- NULL
@@ -84,7 +84,7 @@ RNASeq.subset$Group <- NULL
 #re-order the labels
 Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
 
-# Heatmap
+# Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
 levels (patientcolors$Group) <- c(levels (patientcolors$Group),c("#FF0000","#FFA500","#00FF00","#0000FF"))  #Aply color scheme to patients
 patientcolors$Group[patientcolors$Group=="ICR4"] <- "#FF0000"
@@ -93,9 +93,9 @@ patientcolors$Group[patientcolors$Group=="ICR2"] <- "#00FF00"
 patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 #patientcolors$Group <- droplevels(patientcolors$Group)
 patientcolors <- patientcolors$Group
-my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
-my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.LIHC.ISGS.png",res=600,height=6,width=6,unit="in")     # set filename
+my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
+my.colors = c(seq(-4,-0.5,length=100),seq(-0.5,1,length=1000),seq(1,4,length=100))
+png("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.SKCM-TP.ISGS.png",res=600,height=6,width=6,unit="in")     # set filename
 heatmap.2(t(RNASeq.subset),
           main = paste0("Heatmap RNASeq - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low

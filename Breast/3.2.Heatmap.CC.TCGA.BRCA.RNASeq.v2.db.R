@@ -1,12 +1,12 @@
 #################################################################
 ###
 ### This Script PLots Heatmaps based on 
-### Consensus Clustering grouping of RNASeq Data
+### Consensus Clustering grouping of BRCA RNASeq Data
 ### 
 ### Input data :
-### ./3 ANALISYS/CLUSTERING/RNAseq/...
+### ./3 ANALISYS/CLUSTERING/RNAseq/BRCA/...
 ### Data is saved :
-### NO DATA
+### ./3 ANALISYS/CLUSTERING/RNAseq/BRCA/...
 ### Figures are saved :
 ### ./4 FIGURES/Heatmaps
 ###
@@ -22,34 +22,25 @@ required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
-library("GMD")
 
-# Load Data
-Geneset <- "ISGS" # SET GENESET HERE !!!!!!!!!!!!!!
+# Set Parameters
+Geneset <- "WHGS1" # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4             # SET K here
 
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.csv",header=FALSE) # select source data
+# Load Data
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/BRCA/BRCA.TCGA.EDASeq.k7.",Geneset,".reps5000/BRCA.TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/LIHC/TCGA.LIHC.RNASeq.subset.",Geneset,".RData"))
+load (paste0("./2 DATA/SUBSETS/BRCA/TCGA.BRCA.RNASeq.subset.",Geneset,".RData"))
 RNASeq.subset <- as.matrix(RNASeq.subset)
+load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/BRCA/BRCA.TCGA.EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
 
-## Ines code
-load ("./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/ConsensusClusterObject.Rdata")
+## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 hhc <- ConsensusClusterObject[[K]]$consensusTree
-sampleOrder <- consensusClusters[hhc$order]  ## get the order of cluser assignments based on the consensus tree
-
+sampleOrder <- consensusClusters[hhc$order]                                            ## get the order of cluser assignments based on the consensus tree
 ConsensusClusterObject.oGE <- t(RNASeq.subset[names(sampleOrder),])
-
-column_annotation <- matrix(" ", nrow = ncol(ConsensusClusterObject.oGE), ncol = 1)
-column_annotation[, 1] <- as.character(consensusClusters[names(sampleOrder)])
-unique(column_annotation[, 1])
-ConsensusClusterObject.oGEz <- (ConsensusClusterObject.oGE - rowMeans(ConsensusClusterObject.oGE))/apply(ConsensusClusterObject.oGE, 1, sd)
-quantile(ConsensusClusterObject.oGEz, 0.15); quantile(ConsensusClusterObject.oGEz, 0.85)
-ConsensusClusterObject.oGEz[ConsensusClusterObject.oGEz <= quantile(ConsensusClusterObject.oGEz, 0.15)] <- quantile(ConsensusClusterObject.oGEz, 0.15)
-ConsensusClusterObject.oGEz[ConsensusClusterObject.oGEz >= quantile(ConsensusClusterObject.oGEz, 0.85)] <- quantile(ConsensusClusterObject.oGEz, 0.85)
 
 #Add cluster assignment to data
 RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
@@ -57,7 +48,7 @@ row.names(RNASeq.subset) <- RNASeq.subset$Row.names
 RNASeq.subset$Row.names <- NULL
 RNASeq.subset$PatientID <- NULL
 
-#Rename ICR clusters (redo from high=ICR4 to low =ICR1 after checking heatmap)
+#Rename ICR clusters
 Cluster.order <- data.frame(Group=RNASeq.subset[,ncol(RNASeq.subset)], avg=rowMeans (RNASeq.subset[,1:(ncol(RNASeq.subset)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
 Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
@@ -65,7 +56,7 @@ Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,file="./3 ANALISYS/CLUSTERING/RNAseq/LIHC/LIHC.TCGA.EDASeq.k7.ISGS.reps5000/LIHC.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")       
+write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/BRCA/BRCA.TCGA.EDASeq.k7.",Geneset,".reps5000/BRCA.TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"))       
 
 #Update Cluster names
 RNASeq.subset$Group <- NULL
@@ -75,7 +66,7 @@ RNASeq.subset$Row.names <- NULL
 RNASeq.subset$PatientID <- NULL
 
 #ordeing within clusters
-RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGEz),]
+#RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGE),]
 
 #ordering of the clusters
 RNASeq.subset <- RNASeq.subset[order(factor(RNASeq.subset$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
@@ -84,7 +75,7 @@ RNASeq.subset$Group <- NULL
 #re-order the labels
 Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
 
-# Heatmap
+# Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
 levels (patientcolors$Group) <- c(levels (patientcolors$Group),c("#FF0000","#FFA500","#00FF00","#0000FF"))  #Aply color scheme to patients
 patientcolors$Group[patientcolors$Group=="ICR4"] <- "#FF0000"
@@ -95,7 +86,7 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.LIHC.ISGS.png",res=600,height=6,width=6,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.BRCA.NRWC.",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
 heatmap.2(t(RNASeq.subset),
           main = paste0("Heatmap RNASeq - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low
