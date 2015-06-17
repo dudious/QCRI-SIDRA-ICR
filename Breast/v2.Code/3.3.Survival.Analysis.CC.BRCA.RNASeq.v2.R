@@ -23,7 +23,7 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 if(length(missing.packages)) install.packages(missing.packages)
 required.packages.BioC <- c("reshape")
 missing.packages <- required.packages.BioC[!(required.packages.BioC %in% installed.packages()[,"Package"])]
-source("http://bioconductor.org/biocLite.R")
+#source("http://bioconductor.org/biocLite.R")
 if(length(missing.packages)) biocLite(missing.packages)
 library(survival)
 library(reshape)
@@ -34,12 +34,11 @@ source ("./1 CODE/R tools/ggkm.R")
 
 # Set Parameters
 Cancerset <- "BRCA"
-Filtersamples <- "UnFiltered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1.FLTR.N"          # SET GENESET HERE !!!!!!!!!!!!!!
-Parent.Geneset <- substring(Geneset,1,5)
+Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
+Geneset <- "DBGS1"          # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4                      # SET K here
 Surv.cutoff.years <- 10     # SET cut-off here
-Km.type <- "1vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type <- "1vs2vs3vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 # Load data
 #Clusters.names <- rep(paste0("ICR",1:K))
@@ -53,10 +52,12 @@ rownames(Clinical.data) <- Clinical.data[,1]
 Clinical.data[,1] <-NULL
 
 if (Filtersamples=="Filtered"){     
-  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude.post == "No")     # remove excluded patients
+  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude == "No")     # remove excluded patients
 } else if  (Filtersamples=="UnFiltered")
   {Clinical.data.subset <- Clinical.data
-   }
+   }       
+                               
+
 
 Clinical.data.subset.TS <- Clinical.data.subset[,c("vital_status","death_days_to","last_contact_days_to")]  # select relevant data
 Clinical.data.subset.DFS <- Clinical.data.subset[,c("tumor_status","last_contact_days_to")]                 # select relevant data for Desease Free Survival
@@ -108,7 +109,7 @@ ggkm(mfit,
      timeby=12,
      ystratalabs=Clusters.names ,
      ystrataname="Legend",
-     main=paste0("Kaplan-Meier Plot for ",Parent.Geneset," RNASeq selection"),
+     main=paste0("Kaplan-Meier Plot for ",Geneset," RNASeq selection"),
      xlabs = "Time in months",
      cbPalette = cbPalette
      )

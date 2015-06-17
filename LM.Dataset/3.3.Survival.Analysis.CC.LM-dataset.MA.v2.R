@@ -1,10 +1,10 @@
 #################################################################
 ###
 ### This Script PLots kaplan Meier survival curves based on 
-### Consensus Clustering grouping of ",Cancerset," RNASeq Data
+### Consensus Clustering grouping of ",Cancerset," MA Data
 ### 
 ### Input data :
-### ./3 ANALISYS/CLUSTERING/RNAseq/...
+### ./3 ANALISYS/CLUSTERING/MA/...
 ### Data is saved :
 ### NO DATA
 ### Figures are saved :
@@ -23,7 +23,7 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 if(length(missing.packages)) install.packages(missing.packages)
 required.packages.BioC <- c("reshape")
 missing.packages <- required.packages.BioC[!(required.packages.BioC %in% installed.packages()[,"Package"])]
-source("http://bioconductor.org/biocLite.R")
+#source("http://bioconductor.org/biocLite.R")
 if(length(missing.packages)) biocLite(missing.packages)
 library(survival)
 library(reshape)
@@ -33,33 +33,31 @@ library(plyr)
 source ("./1 CODE/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset <- "BRCA"
+Cancerset <- "LM.Dataset"
 Filtersamples <- "UnFiltered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1.FLTR.N"          # SET GENESET HERE !!!!!!!!!!!!!!
-Parent.Geneset <- substring(Geneset,1,5)
+Geneset <- "DBGS1"          # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4                      # SET K here
 Surv.cutoff.years <- 10     # SET cut-off here
-Km.type <- "1vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type <- "1vs2vs3vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 # Load data
 #Clusters.names <- rep(paste0("ICR",1:K))
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",
-                                   Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",
+                                   Geneset,".reps5000/",Cancerset,".MA.k7.",
                                    Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 rownames(Consensus.class) <- Consensus.class$PatientID
-Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"),header=TRUE)
-rownames(Clinical.data) <- Clinical.data[,1]
-Clinical.data[,1] <-NULL
+load ("~/Dropbox/Data_LM/LM.Dataset.split.Rdata") 
 
-if (Filtersamples=="Filtered"){     
-  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude.post == "No")     # remove excluded patients
-} else if  (Filtersamples=="UnFiltered")
-  {Clinical.data.subset <- Clinical.data
-   }
+#if (Filtersamples=="Filtered"){     
+#  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude == "No")     # remove excluded patients
+#} else if  (Filtersamples=="UnFiltered")
+#  {Clinical.data.subset <- Clinical.data
+#   }       
+                               
 
-Clinical.data.subset.TS <- Clinical.data.subset[,c("vital_status","death_days_to","last_contact_days_to")]  # select relevant data
-Clinical.data.subset.DFS <- Clinical.data.subset[,c("tumor_status","last_contact_days_to")]                 # select relevant data for Desease Free Survival
+
+Clinical.data.subset.TS <- Sample.Meta.data[,c("DMFS 10yr Time:","DMFS 10yr Event:")]  # select relevant data
 
 # Add Class to clinical data
 Clinical.data.subset.TS <- merge(Clinical.data.subset.TS,Consensus.class["Group"],by="row.names",all.x=TRUE, all.y=FALSE)
@@ -83,32 +81,24 @@ Clinical.data.subset.TS$Group <- droplevels(Clinical.data.subset.TS$Group)
 Clusters.names <- levels(Clinical.data.subset.TS$Group)
 
 # time / event object creation
-Y <- Surv.cutoff.years * 365
-TS.Alive <- subset(Clinical.data.subset.TS[,c(1,3,4)],Clinical.data.subset.TS$vital_status == "Alive")
-colnames(TS.Alive) <- c("Status","Time","Group")
-TS.Alive$Time <- as.numeric(as.character(TS.Alive$Time))
-TS.Alive$Time[TS.Alive$Time > Y] <- Y
-TS.Dead <- subset(Clinical.data.subset.TS[,c(1,2,4)],Clinical.data.subset.TS$vital_status == "Dead")
-colnames(TS.Dead) <- c("Status","Time","Group")
-TS.Dead$Time <- as.numeric(as.character(TS.Dead$Time))
-TS.Dead$Status[which(TS.Dead$Time> Y)] = "Alive"
-TS.Dead$Time[TS.Dead$Time > Y] <- Y                                                                        
-TS.Surv <- rbind (TS.Dead,TS.Alive)
+TS.Surv <- Clinical.data.subset.TS
+colnames(TS.Surv) <- c("Time","Status","Group")
 TS.Surv$Time <- as.numeric(as.character(TS.Surv$Time))
-TS.Surv$Status <- TS.Surv$Status == "Dead"
-TS.Surv <- subset(TS.Surv,TS.Surv$Time > 1)                                                                # remove patients with less then 1 day follow up time
+TS.Surv$Time <- TS.Surv$Time * 365
+TS.Surv <- subset(TS.Surv,TS.Surv$Time > 1)
+TS.Surv$Status <- TS.Surv$Status == 1
 
 # survival curve
 msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".TCGA.",Cancerset,"-",Filtersamples,".RNASeq.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".",Cancerset,"-",Filtersamples,".MA.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
 ggkm(mfit,
      timeby=12,
      ystratalabs=Clusters.names ,
      ystrataname="Legend",
-     main=paste0("Kaplan-Meier Plot for ",Parent.Geneset," RNASeq selection"),
+     main=paste0("Kaplan-Meier Plot for ",Geneset," MA selection"),
      xlabs = "Time in months",
      cbPalette = cbPalette
      )

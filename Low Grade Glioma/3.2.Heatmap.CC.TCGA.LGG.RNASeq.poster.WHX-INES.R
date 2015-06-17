@@ -1,12 +1,12 @@
 #################################################################
 ###
 ### This Script PLots Heatmaps based on 
-### Consensus Clustering grouping of ",Cancerset," RNASeq Data
+### Consensus Clustering grouping of RNASeq Data
 ### 
 ### Input data :
-### ./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/...
+### ./3 ANALISYS/CLUSTERING/RNAseq/...
 ### Data is saved :
-### ./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/...
+### NO DATA
 ### Figures are saved :
 ### ./4 FIGURES/Heatmaps
 ###
@@ -22,27 +22,34 @@ required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
-
-# Set Parameters
-Cancerset <- "BRCA"
-Geneset <- "DBGS1.FLTR.NMS" # SET GENESET HERE !!!!!!!!!!!!!!
-Parent.Geneset <- substring(Geneset,1,5)
-K <- 4             # SET K here
+library("GMD")
 
 # Load Data
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
+Geneset <- "ISGS" # SET GENESET HERE !!!!!!!!!!!!!!
+K <- 4             # SET K here
+
+Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/LGG/LGG.TCGA.EDASeq.k7.ISGS.reps5000/LGG.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.csv",header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
+load (paste0("./2 DATA/SUBSETS/LGG/TCGA.LGG.RNASeq.subset.",Geneset,".RData"))
 RNASeq.subset <- as.matrix(RNASeq.subset)
-load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
 
 ## Code to reorder within cluster, expression data not used
+load ("./3 ANALISYS/CLUSTERING/RNAseq/LGG/LGG.TCGA.EDASeq.k7.ISGS.reps5000/ConsensusClusterObject.Rdata")
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 hhc <- ConsensusClusterObject[[K]]$consensusTree
-sampleOrder <- consensusClusters[hhc$order]                                            ## get the order of cluser assignments based on the consensus tree
+sampleOrder <- consensusClusters[hhc$order]  ## get the order of cluser assignments based on the consensus tree
+
 ConsensusClusterObject.oGE <- t(RNASeq.subset[names(sampleOrder),])
+
+column_annotation <- matrix(" ", nrow = ncol(ConsensusClusterObject.oGE), ncol = 1)
+column_annotation[, 1] <- as.character(consensusClusters[names(sampleOrder)])
+unique(column_annotation[, 1])
+ConsensusClusterObject.oGEz <- (ConsensusClusterObject.oGE - rowMeans(ConsensusClusterObject.oGE))/apply(ConsensusClusterObject.oGE, 1, sd)
+quantile(ConsensusClusterObject.oGEz, 0.15); quantile(ConsensusClusterObject.oGEz, 0.85)
+ConsensusClusterObject.oGEz[ConsensusClusterObject.oGEz <= quantile(ConsensusClusterObject.oGEz, 0.15)] <- quantile(ConsensusClusterObject.oGEz, 0.15)
+ConsensusClusterObject.oGEz[ConsensusClusterObject.oGEz >= quantile(ConsensusClusterObject.oGEz, 0.85)] <- quantile(ConsensusClusterObject.oGEz, 0.85)
 
 #Add cluster assignment to data
 RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
@@ -58,7 +65,7 @@ Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"))       
+write.csv (Consensus.class,file="./3 ANALISYS/CLUSTERING/RNAseq/LGG/LGG.TCGA.EDASeq.k7.ISGS.reps5000/LGG.TCGA.EDASeq.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")       
 
 #Update Cluster names
 RNASeq.subset$Group <- NULL
@@ -67,8 +74,8 @@ row.names(RNASeq.subset) <- RNASeq.subset$Row.names
 RNASeq.subset$Row.names <- NULL
 RNASeq.subset$PatientID <- NULL
 
-#ordeing within clusters (comment out if no reordering within cluster is required)
-# RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGE),]
+#ordeing within clusters
+RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGEz),]
 
 #ordering of the clusters
 RNASeq.subset <- RNASeq.subset[order(factor(RNASeq.subset$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
@@ -88,11 +95,11 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
+png("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.LGG.ISGS.png",res=600,height=6,width=6,unit="in")     # set filename
 heatmap.2(t(RNASeq.subset),
-          main = paste0("Heatmap RNASeq - ",Parent.Geneset," sel., K=",K),
+          main = paste0("Heatmap RNASeq - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low
-          breaks=my.colors,                                 
+          breaks=my.colors,                #Uncomment and comment key                 
           ColSideColors=patientcolors,      #set goup colors                 
           key=TRUE,
           symm=FALSE,
@@ -103,9 +110,10 @@ heatmap.2(t(RNASeq.subset),
           trace="none",
           labCol=FALSE,
           cexRow=1.3,cexCol=0.1,margins=c(2,7),
-          Colv=FALSE)
+          Colv=FALSE)                       #warning is normal
 par(lend = 1)
 legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
        col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
 dev.off()
+######################
 

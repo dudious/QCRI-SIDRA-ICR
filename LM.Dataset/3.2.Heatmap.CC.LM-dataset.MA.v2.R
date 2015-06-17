@@ -4,9 +4,9 @@
 ### Consensus Clustering grouping of ",Cancerset," RNASeq Data
 ### 
 ### Input data :
-### ./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/...
+### ./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/...
 ### Data is saved :
-### ./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/...
+### ./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/...
 ### Figures are saved :
 ### ./4 FIGURES/Heatmaps
 ###
@@ -24,58 +24,58 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
 
 # Set Parameters
-Cancerset <- "BRCA"
-Geneset <- "DBGS1.FLTR.NMS" # SET GENESET HERE !!!!!!!!!!!!!!
-Parent.Geneset <- substring(Geneset,1,5)
+Cancerset <- "LM.Dataset"
+Geneset <- "DBGS1" # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4             # SET K here
 
 # Load Data
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/",Cancerset,".MA.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
-RNASeq.subset <- as.matrix(RNASeq.subset)
-load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
+load (paste0("./2 DATA/SUBSETS/",Cancerset,"/",Cancerset,".MA.subset.",Geneset,".RData"))
+MA.subset <- as.matrix(MA.subset)
+load (paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
 
 ## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 hhc <- ConsensusClusterObject[[K]]$consensusTree
 sampleOrder <- consensusClusters[hhc$order]                                            ## get the order of cluser assignments based on the consensus tree
-ConsensusClusterObject.oGE <- t(RNASeq.subset[names(sampleOrder),])
+ConsensusClusterObject.oGE <- t(MA.subset[names(sampleOrder),])
 
 #Add cluster assignment to data
-RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
-row.names(RNASeq.subset) <- RNASeq.subset$Row.names
-RNASeq.subset$Row.names <- NULL
-RNASeq.subset$PatientID <- NULL
+MA.subset <- merge (MA.subset,Consensus.class,by="row.names")
+row.names(MA.subset) <- MA.subset$Row.names
+MA.subset$Row.names <- NULL
+MA.subset$PatientID <- NULL
 
 #Rename ICR clusters
-Cluster.order <- data.frame(Group=RNASeq.subset[,ncol(RNASeq.subset)], avg=rowMeans (RNASeq.subset[,1:(ncol(RNASeq.subset)-1)]))
+MA.subset <- MA.subset[-1783,] # remove ALL-NA sample
+Cluster.order <- data.frame(Group=MA.subset[,ncol(MA.subset)], avg=rowMeans (MA.subset[,1:(ncol(MA.subset)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
 Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
 Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character(Cluster.order[1,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"))       
+write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/",Cancerset,".MA.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"))       
 
 #Update Cluster names
-RNASeq.subset$Group <- NULL
-RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
-row.names(RNASeq.subset) <- RNASeq.subset$Row.names
-RNASeq.subset$Row.names <- NULL
-RNASeq.subset$PatientID <- NULL
+MA.subset$Group <- NULL
+MA.subset <- merge (MA.subset,Consensus.class,by="row.names")
+row.names(MA.subset) <- MA.subset$Row.names
+MA.subset$Row.names <- NULL
+MA.subset$PatientID <- NULL
 
 #ordeing within clusters (comment out if no reordering within cluster is required)
-# RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGE),]
+# MA.subset   <- MA.subset[colnames(ConsensusClusterObject.oGE),]
 
 #ordering of the clusters
-RNASeq.subset <- RNASeq.subset[order(factor(RNASeq.subset$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
-RNASeq.subset$Group <- NULL
+MA.subset <- MA.subset[order(factor(MA.subset$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
+MA.subset$Group <- NULL
 
 #re-order the labels
-Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
+Consensus.class <- Consensus.class[rownames(MA.subset),]
 
 # Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
@@ -88,9 +88,9 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
-heatmap.2(t(RNASeq.subset),
-          main = paste0("Heatmap RNASeq - ",Parent.Geneset," sel., K=",K),
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.MA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
+heatmap.2(t(MA.subset),
+          main = paste0("Heatmap MA - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low
           breaks=my.colors,                                 
           ColSideColors=patientcolors,      #set goup colors                 
