@@ -24,7 +24,7 @@ source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
 source("./1 CODE/R tools/stefanofunctions.R")
    
 # Set Parameters
-Cancerset <- "UCEC-GA"
+Cancerset <- "OV"
 Parent.Cancerset <- substring(Cancerset,1,4)
 Seq.tech = ""
 if (substring(Cancerset,6,nchar(Cancerset))=="hiseq") {Seq.tech = ".hiseq"}

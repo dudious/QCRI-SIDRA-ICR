@@ -33,13 +33,13 @@ library(plyr)
 source ("./1 CODE/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset <- "BRCA"
-Filtersamples <- "UnFiltered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1.FLTR.N"          # SET GENESET HERE !!!!!!!!!!!!!!
+Cancerset <- "BRCA"           # SET Cancertype
+Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
+Geneset <- "DBGS3.FLTR.LMF"           # SET GENESET and pruclustering filter 
 Parent.Geneset <- substring(Geneset,1,5)
-K <- 4                      # SET K here
-Surv.cutoff.years <- 10     # SET cut-off here
-Km.type <- "1vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+K <- 4                        # SET K
+Surv.cutoff.years <- 10       # SET cut-off
+Km.type <- "1vs2vs3vs4"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 # Load data
 #Clusters.names <- rep(paste0("ICR",1:K))

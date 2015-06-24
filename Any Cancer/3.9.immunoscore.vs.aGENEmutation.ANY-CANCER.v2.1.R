@@ -14,7 +14,7 @@ setwd("~/Dropbox/BREAST_QATAR/")
 Geneset <- "DBGS1"       # SET GENESET HERE !!!!!!!!!!!!!!
 Cancerset <- "BRCA"
 K <- 4
-GOF <- "TTN"
+GOF <- "TP53"
 
 ## Load Data
 immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Cancerset,".",Geneset,".csv"))

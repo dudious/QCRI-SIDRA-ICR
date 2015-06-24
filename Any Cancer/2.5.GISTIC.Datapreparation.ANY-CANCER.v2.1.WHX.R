@@ -9,14 +9,36 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 # Set Parameters
-Cancerset   <- "BRCA"
+Cancerset   <- "SKCM"
 Geneset     <- "DBGS1"
 
+# check for split dataset (GA/hiseq)
+split = "FALSE"
+Download.path <- paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_ASSEMBLER/")
+file.hiseq    <- list.files(Download.path,full.names = TRUE,pattern = "hiseq.DATA.txt" )
+hiseq         <- length(file.hiseq)
+file.GA       <- list.files(Download.path,full.names = TRUE,pattern = "GA.DATA.txt" )
+GA            <- length(file.GA)
+if (hiseq+GA == 2) {split = "TRUE"}
+
 # Load Data
-CNV.Data <- read.table(paste0("./2 DATA/TCGA CNV/TCGA CNV_",Cancerset,"_ASSEMBLER/",Cancerset,".CN.TCGA.ASSEMBLER.DATA.nocnv.hg19.txt"),as.is=TRUE,header = TRUE)
-Consensuss.class<-read.delim(file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",
+CNV.Data <- read.table(paste0("./2 DATA/TCGA CNV/TCGA CNV_",Cancerset,"_ASSEMBLER/",Cancerset,".CN.TCGA.ASSEMBLER.DATA.nocnv_hg19.txt"),as.is=TRUE,header = TRUE)
+if (split == "TRUE"){
+  Geneset.GA = paste0(Geneset,"-GA")
+  Consensuss.class.GA<-read.delim(file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"-GA/",
+                                           Cancerset,"-GA.TCGA.EDASeq.k7.",Geneset,".reps5000/",
+                                           Cancerset,"-GA.TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),sep=",")
+  Geneset.hiseq = paste0(Geneset,"-GA")
+  Consensuss.class.hiseq<-read.delim(file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"-hiseq/",
+                                              Cancerset,"-hiseq.TCGA.EDASeq.k7.",Geneset,".reps5000/",
+                                              Cancerset,"-hiseq.TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),sep=",")
+  Consensuss.class <- unique(rbind(Consensuss.class.hiseq,Consensuss.class.GA))
+}
+ if (split == "FALSE"){
+  Consensuss.class<-read.delim(file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",
                                Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",
                                Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),sep=",")
+}
 
 # merge CNV data with Cluster assignment
 CNV.Data$PatientID <- substr(CNV.Data$Sample,1,12)

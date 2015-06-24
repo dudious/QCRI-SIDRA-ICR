@@ -27,6 +27,11 @@ Consensus.class.N <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset
 rownames(Consensus.class.N) <- Consensus.class.N$X
 Consensus.class.N$X <- NULL
 
+Geneset <- "DBGS1.FLTR.NS" # SET GENESET HERE !!!!!!!!!!!!!!
+Consensus.class.NS <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+rownames(Consensus.class.NS) <- Consensus.class.NS$X
+Consensus.class.NS$X <- NULL
+
 Geneset <- "DBGS1" # SET GENESET HERE !!!!!!!!!!!!!!
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 rownames(Consensus.class) <- Consensus.class$X
@@ -36,11 +41,13 @@ Consensus.class$X <- NULL
 #create clusterassignmnet table
 Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
 Consensus.class.N <- Consensus.class.N[rownames(RNASeq.subset),]
+Consensus.class.NS <- Consensus.class.NS[rownames(RNASeq.subset),]
 Consensus.class.NMS <- Consensus.class.NMS[rownames(RNASeq.subset),]
 
 Consensus.class$Group.N <- Consensus.class.N$Group[match(Consensus.class$PatientID,Consensus.class.N$PatientID)]
+Consensus.class$Group.NS <- Consensus.class.NS$Group[match(Consensus.class$PatientID,Consensus.class.NS$PatientID)]
 Consensus.class$Group.NMS <- Consensus.class.NMS$Group[match(Consensus.class$PatientID,Consensus.class.NMS$PatientID)]
-colnames(Consensus.class) <- c("PatientID","Cluster","Cluster.N","Cluster.NMS")
+colnames(Consensus.class) <- c("PatientID","Cluster","Cluster.N","Cluster.NS","Cluster.NMS")
 
 # zeta score calculation (NOT USED)
 RNASeq.subset <- RNASeq.subset[,-ncol(RNASeq.subset)]
@@ -56,18 +63,25 @@ patientcolors$Cluster[patientcolors$Cluster=="ICR4"] <- "#FF0000"
 patientcolors$Cluster[patientcolors$Cluster=="ICR3"] <- "#FFA500"
 patientcolors$Cluster[patientcolors$Cluster=="ICR2"] <- "#00FF00"
 patientcolors$Cluster[patientcolors$Cluster=="ICR1"] <- "#0000FF"
-levels (patientcolors$Cluster.N) <- c(levels (patientcolors$Cluster.N),c("#FF0000","#FFA500","#00FF00","#0000FF","#000000"))  #Aply color scheme to Cluster.NMS
+levels (patientcolors$Cluster.N) <- c(levels (patientcolors$Cluster.N),c("#FF0000","#FFA500","#00FF00","#0000FF","#000000"))  #Aply color scheme to Cluster.N
 patientcolors$Cluster.N[patientcolors$Cluster.N=="ICR4"] <- "#FF0000"
 patientcolors$Cluster.N[patientcolors$Cluster.N=="ICR3"] <- "#FFA500"
 patientcolors$Cluster.N[patientcolors$Cluster.N=="ICR2"] <- "#00FF00"
 patientcolors$Cluster.N[patientcolors$Cluster.N=="ICR1"] <- "#0000FF"
 patientcolors$Cluster.N[is.na(patientcolors$Cluster.N)] <- "#000000"
+levels (patientcolors$Cluster.NS) <- c(levels (patientcolors$Cluster.NS),c("#FF0000","#FFA500","#00FF00","#0000FF","#000000"))  #Aply color scheme to Cluster.NS
+patientcolors$Cluster.NS[patientcolors$Cluster.NS=="ICR4"] <- "#FF0000"
+patientcolors$Cluster.NS[patientcolors$Cluster.NS=="ICR3"] <- "#FFA500"
+patientcolors$Cluster.NS[patientcolors$Cluster.NS=="ICR2"] <- "#00FF00"
+patientcolors$Cluster.NS[patientcolors$Cluster.NS=="ICR1"] <- "#0000FF"
+patientcolors$Cluster.NS[is.na(patientcolors$Cluster.NS)] <- "#000000"
 levels (patientcolors$Cluster.NMS) <- c(levels (patientcolors$Cluster.NMS),c("#FF0000","#FFA500","#00FF00","#0000FF","#000000"))  #Aply color scheme to Cluster.NMS
 patientcolors$Cluster.NMS[patientcolors$Cluster.NMS=="ICR4"] <- "#FF0000"
 patientcolors$Cluster.NMS[patientcolors$Cluster.NMS=="ICR3"] <- "#FFA500"
 patientcolors$Cluster.NMS[patientcolors$Cluster.NMS=="ICR2"] <- "#00FF00"
 patientcolors$Cluster.NMS[patientcolors$Cluster.NMS=="ICR1"] <- "#0000FF"
 patientcolors$Cluster.NMS[is.na(patientcolors$Cluster.NMS)] <- "#000000"
+colnames(patientcolors) <- c("No Filter","N Filter","NS Filter","NMS Filter")
 
 
 patientcolors <- as.matrix(patientcolors)

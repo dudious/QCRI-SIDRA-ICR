@@ -19,13 +19,14 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 # Parameters
-Cancerset <- "UCEC-hiseq"
-Geneset <- "DBGS1"
+Cancerset <- "BRCA"
+Geneset <- "ImSuGS"
+Genedatabase <- "Gene_selection_v2.3.txt"
 
 # load data
 #load ("./2 DATA/TCGA MA/",Cancerset,"/",Cancerset,".MA.TCGA.ASSEMBLER.CLEANED.Rdata")                                # no MA data for ",Cancerset,"
 load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData"))
-gene.list <- read.csv ("./2 DATA/SUBSETS/Gene_selection_v2.2.txt")                                 # Select subset here !!!!! and change filename below !!!!
+gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
 gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
 
 # check availabilety of the genes in the dataset

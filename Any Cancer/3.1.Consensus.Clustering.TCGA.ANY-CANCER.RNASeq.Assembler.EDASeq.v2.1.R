@@ -28,7 +28,7 @@ source("./1 CODE/R tools/stefanofunctions.R")
 
 # Set Parameters
 Cancerset <- "BRCA"           # Select the Cancer to use
-Geneset   <- "DBGS1"          # Select the genset to use
+Geneset   <- "ISGS2"          # Select the genset to use
 Filter    <- "TRUE"           # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 
 # Load data

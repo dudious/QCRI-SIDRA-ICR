@@ -24,10 +24,10 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
 
 # Set Parameters
-Cancerset <- "BRCA"
-Geneset <- "DBGS1.FLTR.NMS" # SET GENESET HERE !!!!!!!!!!!!!!
+Cancerset <- "BRCA"                     # SET Cancertype
+Geneset <- "ISGS2.FLTR.LMF"              # SET GENESET and pruclustering filter 
 Parent.Geneset <- substring(Geneset,1,5)
-K <- 4             # SET K here
+K <- 4                                  # SET K here
 
 # Load Data
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data

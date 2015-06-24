@@ -91,11 +91,16 @@
 # append exclusion parameters
   exclude.samples.males <- which(ClinicalData.subset$gender == "MALE")
   exclude.samples.nat <- which(ClinicalData.subset$history_neoadjuvant_treatment == "Yes")
-  exclude.samples.histo <- which(ClinicalData.subset$histological_type %nin% c("Infiltrating Ductal Carcinoma","Infiltrating Lobular Carcinoma"))
+  exclude.samples.histol <- which(ClinicalData.subset$histological_type %in% c("[Not Available]"))             #%nin% c("Infiltrating Ductal Carcinoma","Infiltrating Lobular Carcinoma"))
   exclude.samples.ims <- which(ClinicalData.subset$TCGA.PAM50.RMethod.RNASeq == "Normal-like")
   exclude.samples.history <- which(ClinicalData.subset$history_other_malignancy == "Yes")
-  exclude.samples.preclust <- unique(c(exclude.samples.males,exclude.samples.nat,exclude.samples.ims)) #exclude.samples.males,exclude.samples.nat,exclude.samples.histo,exclude.samples.ims,exclude.samples.history
-  exclude.samples.postclust <- unique(c(exclude.samples.history))
+  #PRE CLUSTERING FILTER  
+  exclude.samples.preclust <- unique(c(exclude.samples.males,
+                                       exclude.samples.nat,
+                                       exclude.samples.histol,
+                                       exclude.samples.history)) #exclude.samples.males,exclude.samples.nat,exclude.samples.histo,exclude.samples.ims,exclude.samples.history
+  #POST CLUSTERING FILTER  
+  exclude.samples.postclust <- unique(c(exclude.samples.ims))
   ClinicalData.subset$exclude.pre <- "No"
   ClinicalData.subset$exclude.post <- "No"
   ClinicalData.subset[exclude.samples.preclust,"exclude.pre"] <-"Yes"

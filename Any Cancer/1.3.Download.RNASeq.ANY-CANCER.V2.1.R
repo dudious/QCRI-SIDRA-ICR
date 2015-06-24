@@ -28,7 +28,7 @@ source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
 source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
 
 # Set Parameters
-Cancerset           <- "LGG"
+Cancerset           <- "COAD"
 TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_May-06-2015.rda"
 
 # Paths and flies
@@ -47,14 +47,27 @@ end.time <- Sys.time ()
 time <- end.time - start.time #4.850641 mins
 print (time)
 
-# rename files (NEEDS change for GA/Hiseq datasets(COAD,READ,UCEC))
-file.list.old  <- list.files(Download.path,full.names = TRUE,pattern = paste0("_",Cancerset,"_"))
-file.list.new  <- paste0(str_split(file.list.old,paste0("DATA_",Cancerset,"_"))[[1]][[1]],"DATA.txt")
+# rename files (NEEDS check for GA/Hiseq datasets(COAD,READ,UCEC))
+file.hiseq <- list.files(Download.path,full.names = TRUE,pattern = "illuminahiseq" )
+hiseq <- length(file.hiseq)
+file.GA <- list.files(Download.path,full.names = TRUE,pattern = "illuminaga" )
+GA <- length(file.GA)
+if (GA==1){
+  file.hiseq.new <- paste0(str_split(file.hiseq,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"hiseq.DATA.txt")
+  file.GA.new <- paste0(str_split(file.hiseq,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"GA.DATA.txt")
+  file.list.old  <- c(file.hiseq,file.GA)
+  file.list.new  <- c(file.hiseq.new,file.GA.new)
+  tech="hiseq"
+}
+if (GA==0){
+  file.list.old  <- list.files(Download.path,full.names = TRUE,pattern = paste0("__",Cancerset,"__"))
+  file.list.new  <- paste0(str_split(file.list.old,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"DATA.txt")
+}
 file.rename (file.list.old,file.list.new)
 
 # Process the downloaded normalized gene expression data and save the results
 start.time <- Sys.time ()
-Input.file  <- paste0(Download.path,Download.file,".txt")
+Input.file  <- paste0(Download.path,Cancerset,".RNASeq.TCGA.ASSEMBLER.",tech,".DATA.txt")
 Output.file <- paste0(Download.file,".GeneExp")
 GeneExpData = ProcessRNASeqData(inputFilePath = Input.file,
                                 outputFileName = Output.file,
@@ -67,7 +80,7 @@ print (time)
 
 # Process the downloaded exon expression data and save the results
 start.time <- Sys.time ()
-Input.file  <- paste0(Download.path,Download.file,"GeneExp.txt")
+Input.file  <- paste0(Download.path,Download.file,".GeneExp.txt")
 Output.file <- paste0(Download.file,".ExonExp")
 ExonExpData = ProcessRNASeqData(inputFilePath = Input.file,
                                 outputFileName = Output.file,

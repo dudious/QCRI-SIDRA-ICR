@@ -24,7 +24,7 @@ source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
 source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
 
 # Set Parameters
-Cancerset           <- "LGG"
+Cancerset           <- "COAD"
 TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_May-06-2015.rda"
 GenomeFile = "./1 CODE/R tools/TCGA-Assembler/SupportingFiles/Hg19GenePosition.txt"
 
@@ -44,9 +44,13 @@ time <- end.time - start.time
 print (time)
 
 # rename files (NEEDS change for GA/Hiseq datasets(COAD,READ,UCEC))
-file.list.old  <- list.files(Download.path,full.names = TRUE,pattern = paste0("_",Cancerset,"_"))
-file.list.new  <- paste0(str_split(file.list.old,paste0("DATA_",Cancerset,"_"))[[1]][[1]],"DATA.hg19.txt")
+file.list.old  <- list.files(Download.path,full.names = TRUE,pattern = paste0("__",Cancerset,"__"))
+file.list.new  <- paste0(sapply(str_split(file.list.old,"__"), "[[", 1),".",sapply(str_split(file.list.old,"__"), "[[", 5),".txt")
 file.rename (file.list.old,file.list.new)
+file.origin <-str_split(file.list.old,"__") [[1]][c(2,3,4,6)]
+fileConn<-file(paste0(Download.path,"data.source.txt"))
+writeLines(file.origin, fileConn)
+close(fileConn)
 
 # Process CNV data
 start.time <- Sys.time ()
