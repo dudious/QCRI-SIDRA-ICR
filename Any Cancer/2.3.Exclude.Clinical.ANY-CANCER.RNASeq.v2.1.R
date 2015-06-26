@@ -16,11 +16,11 @@
   library (xlsx) #xlsx needs java installed
   library (Hmisc)
  
-  source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
-  source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
+  source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
+  source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Parameters
-  Cancerset <- "SKCM"
+  Cancerset <- "COAD-GA"
   Parent.Cancerset <- substring(Cancerset,1,4) 
   
 # Load data files 
