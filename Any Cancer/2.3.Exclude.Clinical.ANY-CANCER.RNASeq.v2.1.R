@@ -7,10 +7,12 @@
 # Setup environment
   rm(list=ls())
   setwd("~/Dropbox/BREAST_QATAR/")
+  setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")
   ## dependencies
-  ## install java for xlsx export
+  ## install java for xlsx export ( in ubuntu : sudo apt-get install openjdk-7-jdk and sudo R CMD javareconf)
   ## download TCGA assembler scripts http://www.compgenome.org/TCGA-Assembler/
-  required.packages <- c("xlsx","Hmisc","HGNChelper")
+  ## install libcurl on ubuntu if needed (sudo apt-get install libcurl4-gnutls-dev)
+  required.packages <- c("xlsx","Hmisc","HGNChelper","RCurl","httr")
   missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
   if(length(missing.packages)) install.packages(missing.packages)
   library (xlsx) #xlsx needs java installed
@@ -20,7 +22,7 @@
   source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Parameters
-  Cancerset <- "COAD-GA"
+  Cancerset <- "LIHC"
   Parent.Cancerset <- substring(Cancerset,1,4) 
   
 # Load data files 

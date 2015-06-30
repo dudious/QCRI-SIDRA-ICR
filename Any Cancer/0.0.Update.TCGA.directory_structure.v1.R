@@ -7,5 +7,3 @@ source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
 setwd("~/Dropbox/BREAST_QATAR/2 DATA/")
 TraverseAllDirectories(entryPoint = "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/",
                        fileLabel = "DirectoryTraverseResult");
-
-#test github

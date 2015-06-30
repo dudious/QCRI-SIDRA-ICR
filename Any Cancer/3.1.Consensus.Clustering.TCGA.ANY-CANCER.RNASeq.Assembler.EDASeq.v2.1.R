@@ -11,12 +11,14 @@
 
 # Setup environment
 rm(list=ls())
-  setwd("~/Dropbox/BREAST_QATAR/")
-  #Dependencies
-required.packages <- c("clue")
-missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if(length(missing.packages)) install.packages( "./1 CODE/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary")
+if (Sys.info()['sysname']=="Linux"){setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")}  #when using Sidra R-Server DATA
+if (Sys.info()['sysname']=="Windows"){setwd("~/Dropbox/BREAST_QATAR/")}                        #when using Dropbox DATA
 
+  #Dependencies
+  required.packages <- c("clue")
+  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
+  if (Sys.info()['sysname']=="Windows"){if(length(missing.packages)) install.packages( "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary")} #windows
+  if (Sys.info()['sysname']=="Linux"){if(length(missing.packages)) install.packages(missing.packages)} #Linux
   required.packages.BioC <- c("ConsensusClusterPlus")
   missing.packages <- required.packages.BioC[!(required.packages.BioC %in% installed.packages()[,"Package"])]
   source("http://bioconductor.org/biocLite.R")
@@ -24,11 +26,11 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 
 library(ConsensusClusterPlus)
 library(clue)
-source("./1 CODE/R tools/stefanofunctions.R")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Set Parameters
 Cancerset <- "BRCA"           # Select the Cancer to use
-Geneset   <- "ISGS2"          # Select the genset to use
+Geneset   <- "DBGS1"          # Select the genset to use
 Filter    <- "TRUE"           # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 
 # Load data
