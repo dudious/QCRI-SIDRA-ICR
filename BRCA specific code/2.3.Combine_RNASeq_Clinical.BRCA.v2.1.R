@@ -17,8 +17,8 @@
   library (xlsx) #xlsx needs java installed
   library (Hmisc)
   setwd("~/Dropbox/BREAST_QATAR/")
-  source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
-  source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
+  source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
+  source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
   
 # Load data files 
   ## RNASeq DAta from TCGA assembler
@@ -88,7 +88,7 @@
   nomatch <- merge(nomatch,IMS.TCGA.METHOD.RNASeq[,1:7],by="row.names",all.x=TRUE, all.y=FALSE)
   write.csv (nomatch, file = "./3 ANALISYS/IMS/TCGA IMS/RNASeq/nomatchwithMA.csv",row.names = TRUE);
 
-# append exclusion parameters
+# setup exclusion parameters
   exclude.samples.males <- which(ClinicalData.subset$gender == "MALE")
   exclude.samples.nat <- which(ClinicalData.subset$history_neoadjuvant_treatment == "Yes")
   exclude.samples.histol <- which(ClinicalData.subset$histological_type %in% c("[Not Available]"))             #%nin% c("Infiltrating Ductal Carcinoma","Infiltrating Lobular Carcinoma"))
@@ -98,9 +98,10 @@
   exclude.samples.preclust <- unique(c(exclude.samples.males,
                                        exclude.samples.nat,
                                        exclude.samples.histol,
-                                       exclude.samples.history)) #exclude.samples.males,exclude.samples.nat,exclude.samples.histo,exclude.samples.ims,exclude.samples.history
+                                       exclude.samples.ims)) #exclude.samples.males,exclude.samples.nat,exclude.samples.histo,exclude.samples.ims,exclude.samples.history
   #POST CLUSTERING FILTER  
-  exclude.samples.postclust <- unique(c(exclude.samples.ims))
+  exclude.samples.postclust <- unique(c(exclude.samples.history))
+  #add exclusion parameters
   ClinicalData.subset$exclude.pre <- "No"
   ClinicalData.subset$exclude.post <- "No"
   ClinicalData.subset[exclude.samples.preclust,"exclude.pre"] <-"Yes"
