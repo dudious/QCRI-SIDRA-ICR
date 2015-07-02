@@ -74,6 +74,7 @@ rownames(Consensus.class) <- Consensus.class$PatientID
 Clinical.data$PatientID <- substring(rownames(Clinical.data),1,12)
 #rownames(Clinical.data) <- NULL
 
+# Select relevant clinical data
 if (Filtersamples=="Filtered"){     
   Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude.post == "No")     # remove excluded patients
 } else if  (Filtersamples=="UnFiltered")

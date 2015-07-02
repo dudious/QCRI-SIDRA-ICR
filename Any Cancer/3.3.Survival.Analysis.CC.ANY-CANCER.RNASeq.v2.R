@@ -33,9 +33,9 @@ library(plyr)
 source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset <- "COAD-hiseq"     # SET Cancertype
-Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1"            # SET GENESET and pruclustering filter 
+Cancerset <- "BRCA"     # SET Cancertype
+Filtersamples <- "UnFiltered" # altervatives : Filtered , UnFiltered
+Geneset <- "DBGS3"            # SET GENESET and pruclustering filter 
 K <- 4                        # SET K
 Surv.cutoff.years <- 10       # SET cut-off
 Km.type <- "1vs2vs3vs4"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4

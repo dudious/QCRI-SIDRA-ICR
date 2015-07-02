@@ -30,7 +30,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Set Parameters
 Cancerset <- "BRCA"           # Select the Cancer to use
-Geneset   <- "DBGS1"          # Select the genset to use
+Geneset   <- "DBGS3"          # Select the genset to use
 Filter    <- "TRUE"           # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 
 # Load data
@@ -40,7 +40,7 @@ Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,"
 # Filter for sample exlusion parameter
 Selected.samples <- Clinical.data[Clinical.data$exclude.pre=="No",1]
 if (Filter == "TRUE"){
-  Geneset <- paste0(Geneset,".FLTR")
+  Geneset <- paste0(Geneset,".FLTR.LMFv1")
   RNASeq.subset <- RNASeq.subset[rownames(RNASeq.subset) %in% Selected.samples,]
 }
 

@@ -6,8 +6,8 @@
 
 # Setup environment
   rm(list=ls())
-  setwd("~/Dropbox/BREAST_QATAR/")
-  setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")
+  if (Sys.info()['sysname']=="Linux"){setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")}  #when using Sidra R-Server DATA
+  if (Sys.info()['sysname']=="Windows"){setwd("~/Dropbox/BREAST_QATAR/")}                        #when using Dropbox DATA
   ## dependencies
   ## install java for xlsx export ( in ubuntu : sudo apt-get install openjdk-7-jdk and sudo R CMD javareconf)
   ## download TCGA assembler scripts http://www.compgenome.org/TCGA-Assembler/
@@ -22,7 +22,7 @@
   source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Parameters
-  Cancerset <- "LIHC"
+  Cancerset <- "SKCM"
   Parent.Cancerset <- substring(Cancerset,1,4) 
   
 # Load data files 
