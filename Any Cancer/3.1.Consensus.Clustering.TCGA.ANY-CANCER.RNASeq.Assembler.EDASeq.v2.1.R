@@ -11,13 +11,11 @@
 
 # Setup environment
 rm(list=ls())
-if (Sys.info()['sysname']=="Linux"){setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")}  #when using Sidra R-Server DATA
-if (Sys.info()['sysname']=="Windows"){setwd("~/Dropbox/BREAST_QATAR/")}                        #when using Dropbox DATA
-
-  #Dependencies
+setwd("~/Dropbox/BREAST_QATAR/") #using symbolic link on R-server, no actual dropbox (ln -s /cancer_data/Cancer\ Immunesignature\ QCRI-SIDRA/ /home/whendrickx/Dropbox/BREAST_QATAR)
+#Dependencies
   required.packages <- c("clue")
   missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if (Sys.info()['sysname']=="Windows"){if(length(missing.packages)) install.packages( "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary")} #windows
+  if(length(missing.packages)) install.packages( "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary") #windows
   if (Sys.info()['sysname']=="Linux"){if(length(missing.packages)) install.packages(missing.packages)} #Linux
   required.packages.BioC <- c("ConsensusClusterPlus")
   missing.packages <- required.packages.BioC[!(required.packages.BioC %in% installed.packages()[,"Package"])]

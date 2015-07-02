@@ -7,7 +7,6 @@
 # Setup environment
   rm(list=ls())
   setwd("~/Dropbox/BREAST_QATAR/")
-  setwd("/cancer_data/Cancer Immunesignature QCRI-SIDRA/")
   ## dependencies
   ## install java for xlsx export ( in ubuntu : sudo apt-get install openjdk-7-jdk and sudo R CMD javareconf)
   ## download TCGA assembler scripts http://www.compgenome.org/TCGA-Assembler/
