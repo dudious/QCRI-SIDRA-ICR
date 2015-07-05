@@ -28,7 +28,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Set Parameters
 Cancerset           <- "GBM"
-TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_May-06-2015.rda"
+TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
 
 # Paths and flies
 Download.path       <- paste0("./2 DATA/TCGA MA/",Cancerset,"/")

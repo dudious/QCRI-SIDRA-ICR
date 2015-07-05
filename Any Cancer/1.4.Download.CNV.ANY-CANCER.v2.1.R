@@ -20,13 +20,13 @@ setwd("~/Dropbox/BREAST_QATAR")
 required.packages <- c("HGNChelper","RCurl","httr","stringr","digest","bitops")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
-source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
-source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Set Parameters
-Cancerset           <- "COAD"
-TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_May-06-2015.rda"
-GenomeFile = "./1 CODE/R tools/TCGA-Assembler/SupportingFiles/Hg19GenePosition.txt"
+Cancerset           <- "BRCA"
+TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
+GenomeFile = "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/SupportingFiles/Hg19GenePosition.txt"
 
 # Paths and flies
 Download.path       <- paste0("./2 DATA/TCGA CNV/TCGA CNV_",Cancerset,"_ASSEMBLER/")
