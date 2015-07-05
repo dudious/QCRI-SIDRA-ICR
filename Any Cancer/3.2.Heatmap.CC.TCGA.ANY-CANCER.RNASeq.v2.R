@@ -25,7 +25,7 @@ library("gplots")
 
 # Set Parameters
 Cancerset <- "BRCA"                     # SET Cancertype
-Geneset <- "DBGS3.FLTR.LMFv2"              # SET GENESET and pruclustering filter 
+Geneset <- "DBGS3.FLTR"              # SET GENESET and pruclustering filter 
 Parent.Geneset <- substring(Geneset,1,5)
 K <- 4                                  # SET K here
 

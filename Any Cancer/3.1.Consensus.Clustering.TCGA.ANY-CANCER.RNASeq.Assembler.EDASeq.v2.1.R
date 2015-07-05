@@ -38,7 +38,7 @@ Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,"
 # Filter for sample exlusion parameter
 Selected.samples <- Clinical.data[Clinical.data$exclude.pre=="No",1]
 if (Filter == "TRUE"){
-  Geneset <- paste0(Geneset,".FLTR.LMFv1")
+  Geneset <- paste0(Geneset,".FLTR")
   RNASeq.subset <- RNASeq.subset[rownames(RNASeq.subset) %in% Selected.samples,]
 }
 

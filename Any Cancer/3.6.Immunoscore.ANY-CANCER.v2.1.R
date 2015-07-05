@@ -19,7 +19,7 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 if(length(missing.packages)) install.packages("./1 CODE/R tools/estimate_1.0.11.zip", repos=NULL)
 library("plyr")
 library("estimate")
-source ("./1 CODE/R tools/read.gct.R")
+source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/read.gct.R")
 
 dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/",showWarnings=FALSE)
 

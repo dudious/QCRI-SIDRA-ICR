@@ -20,8 +20,8 @@ setwd("~/Dropbox/BREAST_QATAR")
    if(length(missing.packages)) biocLite(missing.packages)
 
 library("EDASeq","base64enc")
-source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
-source("./1 CODE/R tools/stefanofunctions.R")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
    
 # Set Parameters
 Cancerset <- "OV"
