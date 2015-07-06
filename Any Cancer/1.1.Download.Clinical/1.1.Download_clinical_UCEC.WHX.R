@@ -19,11 +19,14 @@ required.packages <- c("xlsx","RCurl","httr")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 
-source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
 library (xlsx)  #xlsx needs java installed
 
+# Parameters
+TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
+
 # Download de-identified clinical information of UCEC patients in the Biotab format
-DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-06-2015.rda", 
+DownloadClinicalData(traverseResultFile = TCGA.structure.file, 
                      saveFolderName = "./2 DATA/Clinical Information/UCEC/RawData",
                      cancerType = "UCEC",
                      clinicalDataType = c("patient",                                          
@@ -33,7 +36,7 @@ DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-
                                           "nte",                                          
                                           "follow_up"));
 
-DownloadBiospecimenData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-06-2015.rda",
+DownloadBiospecimenData(traverseResultFile = TCGA.structure.file,
                         saveFolderName = "./2 DATA/Biospecimeninfo/UCEC/",
                         cancerType = "UCEC",
                         biospecimenDataType = c("normal_control", "tumor_sample"));
@@ -80,7 +83,7 @@ print ("Files renamed ...")
   follow_up.table.4.0 <- (follow_up.table.4.0 [-c(1,2),]) # delete first 2 rows
   row.names(follow_up.table.4.0) <- NULL
 
-  follow_up.table.4.0_nte <- read.csv ("./2 DATA/Clinical Information/LIHC/RawData/follow_up_v4.0_nte.txt", header = TRUE, sep="\t", as.is=TRUE)
+  follow_up.table.4.0_nte <- read.csv ("./2 DATA/Clinical Information/UCEC/RawData/follow_up_v4.0_nte.txt", header = TRUE, sep="\t", as.is=TRUE)
   follow_up.table.4.0_nte <- (follow_up.table.4.0_nte [-c(1,2),]) # delete first 2 rows
   row.names(follow_up.table.4.0_nte) <- NULL
 
@@ -144,7 +147,7 @@ patient.vars[-which(patient.vars %in% colnames(patient.table))] # check for unav
   clinicaldata.table <- unique(clinicaldata.table)
    
   clinicaldata.table <- merge(clinicaldata.table,
-                            follow_up.table.nte[c("bcr_patient_barcode")], # this is histo data on nte tumours
+                              follow_up.table.4.0_nte[c("bcr_patient_barcode")], # this is histo data on nte tumours
                             by.x="bcr_patient_barcode", by.y="bcr_patient_barcode",all.x=TRUE,all.y=FALSE);
   clinicaldata.table <- unique(clinicaldata.table)
   

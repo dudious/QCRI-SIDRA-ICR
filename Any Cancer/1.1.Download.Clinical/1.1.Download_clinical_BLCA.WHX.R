@@ -19,11 +19,14 @@ required.packages <- c("xlsx","RCurl","httr")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 
-source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
 library (xlsx)  #xlsx needs java installed
 
+# Parameters
+TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
+
 # Download de-identified clinical information of BLCA patients in the Biotab format
-DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-06-2015.rda", 
+DownloadClinicalData(traverseResultFile = TCGA.structure.file, 
                      saveFolderName = "./2 DATA/Clinical Information/BLCA/RawData",
                      cancerType = "BLCA",
                      clinicalDataType = c("patient",                                          
@@ -33,7 +36,7 @@ DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-
                                           "nte",                                          
                                           "follow_up"));
 
-DownloadBiospecimenData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_Jan-07-2015.rda",
+DownloadBiospecimenData(traverseResultFile = TCGA.structure.file,
                         saveFolderName = "./2 DATA/Biospecimeninfo/BLCA/",
                         cancerType = "BLCA",
                         biospecimenDataType = c("normal_control", "tumor_sample"));
@@ -83,13 +86,13 @@ print ("Files renamed ...")
 
 ## selection of variables
 #paste(colnames (patient.table),collapse=",")
-  patient.vars[-which(patient.vars %in% colnames(patient.table))] #has to be NULL, otherwise drop/change variables
   patient.vars <- c("bcr_patient_barcode","gender","race","ethnicity","history_other_malignancy","history_neoadjuvant_treatment",
                  "tumor_status","vital_status","histological_type","neoplasm_histologic_grade",
                  "ajcc_tumor_pathologic_pt","ajcc_nodes_pathologic_pn","ajcc_metastasis_pathologic_pm","ajcc_pathologic_tumor_stage",
                  "new_tumor_event_dx_indicator",
                  "age_at_diagnosis","birth_days_to","clinical_M","clinical_N","clinical_T","clinical_stage","death_days_to",
                  "last_contact_days_to","tumor_tissue_site","karnofsky_score")
+  patient.vars[-which(patient.vars %in% colnames(patient.table))] #has to be NULL, otherwise drop/change variables
   cqcf.vars <- c("bcr_patient_barcode")
   drug.vars <- c("bcr_patient_barcode") 
   radiation.vars <- c("bcr_patient_barcode")

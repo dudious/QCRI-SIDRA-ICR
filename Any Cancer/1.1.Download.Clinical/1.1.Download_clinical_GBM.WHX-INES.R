@@ -19,11 +19,14 @@ required.packages <- c("xlsx","RCurl","httr")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 
-source("./1 CODE/R tools/TCGA-Assembler/Module_A.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
 library (xlsx)  #xlsx needs java installed
 
+# Parameters
+TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
+
 # Download de-identified clinical information of GBM patients in the Biotab format
-DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-06-2015.rda", 
+DownloadClinicalData(traverseResultFile = TCGA.structure.file, 
                      saveFolderName = "./2 DATA/Clinical Information/GBM/RawData",
                      cancerType = "GBM",
                      clinicalDataType = c("patient",                                          
@@ -33,7 +36,7 @@ DownloadClinicalData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-
                                           "nte",                                          
                                           "follow_up"));
 
-DownloadBiospecimenData(traverseResultFile = "./2 DATA/DirectoryTraverseResult_May-06-2015.rda",
+DownloadBiospecimenData(traverseResultFile = TCGA.structure.file,
                         saveFolderName = "./2 DATA/Biospecimeninfo/GBM/",
                         cancerType = "GBM",
                         biospecimenDataType = c("normal_control", "tumor_sample"));
