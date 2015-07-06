@@ -27,7 +27,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Set Parameters
-Cancerset           <- "GBM"
+Cancerset           <- "BRCA"
 TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
 
 # Paths and flies
@@ -50,6 +50,8 @@ file.agilent <- list.files(Download.path,full.names = TRUE,pattern = "agilent" )
 agilent <- length(file.agilent)
 file.affy <- list.files(Download.path,full.names = TRUE,pattern = "u133" )
 affy <- length(file.affy)
+file.agilent.new <- character()
+file.affy.new <- character()
  ## 1 file
 if (agilent==1){
   file.agilent.new <- paste0(str_split(file.agilent,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"agilent.DATA.txt")
