@@ -18,7 +18,7 @@ setwd("~/Dropbox/BREAST_QATAR")
 library(ctc)
 library(heatmap.plus)
 
-source("./1 CODE/R tools/TCGA-Assembler/Module_B.r")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 ## RNASeq DAta from the EDASeq protocol after log2 transformation
 load ("./2 DATA/TCGA RNAseq/RNASeq_BRCA_EDASeq/BRCA.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData")
@@ -26,13 +26,13 @@ RNASeq.NORM <- RNASeq.NORM_Log2
 
 #rename to old genenames to fit with this method
 rownames(RNASeq.NORM)[rownames(RNASeq.NORM) == "NDC80"] <- "KNTC2"
-rownames(RNASeq.NORM)[rownames(RNASeq.NORM) == "NUF2"] <- "CDCA1"
-rownames(RNASeq.NORM)[rownames(RNASeq.NORM) == "ORC6"] <- "ORC6L"
+rownames(RNASeq.NORM)[rownames(RNASeq.NORM) == "NUF2"]  <- "CDCA1"
+rownames(RNASeq.NORM)[rownames(RNASeq.NORM) == "ORC6"]  <- "ORC6L"
 
 write.table (RNASeq.NORM,file="./3 ANALISYS/IMS/TCGA IMS/RNASeq/BRCA.TCGA.EDASeq.RNASeq.CLEANED.txt",sep = "\t",quote=FALSE,col.names=NA)
 
-paramDir<- "./1 CODE/R tools/PAM50.TCGA.method/bioclassifier_R" # the location of unchanging files such as the function library and main program
-inputDir<- "./3 ANALISYS/IMS/TCGA IMS/RNASeq/"          # the location of the data matrix, and where output will be located
+paramDir<- "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/PAM50.TCGA.method/bioclassifier_R" # the location of unchanging files such as the function library and main program
+inputDir<- "./3 ANALISYS/IMS/TCGA IMS/RNASeq/"                                             # the location of the data matrix, and where output will be located
 
 inputFile<- "BRCA.TCGA.EDASeq.RNASeq.CLEANED.txt" # the input data matrix as a tab delimited text file
 short<-"BRCA.TCGA.EDASeq.RNASeq.IMS.OUTPUT"       # short name that will be used for output files
@@ -46,8 +46,8 @@ hasClinical<-FALSE 	#may include tumor size as second row, with 'T' as the gene 
 										#set this variable to FALSE if tumor size is not available
 
 collapseMethod<-"mean" # can be mean or iqr (probe with max iqr is selected)
-											# typically, mean is preferred for long oligo and
-											# iqr is preferred for short oligo platforms
+											 # typically, mean is preferred for long oligo and
+											 # iqr is preferred for short oligo platforms
 
 
 ####
