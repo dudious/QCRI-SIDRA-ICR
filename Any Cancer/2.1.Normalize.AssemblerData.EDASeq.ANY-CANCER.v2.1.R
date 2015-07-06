@@ -60,7 +60,7 @@ if (Cancerset == "SKCM"){Tissue <- c("TP","TM")}                                
 RNASeq.DATA <- ExtractTissueSpecificSamples(inputData = RNASeq.DATA,                          # this function will also remove anotation column
                                             tissueType = Tissue,
                                             singleSampleFlag = TRUE,
-                                            sampleTypeFile=".~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/SupportingFiles/TCGASampleType.txt"); # select primary tumour and metastatic only
+                                            sampleTypeFile="~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/SupportingFiles/TCGASampleType.txt"); # select primary tumour and metastatic only
 RNASeq.DATA <- cbind (RNASeq.DES,RNASeq.DATA)
 length(unique(colnames(RNASeq.DATA))) - length(unique(substring(colnames(RNASeq.DATA),1,12))) # 0 patient with 2 samples (normal control tissue)
 colnames(RNASeq.DATA) <- substring(colnames(RNASeq.DATA),1,12)                                # rename columns from sample to patient ID
