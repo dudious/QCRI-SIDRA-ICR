@@ -19,8 +19,8 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 # Parameters
-Cancerset <- "BRCA"
-Geneset <- "ImSuGS"
+Cancerset <- "KIRC"
+Geneset <- "DBGS3"
 Genedatabase <- "Gene_selection_v2.3.txt"
 
 # load data

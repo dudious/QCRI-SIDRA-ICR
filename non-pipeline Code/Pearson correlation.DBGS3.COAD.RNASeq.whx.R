@@ -19,12 +19,10 @@ if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
 # load data
-load ("./2 DATA/SUBSETS/METABRIC/METABRIC.RNASEQ.DATA.1.genesubset.25G.DB.RData") # Select subset here !!!!!
-load ("./2 DATA/SUBSETS/METABRIC/METABRIC.RNASEQ.DATA.2.genesubset.25G.DB.RData") # Select subset here !!!!!
-RNASEQ.DATA.ALL.subset <- rbind(RNASEQ.DATA.1.subset,RNASEQ.DATA.2.subset)
+load ("./2 DATA/SUBSETS/COAD-hiseq/TCGA.COAD-hiseq.RNASeq.subset.DBGS3.RData") # Select subset here !!!!!
 
 # Corelation matrix
-RNASeq.subset.cor <- cor (RNASEQ.DATA.ALL.subset,method="pearson")
+RNASeq.subset.cor <- cor (RNASeq.subset,method="pearson")
 
 # cor significance
 cor.mtest <- function(mat, conf.level = 0.95) {
@@ -47,7 +45,7 @@ RNASeq.subset.cor.sign <- cor.mtest(RNASeq.subset.cor, 0.95)
                                 
 
 # Correlation plot
-png("./4 FIGURES/CORRELATION/correlation.METABRIC.ALL.25G.DB.RNASeq.test.png",res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+png("./4 FIGURES/CORRELATION/correlation.COAD.DBGS3.RNASeq.png",res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
 cex.before <- par("cex")
 par(cex = 0.45)
 corrplot.mixed(RNASeq.subset.cor,
@@ -55,14 +53,15 @@ corrplot.mixed(RNASeq.subset.cor,
                lower = "circle",
                upper ="number",
                order="FPC",
-               #cl.lim=c(0,1),                          # only positive correlations
+               cl.lim=c(0,1),                          # only positive correlations
                tl.pos ="lt",
                #insig="blank",                          # remove insignificant correlations
                tl.cex = 1/par("cex"),
                cl.cex = 1/par("cex"),
-               title = "Pearson METABRIC.ALL-RNASeq (DBGS)",
+               title = "Pearson COAD DBGS3",
                cex.main = 1.4/par("cex"),
-               mar=c(5.1,4.1,4.1,2.1))
+               mar=c(5.1,4.1,4.1,2.1)
+               )
 par(cex = cex.before)
 dev.off()
 

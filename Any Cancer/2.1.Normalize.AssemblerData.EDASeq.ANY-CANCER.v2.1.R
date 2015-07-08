@@ -24,7 +24,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
    
 # Set Parameters
-Cancerset <- "CESC"
+Cancerset <- "KIRC"
 Parent.Cancerset <- substring(Cancerset,1,4)
 Seq.tech = ""
 if (substring(Cancerset,6,nchar(Cancerset))=="hiseq") {Seq.tech = ".hiseq"}
@@ -45,7 +45,10 @@ colnames(RNASeq.DES) <- c("GeneSymbol","EntrezID")
 
 # clean-up Data
 RNASeq.DATA <- RNASeq.DATA[-1,-c(1,2)]                                              # drop annotaion from data
-RNASeq.DATA <- RNASeq.DATA[,which(substring (colnames (RNASeq.DATA),28,31) == "7")] # remove "scaled_estimate" data
+x=7
+if (Cancerset == "GBM") {x=1}
+if (Cancerset == "OV") {x=3}
+RNASeq.DATA <- RNASeq.DATA[,which(substring (colnames (RNASeq.DATA),28,31) == x)] # remove "scaled_estimate" data 
 colnames(RNASeq.DATA) <- gsub("\\.","-",colnames(RNASeq.DATA))                      # replace "." with "-" in sample names
 rownames(RNASeq.DATA) <- NULL
 
