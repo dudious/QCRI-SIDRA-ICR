@@ -9,8 +9,9 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 # Set Parameters
-Cancerset   <- "SKCM"
-Geneset     <- "DBGS1"
+Cancerset   <- "BRCA"         #use combined cancerset not -GA or -hiseq
+Geneset     <- "DBGS3.FLTR"
+BRCA.Filter <- "PCF"          # "PCF" or "BSF" Pancer or Breast specific
 
 # check for split dataset (GA/hiseq)
 split = "FALSE"
@@ -23,6 +24,11 @@ if (hiseq+GA == 2) {split = "TRUE"}
 
 # Load Data
 CNV.Data <- read.table(paste0("./2 DATA/TCGA CNV/TCGA CNV_",Cancerset,"_ASSEMBLER/",Cancerset,".CN.TCGA.ASSEMBLER.DATA.nocnv_hg19.txt"),as.is=TRUE,header = TRUE)
+if (Cancerset == "BRCA"){
+  if (substring(Geneset,7,10)=="FLTR"){
+    Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+  }
+}
 if (split == "TRUE"){
   Geneset.GA = paste0(Geneset,"-GA")
   Consensuss.class.GA<-read.delim(file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"-GA/",

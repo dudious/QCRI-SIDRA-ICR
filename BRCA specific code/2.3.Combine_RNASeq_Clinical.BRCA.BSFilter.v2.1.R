@@ -19,6 +19,9 @@
   setwd("~/Dropbox/BREAST_QATAR/")
   source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
   source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
+
+# Parameters
+Cancerset <- "BRCA"
   
 # Load data files 
   ## RNASeq DAta from TCGA assembler
@@ -107,9 +110,9 @@
   ClinicalData.subset[exclude.samples.preclust,"exclude.pre"] <-"Yes"
   ClinicalData.subset[exclude.samples.postclust,"exclude.post"] <-"Yes"
   print ("exclusion parameter added...")
-  
+  Cancerset <- "BRCA.BSF"
 # export data to txt and excel
-  write.csv (ClinicalData.subset, file = "./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.RNASeq_subset_clinicaldata.csv",row.names = TRUE);
-  write.xlsx (ClinicalData.subset, file = "./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.RNASeq_subset_clinicaldata.xlsx", sheetName ="RNASeq subset clinical data", row.names=TRUE);
-  print ("Data on all Samples are saved in RNASeq_subset_clinicaldata.xlsx and RNASeq_subset_clinicaldata.txt.")
- 
+write.csv (ClinicalData.subset, file = paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"),row.names = TRUE);
+write.xlsx (ClinicalData.subset, file = paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.xlsx"), sheetName ="RNASeq subset clinical data", row.names=TRUE);
+print (paste0("Data on all Samples are saved in TCGA.",Cancerset,".RNASeq_subset_clinicaldata.xlsx and TCGA.",Cancerset,".RNASeq_subset_clinicaldata.txt."))
+
