@@ -24,7 +24,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
 source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Set Parameters
-Cancerset           <- "BRCA"
+Cancerset           <- "OV"
 TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
 GenomeFile = "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/SupportingFiles/Hg19GenePosition.txt"
 
