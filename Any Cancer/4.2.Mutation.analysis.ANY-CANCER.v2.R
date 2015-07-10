@@ -24,24 +24,53 @@ setwd("~/Dropbox/BREAST_QATAR/")
 library("plyr")
 
 # Set Parameters
-Cancerset <- "UCEC"
+Cancerset <- "COAD"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "PCF"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4                        # SET K here
 
 ## Load Data
-load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
-Mutation.selected.data <- data.frame(Hugo_Symbol = maf.merged.table$Hugo_Symbol, Variant_Classification = maf.merged.table$Variant_Classification, Patient_ID = substr(maf.merged.table$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
-if (Cancerset == "BRCA"){
-  if (substring(Geneset,7,10)=="FLTR"){
+if (Cancerset %in% c("COAD","READ","UCEC")) {
+  #GA data
+  Cancerset <- paste0(Cancerset,"-GA")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  Mutation.selected.data.GA <- data.frame(Hugo_Symbol = maf.merged.table$Hugo_Symbol, Variant_Classification = maf.merged.table$Variant_Classification, Patient_ID = substr(maf.merged.table$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
+  Consensus.class.GA <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.GA <- Consensus.class.GA[,-1]
+  colnames (Consensus.class.GA) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.GA) <- Consensus.class.GA[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #hiseq data
+  Cancerset <- paste0(Cancerset,"-hiseq")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  Mutation.selected.data.hiseq <- data.frame(Hugo_Symbol = maf.merged.table$Hugo_Symbol, Variant_Classification = maf.merged.table$Variant_Classification, Patient_ID = substr(maf.merged.table$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
+  Consensus.class.hiseq <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.hiseq <- Consensus.class.hiseq[,-1]
+  colnames (Consensus.class.hiseq) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.hiseq) <- Consensus.class.hiseq[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #merge GA-hiseq
+  Consensus.class <- rbind (Consensus.class.hiseq,Consensus.class.GA)
+  Mutation.selected.data <- rbind (Mutation.selected.data.hiseq,Mutation.selected.data.GA)
+  Consensus.class <- Consensus.class[which(rownames(Consensus.class) %in% as.character(Mutation.selected.data$Patient_ID)),] # drop samples without any mutation data
+} else {
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  Mutation.selected.data <- data.frame(Hugo_Symbol = maf.merged.table$Hugo_Symbol, Variant_Classification = maf.merged.table$Variant_Classification, Patient_ID = substr(maf.merged.table$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
+  if (Cancerset == "BRCA"){
+    if (substring(Geneset,7,10)=="FLTR"){
     Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+    }
   }
-}
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
 Consensus.class <- Consensus.class[which(rownames(Consensus.class) %in% as.character(Mutation.selected.data$Patient_ID)),] # drop samples without any mutation data
+rm(maf.merged.table)
+}
+
 dir.create (paste0("./3 ANALISYS/Mutations/",Cancerset,"/"),showWarnings=FALSE)
 
 # Add Class to mutation data

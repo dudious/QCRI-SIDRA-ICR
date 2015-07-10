@@ -19,7 +19,7 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BRCA.PCF" # FOR BRCA use BRCA.PCF or BRCA.BSF
+Cancerset <- "COAD"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
 gene = "TP53"
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
@@ -91,6 +91,7 @@ meds$p.value = p.values$p.value [match(meds$mut.type,p.values$mut.type)]
 meds$p.value.label = paste0("p = ",round(meds$p.value,4)) 
 meds[meds$cluster != "ICR2","p.value.label"] = ""
 meds.limit = 4*max(meds$med)
+if (Cancerset == "COAD"){meds.limit = 6*max(meds$med)}
 mean.n = function(x){ return(c(y = 0 , label = round(mean(x),1))) } ## mean
 
 png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".png"), height = 1000, width= blot.width)   #set filename

@@ -23,10 +23,10 @@ library("gplots")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BRCA"
-Geneset = "DBGS1"
+Cancerset <- "BLCA"
+Geneset = "DBGS3.FLTR"
 matrix.type = "Any"       # Alterantives "Any" , "Missense"
-plot.type = "low"         # Alterantives "low" , "high" , "373genes"  (NOT WORKING)
+plot.type = "high"         # Alterantives "low" , "high" , "373genes"  (NOT WORKING)
 
 # Load Data
 load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
@@ -36,7 +36,9 @@ colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
 
 # select data to plot
-allmuts.mutatedgenes <- genes.mutations.low              #assign(paste0("genes.mutations.",plot.type))
+if (plot.type == "low"){allmuts.mutatedgenes <- genes.mutations.low}
+if (plot.type == "high"){allmuts.mutatedgenes <- genes.mutations.high}
+if (plot.type == "373genes"){allmuts.mutatedgenes <- genes.mutations.373genes}
 allmuts.mutatedgenes[is.na(allmuts.mutatedgenes)] = 0
 
 #merge data
@@ -99,7 +101,9 @@ heatmap.2(allmuts.mutatedgenes,
           density.info="none",
           trace="none",
           labCol=colnames(allmuts.mutatedgenes),
-          cexRow=0.2,cexCol=0.65,margins=c(10,2),labRow=FALSE,
+          cexRow=1,cexCol=3,
+          margins=c(10,2),
+          labRow=FALSE,
           Colv=FALSE, Rowv=FALSE                              # reorder row/columns by dendogram
           )
 par(lend = 1)

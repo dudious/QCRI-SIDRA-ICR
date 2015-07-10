@@ -10,7 +10,7 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BRCA.BSF"  # FOR BRCA use BRCA.PCF or BRCA.BSF
+Cancerset <- "BLCA"  # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset = "DBGS3.FLTR"   # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                    # SET K here
 Filter = 3               # at least one clutser has to have x% mutation frequency
@@ -22,7 +22,7 @@ numMuts.Any     = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=M
 ## Pick genes based on cutoff (Freq.Any.pct) (present in at least "cutoff" samples for each cluster)
 gene.list = as.character(unique(Mutation.Frequency.Gene$Hugo_Symbol))
 gene.list.selected = NULL
-gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have 10% mutation
+gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
 variation.table = NULL
 
 ## for each gene, pick the 4 clusters, corresponding Freq.Any.pct
@@ -46,10 +46,18 @@ for (gene in gene.list.selected){
   gene.data.row = data.frame(gene, paste0(gene.data.pct, collapse=" : "), variation, paste0((trend), collapse=" : "), flag, trend.pval)  
   variation.table = rbind(variation.table, gene.data.row)
 }
-
 colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared")
-low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<.1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*0.75), ]
-high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<.05 | variation.table$Trend) & variation.table$Max_Variation>=Filter*1.5), ]
+
+# significance filter
+SL1 = 0.01  #chisquare p for LOW
+SL2 = 2     #maxvar Filter multiplier for LOW
+SH1 = SL1/2 #chisquare p for HIGH
+SH2 = SL2*2 #maxvar Filter multiplier for HIGH
+low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
+high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
+
+# settings Table (SL1,SL2,SH1,SH2)
+# BLCA  (0.01,2,0.005,4)
 
 save(low.significant.variation.table, high.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
 write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTable.csv"))

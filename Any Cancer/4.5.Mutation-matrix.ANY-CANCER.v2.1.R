@@ -17,28 +17,25 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BRCA"
-Geneset = "DBGS1"
-matrix.type = "Any"       # Alterantives "Any" , "Missense"
+Cancerset   = "COAD"
+Geneset     = "DBGS3.FLTR"
+matrix.type = "Any"         # Alterantives "Any" , "Missense"
 
+##load data
 ## Read the mutation .maf file 
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
 muts = maf.merged.table
-
-#muts = read.csv("BRCA.mutation.TCGA.txt", sep="\t" )
 muts$sample.name = substr(muts$Tumor_Sample_Barcode, 1, 12)
-
-## RNASeq clustering
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
-Consensus.class <- Consensus.class[,-1]
-colnames (Consensus.class) <- c("Patient_ID","Cluster")
-rownames(Consensus.class) <- Consensus.class[,1]
-cluster.assignment <- Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data
-
 ## Read the gene list (373 genes)
 genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
 ## Load the mutation variation data
 load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
+## RNASeq clustering
+Consensus.class = read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+Consensus.class = Consensus.class[,-1]
+colnames (Consensus.class) = c("Patient_ID","Cluster")
+rownames(Consensus.class) = Consensus.class[,1]
+cluster.assignment = Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data
 
 ## Merge the cluster info and Remove the mutations with samples not having cluster information
 muts$cluster = cluster.assignment$Cluster[match(muts$sample.name, as.character(cluster.assignment$Patient_ID))]
