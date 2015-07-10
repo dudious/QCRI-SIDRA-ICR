@@ -10,8 +10,8 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BRCA"
-Geneset = "DBGS1"        # SET GENESET HERE !!!!!!!!!!!!!!
+Cancerset <- "BRCA.BSF"  # FOR BRCA use BRCA.PCF or BRCA.BSF
+Geneset = "DBGS3.FLTR"   # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                    # SET K here
 Filter = 3               # at least one clutser has to have x% mutation frequency
 

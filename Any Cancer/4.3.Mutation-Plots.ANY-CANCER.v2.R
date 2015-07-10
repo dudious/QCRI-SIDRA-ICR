@@ -19,9 +19,9 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BRCA"
+Cancerset <- "BRCA.PCF" # FOR BRCA use BRCA.PCF or BRCA.BSF
 gene = "TP53"
-Geneset = "DBGS1"        # SET GENESET HERE !!!!!!!!!!!!!!
+Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
 Plot.type = "All"       # Alterantives "All" , "Any" , "Missense"
 
@@ -59,7 +59,7 @@ test.Missense.Any = aov(count~cluster,data=numMuts.Missense.Any)
 p.value.Missense.Any = summary(test.Missense.Any)[[1]][["Pr(>F)"]][[1]]
 test.Silent.Any = aov(count~cluster,data=numMuts.Silent.Any)
 p.value.Silent.Any = summary(test.Silent.Any)[[1]][["Pr(>F)"]][[1]]
-p.values <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","Any","Misense.Any","Silent.Any"),
+p.values <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","Any","Missense.Any","Silent.Any"),
                        p.value=c(p.value.All,p.value.Missense,p.value.Silent,p.value.Nonsense,p.value.Other,p.value.Any,p.value.Missense.Any,p.value.Silent.Any))
 
 # Combine
