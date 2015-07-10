@@ -24,19 +24,25 @@ setwd("~/Dropbox/BREAST_QATAR/")
 library("plyr")
 
 # Set Parameters
-Cancerset <- "BRCA"
-Geneset <- "DBGS1"       # SET GENESET HERE !!!!!!!!!!!!!!
-K <- 4                   # SET K here
+Cancerset <- "UCEC"
+BRCA.Filter <- "PCF"          # "PCF" or "BSF" Pancer or Breast specific
+Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
+K <- 4                        # SET K here
 
 ## Load Data
-dir.create (paste0("./3 ANALISYS/Mutations/",Cancerset,"/"),showWarnings=FALSE)
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
 Mutation.selected.data <- data.frame(Hugo_Symbol = maf.merged.table$Hugo_Symbol, Variant_Classification = maf.merged.table$Variant_Classification, Patient_ID = substr(maf.merged.table$Tumor_Sample_Barcode,1,12)) #add Mutation.data$Variant_Type for del,snp,ins
+if (Cancerset == "BRCA"){
+  if (substring(Geneset,7,10)=="FLTR"){
+    Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+  }
+}
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
-Consensus.class <- Consensus.class[which(rownames(Consensus.class) %in% Mutation.selected.data$Patient_ID),] # drop samples without any mutation data
+Consensus.class <- Consensus.class[which(rownames(Consensus.class) %in% as.character(Mutation.selected.data$Patient_ID)),] # drop samples without any mutation data
+dir.create (paste0("./3 ANALISYS/Mutations/",Cancerset,"/"),showWarnings=FALSE)
 
 # Add Class to mutation data
 Mutation.selected.data$Cluster <- Consensus.class$Cluster [match(Mutation.selected.data$Patient_ID,Consensus.class$Patient_ID)]
