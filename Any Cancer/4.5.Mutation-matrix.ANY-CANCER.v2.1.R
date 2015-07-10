@@ -22,24 +22,51 @@ Geneset     = "DBGS3.FLTR"
 matrix.type = "Any"         # Alterantives "Any" , "Missense"
 
 ##load data
-## Read the mutation .maf file 
-load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+## Read the mutation .maf file and cluster assignments
+if (Cancerset %in% c("COAD","READ","UCEC")) {
+  #GA data
+  Cancerset <- paste0(Cancerset,"-GA")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  maf.merged.table.GA <- maf.merged.table
+  Consensus.class.GA <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.GA <- Consensus.class.GA[,-1]
+  colnames (Consensus.class.GA) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.GA) <- Consensus.class.GA[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #hiseq data
+  Cancerset <- paste0(Cancerset,"-hiseq")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  maf.merged.table.hiseq <- maf.merged.table 
+  Consensus.class.hiseq <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.hiseq <- Consensus.class.hiseq[,-1]
+  colnames (Consensus.class.hiseq) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.hiseq) <- Consensus.class.hiseq[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #merge GA-hiseq
+  Consensus.class <- unique(rbind (Consensus.class.hiseq,Consensus.class.GA))
+  maf.merged.table   <- unique(rbind (maf.merged.table.hiseq,maf.merged.table.GA))
+} else {
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  Consensus.class = read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class = Consensus.class[,-1]
+  colnames (Consensus.class) = c("Patient_ID","Cluster")
+  rownames(Consensus.class) = Consensus.class[,1]
+} 
 muts = maf.merged.table
+rm(maf.merged.table)
 muts$sample.name = substr(muts$Tumor_Sample_Barcode, 1, 12)
-## Read the gene list (373 genes)
-genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
-## Load the mutation variation data
-load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
-## RNASeq clustering
-Consensus.class = read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
-Consensus.class = Consensus.class[,-1]
-colnames (Consensus.class) = c("Patient_ID","Cluster")
-rownames(Consensus.class) = Consensus.class[,1]
-cluster.assignment = Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data
+cluster.assignment = Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data  
 
 ## Merge the cluster info and Remove the mutations with samples not having cluster information
 muts$cluster = cluster.assignment$Cluster[match(muts$sample.name, as.character(cluster.assignment$Patient_ID))]
 muts =  (muts[-which(is.na(muts$cluster)), ])
+
+## Read the gene list (373 genes)
+genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
+## Load the mutation variation data
+load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
 
 ## Pick the Missense Mutations only
 if (matrix.type =="Missense") {muts = muts[which(muts$Variant_Classification=="Missense_Mutation"), ]}

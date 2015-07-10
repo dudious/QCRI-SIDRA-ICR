@@ -49,8 +49,8 @@ for (gene in gene.list.selected){
 colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared")
 
 # significance filter
-SL1 = 0.01  #chisquare p for LOW
-SL2 = 2     #maxvar Filter multiplier for LOW
+SL1 = 0.001 #chisquare p for LOW
+SL2 = 2.5   #maxvar Filter multiplier for LOW
 SH1 = SL1/2 #chisquare p for HIGH
 SH2 = SL2*2 #maxvar Filter multiplier for HIGH
 low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
@@ -58,6 +58,7 @@ high.significant.variation.table = variation.table[which((variation.table$Trend_
 
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
+# COAD  (0.001,2.5,0.0005,5)
 
 save(low.significant.variation.table, high.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
 write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTable.csv"))

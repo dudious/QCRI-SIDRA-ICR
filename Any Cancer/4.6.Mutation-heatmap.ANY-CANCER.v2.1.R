@@ -23,18 +23,36 @@ library("gplots")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BLCA"
-Geneset = "DBGS3.FLTR"
+Cancerset   = "COAD"
+Geneset     = "DBGS3.FLTR"
 matrix.type = "Any"       # Alterantives "Any" , "Missense"
-plot.type = "high"         # Alterantives "low" , "high" , "373genes"  (NOT WORKING)
+plot.type   = "high"         # Alterantives "low" , "high" , "373genes"  (NOT WORKING)
 
 # Load Data
 load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
-Consensus.class <- Consensus.class[,-1]
-colnames (Consensus.class) <- c("Patient_ID","Cluster")
-rownames(Consensus.class) <- Consensus.class[,1]
-
+if (Cancerset %in% c("COAD","READ","UCEC")) {
+  #GA data
+  Cancerset <- paste0(Cancerset,"-GA")
+  Consensus.class.GA <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.GA <- Consensus.class.GA[,-1]
+  colnames (Consensus.class.GA) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.GA) <- Consensus.class.GA[,1]
+  Cancerset <- substring(Cancerset,1,4)
+  #hiseq data
+  Cancerset <- paste0(Cancerset,"-hiseq")
+  Consensus.class.hiseq <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.hiseq <- Consensus.class.hiseq[,-1]
+  colnames (Consensus.class.hiseq) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.hiseq) <- Consensus.class.hiseq[,1]
+  Cancerset <- substring(Cancerset,1,4)
+  #merge GA-hiseq
+  Consensus.class <- unique(rbind (Consensus.class.hiseq,Consensus.class.GA))
+} else {
+  Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class <- Consensus.class[,-1]
+  colnames (Consensus.class) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class) <- Consensus.class[,1]
+}
 # select data to plot
 if (plot.type == "low"){allmuts.mutatedgenes <- genes.mutations.low}
 if (plot.type == "high"){allmuts.mutatedgenes <- genes.mutations.high}
