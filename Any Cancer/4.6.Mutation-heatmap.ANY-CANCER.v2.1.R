@@ -16,17 +16,18 @@
 rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 # Dependencies
-required.packages <- c("gplots","plyr")
+required.packages <- c("gplots","plyr","beepr")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
 library("plyr")
+library("beepr")
 
 ## Parameters
 Cancerset   = "COAD"
 Geneset     = "DBGS3.FLTR"
 matrix.type = "Any"       # Alterantives "Any" , "Missense"
-plot.type   = "high"         # Alterantives "low" , "high" , "373genes"  (NOT WORKING)
+plot.type   = "auto"         # Alterantives "low" , "high" , "373genes"  ,"auto"
 
 # Load Data
 load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
@@ -56,6 +57,7 @@ if (Cancerset %in% c("COAD","READ","UCEC")) {
 # select data to plot
 if (plot.type == "low"){allmuts.mutatedgenes <- genes.mutations.low}
 if (plot.type == "high"){allmuts.mutatedgenes <- genes.mutations.high}
+if (plot.type == "auto"){allmuts.mutatedgenes <- genes.mutations.auto}
 if (plot.type == "373genes"){allmuts.mutatedgenes <- genes.mutations.373genes}
 allmuts.mutatedgenes[is.na(allmuts.mutatedgenes)] = 0
 
@@ -87,7 +89,7 @@ allmuts.mutatedgenes.sd <- allmuts.mutatedgenes.sd[order(allmuts.mutatedgenes.sd
 allmuts.mutatedgenes.mean <- as.data.frame(allmuts.mutatedgenes.mean[,rownames(allmuts.mutatedgenes.sd)])   # order mutaion frequency by SD
 #allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,rownames(allmuts.mutatedgenes.sd)])            # order mutation count by SD freq
 allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,order(colnames(allmuts.mutatedgenes))])         # order mutation count alphabeticaly
-Consensus.class<-as.data.frame(Consensus.class[rownames(allmuts.mutatedgenes),])                      # sort cluster asignments like mutation matrix
+Consensus.class<-as.data.frame(Consensus.class[rownames(allmuts.mutatedgenes),])                            # sort cluster asignments like mutation matrix
 
 #enforce numeric mutation matrix
 allmuts.mutatedgenes = as.matrix(allmuts.mutatedgenes)
@@ -95,7 +97,7 @@ allmuts.mutatedgenes.mean = as.matrix(allmuts.mutatedgenes.mean)
 mode(allmuts.mutatedgenes)="numeric"
 mode(allmuts.mutatedgenes.mean)="numeric"
 
-# Heatmap
+# Binary Heatmap for selected gene mutations by patient
 patientcolors <- Consensus.class
 levels (patientcolors$Cluster) <- c(levels (patientcolors$Cluster),c("#FF0000","#FFA500","#00FF00","#0000FF"))        # Apply color scheme to patients
 patientcolors$Cluster[patientcolors$Cluster=="ICR4"] <- "#FF0000"
@@ -130,7 +132,7 @@ legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
 dev.off()
 
 
-# Heatmap 2
+# Heatmap for gene mutation frequency by cluster for the same selection of genes
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 patientcolors <- c("#0000FF","#00FF00","#FFA500","#FF0000")
@@ -158,6 +160,7 @@ par(lend = 1)
 legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
        col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
 dev.off()
+beep()
 
 
 

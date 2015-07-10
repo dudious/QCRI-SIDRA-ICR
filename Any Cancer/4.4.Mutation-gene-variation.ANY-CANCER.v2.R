@@ -10,7 +10,7 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BLCA"  # FOR BRCA use BRCA.PCF or BRCA.BSF
+Cancerset <- "COAD"  # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset = "DBGS3.FLTR"   # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                    # SET K here
 Filter = 3               # at least one clutser has to have x% mutation frequency
@@ -49,16 +49,26 @@ for (gene in gene.list.selected){
 colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared")
 
 # significance filter
-SL1 = 0.001 #chisquare p for LOW
-SL2 = 2.5   #maxvar Filter multiplier for LOW
-SH1 = SL1/2 #chisquare p for HIGH
+SL1 = 0.0005 #chisquare p for LOW OR trend = TRUE
+SL2 = 4   #maxvar Filter multiplier for LOW
+SH1 = SL1/10 #chisquare p for HIGH OR trend = TRUE
 SH2 = SL2*2 #maxvar Filter multiplier for HIGH
 low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
 high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
-
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
-# COAD  (0.001,2.5,0.0005,5)
+# COAD  (0.0005,4,0.00005,8)
 
-save(low.significant.variation.table, high.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
+#automatic significance filter
+ASF1     = 0.001
+ASF2     = 1
+ASF.stop = 20
+L.sig = nrow(variation.table)
+while (L.sig > ASF.stop){
+  auto.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<ASF1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*ASF2), ]
+  ASF2 = ASF2+0.1
+  L.sig = nrow(auto.significant.variation.table)
+}
+
+save(low.significant.variation.table, high.significant.variation.table,auto.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
 write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTable.csv"))

@@ -15,6 +15,11 @@
 # Setup environment
 rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
+# Dependencies
+required.packages <- c("beepr")
+missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
+if(length(missing.packages)) install.packages(missing.packages)
+library("beepr")
 
 ## Parameters
 Cancerset   = "COAD"
@@ -92,7 +97,8 @@ for(i in 1:nrow(muts)){
 genes.mutations.373genes = genes.mutations[,colnames(genes.mutations) %in% as.character(genes.list$V1)]
 genes.mutations.low = genes.mutations[,colnames(genes.mutations) %in% as.character(low.significant.variation.table$Gene)]
 genes.mutations.high = genes.mutations[,colnames(genes.mutations) %in% as.character(high.significant.variation.table$Gene)]
-save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,
+genes.mutations.auto = genes.mutations[,colnames(genes.mutations) %in% as.character(auto.significant.variation.table$Gene)]
+save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,genes.mutations.auto,
       file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 
 #### Get the number of genes that are mutated in more than 2,3, 5% of the samples
