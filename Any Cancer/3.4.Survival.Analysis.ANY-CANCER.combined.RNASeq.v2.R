@@ -37,16 +37,16 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 # Set Parameters
 Cancerset <- "COAD"           # SET Cancertype
 Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1"            # SET GENESET and pruclustering filter 
+Geneset <- "DBGS3.FLTR"            # SET GENESET and pruclustering filter 
 K <- 4                        # SET K
 Surv.cutoff.years <- 10       # SET cut-off
-Km.type <- "1vs2vs3vs4"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type <- "1vs4"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 
 # Load data
 Parent.Geneset <- substring(Geneset,1,5)
-Cancerset.1 <- paste0(Cancerset,"-hiseq")
-Cancerset.2 <- paste0(Cancerset,"-GA")
+Cancerset.1 <- paste0(substring(Cancerset,1,4),"-hiseq")
+Cancerset.2 <- paste0(substring(Cancerset,1,4),"-GA")
 ## load hiseq data
 Consensus.class.1 <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset.1,"/",Cancerset.1,".TCGA.EDASeq.k7.",
                                    Geneset,".reps5000/",Cancerset.1,".TCGA.EDASeq.k7.",

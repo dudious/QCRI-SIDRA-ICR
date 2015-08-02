@@ -10,35 +10,52 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "COAD"  # FOR BRCA use BRCA.PCF or BRCA.BSF
-Geneset = "DBGS3.FLTR"   # SET GENESET HERE !!!!!!!!!!!!!!
-K = 4                    # SET K here
-Filter = 3               # at least one clutser has to have x% mutation frequency
+Cancerset <- "COAD"         # FOR BRCA use BRCA.PCF or BRCA.BSF
+Geneset = "DBGS3.FLTR"      # SET GENESET HERE !!!!!!!!!!!!!!
+K = 4                       # SET K here
+Filter = 3                  # at least one clutser has to have x% mutation frequency
+mutation.type = "Any"  # Alterantives "Any" , "Missense"
 
 ## Read the mutation frequency file  (Mutation.Frequency.Gene)
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
-numMuts.Any     = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
+#numMuts.Any      = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
+#numMuts.Missense = data.frame(count=Mutation.Frequency.Patient$Freq.Missense,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense")
 
-## Pick genes based on cutoff (Freq.Any.pct) (present in at least "cutoff" samples for each cluster)
+## Pick genes based on cutoff (Freq.Any.pct OR Freq.Missense.Any.pct) (present in at least "cutoff" samples for each cluster)
 gene.list = as.character(unique(Mutation.Frequency.Gene$Hugo_Symbol))
 gene.list.selected = NULL
-gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
+if (mutation.type=="Any") {
+  gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
+} 
+if (mutation.type=="Missense") {
+  gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Missense.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
+} 
 variation.table = NULL
 
-## for each gene, pick the 4 clusters, corresponding Freq.Any.pct
+## for each gene, pick the 4 clusters, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
 for (gene in gene.list.selected){
   #print(gene)
   gene.data = Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol==gene),]   # select a gene
   gene.data = gene.data[order(gene.data$Cluster),]                                         # sort the cluster
-  gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]             # add the percentages
+  if (mutation.type=="Any") {
+    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]             # add the percentages
+  }
+  if (mutation.type=="Missense") {
+    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Missense.Any.pct"]             # add the percentages
+  }
   variation = max(gene.data.pct) - min(gene.data.pct)                                      # calculate max variation
   trend = sign(diff(gene.data.pct))                                                        # add direction of change
   trend.test = (trend[which(trend!=0)])                                                    # exclude 0's from trend
   flag = all(trend.test==trend.test[1])                                                    # test for trend 
   if(all(trend.test==0)){flag=FALSE}                                                       # 0,0,0 = no trend
-  
+  gene.data[is.na(gene.data)] <- 0
   ## Add Chi-square
-  gene.patients = gene.data$Freq.Any
+  if (mutation.type=="Any") {
+    gene.patients = gene.data$Freq.Any
+  }
+  if (mutation.type=="Missense") {
+    gene.patients = gene.data$Freq.Missense.Any
+  }
   all.patients = gene.data$N
   trend.results = prop.trend.test(gene.patients, all.patients)
   trend.pval = trend.results[[3]]
@@ -62,7 +79,7 @@ high.significant.variation.table = variation.table[which((variation.table$Trend_
 #automatic significance filter
 ASF1     = 0.001
 ASF2     = 1
-ASF.stop = 20
+ASF.stop = 30
 L.sig = nrow(variation.table)
 while (L.sig > ASF.stop){
   auto.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<ASF1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*ASF2), ]
@@ -70,5 +87,5 @@ while (L.sig > ASF.stop){
   L.sig = nrow(auto.significant.variation.table)
 }
 
-save(low.significant.variation.table, high.significant.variation.table,auto.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
-write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTable.csv"))
+save(low.significant.variation.table, high.significant.variation.table,auto.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTables.RData"))
+write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTable.csv"))

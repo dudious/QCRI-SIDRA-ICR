@@ -11,13 +11,14 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 # Set Parameters
-Geneset <- "DBGS1"       # SET GENESET HERE !!!!!!!!!!!!!!
-Cancerset <- "BRCA"
+Geneset <- "DBGS3.FLTR"       # SET GENESET HERE
+Parent.Geneset <- substring(Geneset,1,5)
+Cancerset <- "BLCA"
 K <- 4
 GOF <- "TP53"
 
 ## Load Data
-immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Cancerset,".",Geneset,".csv"))
+immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Cancerset,".",Parent.Geneset,".csv"))
 rownames(immunoscore) <- immunoscore$X
 immunoscore$X <- NULL
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".split.RDATA"))

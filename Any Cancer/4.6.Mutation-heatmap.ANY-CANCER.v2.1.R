@@ -24,9 +24,9 @@ library("plyr")
 library("beepr")
 
 ## Parameters
-Cancerset   = "COAD"
-Geneset     = "DBGS3.FLTR"
-matrix.type = "Any"       # Alterantives "Any" , "Missense"
+Cancerset   = "COAD"     # FOR BRCA use BRCA.PCF or BRCA.BSF
+Geneset     = "DBGS3.FLTR"   # SET GENESET HERE 
+matrix.type = "Any"          # Alterantives "Any" , "Missense"
 plot.type   = "auto"         # Alterantives "low" , "high" , "373genes"  ,"auto"
 
 # Load Data
@@ -108,7 +108,7 @@ patientcolors$Cluster[patientcolors$Cluster=="ICR1"] <- "#0000FF"
 patientcolors <- as.character(patientcolors$Cluster)
 
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".reordered_alpha.png"),res=600,height=6,width=25,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".reordered_alphabetic.png"),res=600,height=9,width=25,unit="in")     # set filename
 heatmap.2(allmuts.mutatedgenes,
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -121,14 +121,14 @@ heatmap.2(allmuts.mutatedgenes,
           density.info="none",
           trace="none",
           labCol=colnames(allmuts.mutatedgenes),
-          cexRow=1,cexCol=3,
+          cexRow=1,cexCol=2,
           margins=c(10,2),
           labRow=FALSE,
           Colv=FALSE, Rowv=FALSE                              # reorder row/columns by dendogram
           )
 par(lend = 1)
 legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
-       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.5)
 dev.off()
 
 
@@ -136,7 +136,7 @@ dev.off()
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 patientcolors <- c("#0000FF","#00FF00","#FFA500","#FF0000")
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mean.Mutation.HeatMap.",matrix.type,".",plot.type,".png"),res=600,height=5,width=50,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".Mean.png"),res=600,height=5,width=50,unit="in")     # set filename
 par(mar=c(1,1,1,1))
 heatmap.2(allmuts.mutatedgenes.mean,
           main = "HeatMap-MutatedGenes frequency",

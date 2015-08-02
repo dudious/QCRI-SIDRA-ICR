@@ -24,6 +24,7 @@ library("beepr")
 ## Parameters
 Cancerset   = "COAD"
 Geneset     = "DBGS3.FLTR"
+BRCA.Filter = "PCF"
 matrix.type = "Any"         # Alterantives "Any" , "Missense"
 
 ##load data
@@ -54,6 +55,11 @@ if (Cancerset %in% c("COAD","READ","UCEC")) {
   maf.merged.table   <- unique(rbind (maf.merged.table.hiseq,maf.merged.table.GA))
 } else {
   load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  if (Cancerset == "BRCA"){
+    if (substring(Geneset,7,10)=="FLTR"){
+      Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+    }
+  }
   Consensus.class = read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
   Consensus.class = Consensus.class[,-1]
   colnames (Consensus.class) = c("Patient_ID","Cluster")
@@ -71,7 +77,7 @@ muts =  (muts[-which(is.na(muts$cluster)), ])
 ## Read the gene list (373 genes)
 genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
 ## Load the mutation variation data
-load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
+load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",matrix.type,".VariationTables.RData"))
 
 ## Pick the Missense Mutations only
 if (matrix.type =="Missense") {muts = muts[which(muts$Variant_Classification=="Missense_Mutation"), ]}

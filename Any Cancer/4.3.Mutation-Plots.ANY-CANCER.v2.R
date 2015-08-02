@@ -23,7 +23,7 @@ Cancerset <- "COAD"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hi
 gene = "TP53"
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
-Plot.type = "All"       # Alterantives "All" , "Any" , "Missense"
+Plot.type = "Any"       # Alterantives "All" , "Any" , "Missense"
 
 ## Ines RNASeq Clustering k = 4
 num.clusters = 4
@@ -86,7 +86,7 @@ if (Plot.type =='All') {
   blot.font.size = 13
   }
 numMuts.blot = numMuts.blot[complete.cases(numMuts.blot),]
-meds = ddply(numMuts.blot, .(mut.type, cluster), summarize, med = median(count)) ## median
+meds = ddply(numMuts.blot, .(mut.type, cluster), summarise, med = median(count)) ## median
 meds$p.value = p.values$p.value [match(meds$mut.type,p.values$mut.type)]
 meds$p.value.label = paste0("p = ",round(meds$p.value,4)) 
 meds[meds$cluster != "ICR2","p.value.label"] = ""
@@ -139,9 +139,10 @@ dev.off()
 mut.df = merge (sample.cluster.count,Mutation.Frequency.Gene[Mutation.Frequency.Gene$Hugo_Symbol==gene,c("Hugo_Symbol","Cluster","Freq.Any.pct")],by="Cluster",all=TRUE)
 mut.df[is.na(mut.df)] = 0
 mut.df$label = paste0(sprintf("%.0f", mut.df$Freq.Any.pct), "%")
+dir.create(paste0("./4 FIGURES/Mutation Plots/",gene,"/"), showWarnings = FALSE)
 
 ## Plot TP53 percetage barplot
-png(paste0("./4 FIGURES/Mutation Plots/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
+png(paste0("./4 FIGURES/Mutation Plots/",gene,"/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
 cluster.order = rev(clusters)
 gg = ggplot(mut.df, aes(x = clusters, y = Freq.Any.pct))  +
   geom_bar(stat = "identity", width = 0.8, position="dodge") +
