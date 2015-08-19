@@ -17,7 +17,8 @@
   setwd("~/Dropbox/BREAST_QATAR/")
 
 # Set Parameters
-  Cancerset <- "BLCA"
+  Cancerset <- "COAD-hiseq"
+  Parent.Cancerset <- substring(Cancerset,1,4)
   Geneset   <- "DBGS3.FLTR"       # SET GENESET HERE
   Parent.Geneset <- substring(Geneset,1,5)
   K <- 4          
@@ -42,11 +43,11 @@
   rownames(immunoscore) <- immunoscore$X
   immunoscore$X <- NULL
   #mutation frequnecy data
-  mutation.freq <- read.csv (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",Geneset,".Patient.by.Cluster.csv"))      # mutation frequencies
+  mutation.freq <- read.csv (paste0("./3 ANALISYS/Mutations/",Parent.Cancerset,"/Mutations.TCGA.",Parent.Cancerset,".",Geneset,".Patient.by.Cluster.csv"))      # mutation frequencies
   rownames(mutation.freq) <- mutation.freq$Patient_ID
   mutation.freq <-  mutation.freq[,c("Freq.All","Freq.Missense")]
   #TP53.mutaion status
-  TP53.patients <- read.csv (paste0("./3 ANALISYS/Mutations/",Cancerset,"/TP53.mutations.",Geneset,".bypatient.csv"))      # TP53 
+  TP53.patients <- read.csv (paste0("./3 ANALISYS/Mutations/",Parent.Cancerset,"/",Cancerset,".TP53.mutations.",Geneset,".bypatient.csv"))      # TP53 
   rownames(TP53.patients) <- TP53.patients$Patient_ID
   TP53.patients$Patient_ID <- NULL
   TP53.patients$X <- NULL

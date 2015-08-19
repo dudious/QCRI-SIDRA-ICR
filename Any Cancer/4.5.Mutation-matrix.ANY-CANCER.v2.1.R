@@ -22,10 +22,11 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("beepr")
 
 ## Parameters
-Cancerset   = "COAD"
-Geneset     = "DBGS3.FLTR"
-BRCA.Filter = "PCF"
-matrix.type = "Any"         # Alterantives "Any" , "Missense"
+Cancerset      = "COAD"
+Geneset        = "DBGS3.FLTR"
+BRCA.Filter    = "PCF"
+matrix.type    = "Any"         # Alterantives "Any" , "Missense"
+selected.genes = c("TP53","MAP2K4","MAP3K1")
 
 ##load data
 ## Read the mutation .maf file and cluster assignments
@@ -104,7 +105,8 @@ genes.mutations.373genes = genes.mutations[,colnames(genes.mutations) %in% as.ch
 genes.mutations.low = genes.mutations[,colnames(genes.mutations) %in% as.character(low.significant.variation.table$Gene)]
 genes.mutations.high = genes.mutations[,colnames(genes.mutations) %in% as.character(high.significant.variation.table$Gene)]
 genes.mutations.auto = genes.mutations[,colnames(genes.mutations) %in% as.character(auto.significant.variation.table$Gene)]
-save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,genes.mutations.auto,
+genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selected.genes]
+save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,genes.mutations.auto,genes.mutations.selected,
       file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 
 #### Get the number of genes that are mutated in more than 2,3, 5% of the samples

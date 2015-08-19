@@ -18,15 +18,15 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
-#parameters
-Geneset = "BCRGS"
-Cancerset = "BRCA"
-
 # load data
-load ("./2 DATA/SUBSETS/BRCA/TCGA.BRCA.MA.subset.BCRGS.RData") # Select subset here !!!!!
-
+RNASeq.data <- read.csv ("./3 ANALISYS/TCGA.COAD-ICR4_DBGS3_RNASeq.Data.csv") # Select subset here !!!!!
+#RNASeq.subset <- as.matrix(RNASeq.data[,1:(ncol(RNASeq.data)-1)])
+#RNASeq.subset <- as.matrix(RNASeq.data[RNASeq.data$X=="LOW",1:(ncol(RNASeq.data)-1)])
+inhib.genes <- c("PDCD1","CTLA4","CD274","FOXP3","IDO1")
+which(colnames(RNASeq.data) %in% inhib.genes)
+RNASeq.subset <- as.matrix(RNASeq.data[,which(colnames(RNASeq.data) %in% inhib.genes)])
 # Corelation matrix
-MA.subset.cor <- cor (MA.subset,method="pearson")
+RNASeq.subset.cor <- cor (RNASeq.subset,method="pearson")
 
 # cor significance
 cor.mtest <- function(mat, conf.level = 0.95) {
@@ -45,27 +45,24 @@ cor.mtest <- function(mat, conf.level = 0.95) {
   }
   return(list(p.mat, lowCI.mat, uppCI.mat))
 }
-MA.subset.cor.sign <- cor.mtest(MA.subset.cor, 0.95)
+RNASeq.subset.cor.sign <- cor.mtest(RNASeq.subset.cor, 0.95)
                                 
 
 # Correlation plot
-png(paste0("./4 FIGURES/CORRELATION/",Cancerset,".correlation.",Geneset,".MA.png"),res=600,height=6,width=6,unit="in") #adjust output file names here !!!!!
+png("./4 FIGURES/CORRELATION/correlation.COAD_ICR4.all.IMSUG.RNASeq.png",res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
 cex.before <- par("cex")
-par(cex = 0.40)
-col1 = colorRampPalette(c("blue", "white", "#009900"))
-corrplot.mixed(MA.subset.cor,
-               #p.mat = MA.subset.cor.sign[[1]],
-               col = col1(100),
-               lower = "square",
+par(cex = 0.45)
+corrplot.mixed(RNASeq.subset.cor,
+               #p.mat = RNASeq.subset.cor.sign[[1]],    # add significance to correlations
+               lower = "circle",
                upper ="number",
                order="FPC",
-               cl.lim=c(0,1),
+               #cl.lim=c(0,1),                          # only positive correlations
                tl.pos ="lt",
-               tl.col = "#c00000",
-               #insig="blank",
+               #insig="blank",                          # remove insignificant correlations
                tl.cex = 1/par("cex"),
                cl.cex = 1/par("cex"),
-               title = paste0("MA Gene List (",Geneset,")"),
+               title = "Pearson COAD DBGS3",
                cex.main = 1.4/par("cex"),
                mar=c(5.1,4.1,4.1,2.1)
                )
