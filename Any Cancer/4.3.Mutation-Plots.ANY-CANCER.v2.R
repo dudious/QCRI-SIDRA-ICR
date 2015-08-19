@@ -19,11 +19,11 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-Cancerset <- "COAD"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
-gene = "TP53"
+Cancerset <- "BRCA.BSF"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
+gene = "MAP2K4"
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
-Plot.type = "Any"       # Alterantives "All" , "Any" , "Missense"
+Plot.type = "NonSilent"       # Alterantives "All" , "Any" , "Missense", "NonSilent"
 
 ## Ines RNASeq Clustering k = 4
 num.clusters = 4
@@ -33,34 +33,42 @@ clusters = rep(paste0("ICR", 1:num.clusters))
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
 
 #Prepare Data for Boxplots
-numMuts.All     = data.frame(count=Mutation.Frequency.Patient$Freq.All,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "All")
-numMuts.Missense  = data.frame(count=Mutation.Frequency.Patient$Freq.Missense,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense")
-numMuts.Nonsense  = data.frame(count=Mutation.Frequency.Patient$Freq.Nonsense,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Nonsense")
-numMuts.Silent    = data.frame(count=Mutation.Frequency.Patient$Freq.Silent,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Silent")
-numMuts.Other     = data.frame(count=Mutation.Frequency.Patient$Freq.Other,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Other")
-numMuts.Any     = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
-numMuts.Missense.Any     = data.frame(count=Mutation.Frequency.Patient$Freq.Missense.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense.Any")
-numMuts.Silent.Any     = data.frame(count=Mutation.Frequency.Patient$Freq.Silent.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Silent.Any")
+numMuts.All           = data.frame(count=Mutation.Frequency.Patient$Freq.All          ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "All")
+numMuts.Missense      = data.frame(count=Mutation.Frequency.Patient$Freq.Missense     ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense")
+numMuts.Nonsense      = data.frame(count=Mutation.Frequency.Patient$Freq.Nonsense     ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Nonsense")
+numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Silent")
+numMuts.Other         = data.frame(count=Mutation.Frequency.Patient$Freq.Other        ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Other")
+numMuts.NonSilent     = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent    ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "NonSilent")
+numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Silent")
+numMuts.Any           = data.frame(count=Mutation.Frequency.Patient$Freq.Any          ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
+numMuts.Missense.Any  = data.frame(count=Mutation.Frequency.Patient$Freq.Missense.Any ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense.Any")
+numMuts.Silent.Any    = data.frame(count=Mutation.Frequency.Patient$Freq.Silent.Any   ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Silent.Any")
+numMuts.NonSilent.Any = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "NonSilent.Any")
 
 # statistics
-test.All = aov(count~cluster,data=numMuts.All)
+test.All    = aov(count~cluster,data=numMuts.All)
 p.value.All = summary(test.All)[[1]][["Pr(>F)"]][[1]]
-test.Missense = aov(count~cluster,data=numMuts.Missense)
+test.Missense    = aov(count~cluster,data=numMuts.Missense)
 p.value.Missense = summary(test.Missense)[[1]][["Pr(>F)"]][[1]]
-test.Silent = aov(count~cluster,data=numMuts.Silent)
+test.Silent    = aov(count~cluster,data=numMuts.Silent)
 p.value.Silent = summary(test.Silent)[[1]][["Pr(>F)"]][[1]]
-test.Nonsense = aov(count~cluster,data=numMuts.Nonsense)
+test.Nonsense    = aov(count~cluster,data=numMuts.Nonsense)
 p.value.Nonsense = summary(test.Nonsense)[[1]][["Pr(>F)"]][[1]]
-test.Other = aov(count~cluster,data=numMuts.Other)
+test.Other    = aov(count~cluster,data=numMuts.Other)
 p.value.Other = summary(test.Other)[[1]][["Pr(>F)"]][[1]]
-test.Any = aov(count~cluster,data=numMuts.Any)
+test.Any    = aov(count~cluster,data=numMuts.Any)
 p.value.Any = summary(test.Any)[[1]][["Pr(>F)"]][[1]]
-test.Missense.Any = aov(count~cluster,data=numMuts.Missense.Any)
+test.Missense.Any    = aov(count~cluster,data=numMuts.Missense.Any)
 p.value.Missense.Any = summary(test.Missense.Any)[[1]][["Pr(>F)"]][[1]]
-test.Silent.Any = aov(count~cluster,data=numMuts.Silent.Any)
+test.Silent.Any    = aov(count~cluster,data=numMuts.Silent.Any)
 p.value.Silent.Any = summary(test.Silent.Any)[[1]][["Pr(>F)"]][[1]]
-p.values <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","Any","Missense.Any","Silent.Any"),
-                       p.value=c(p.value.All,p.value.Missense,p.value.Silent,p.value.Nonsense,p.value.Other,p.value.Any,p.value.Missense.Any,p.value.Silent.Any))
+test.NonSilent    = aov(count~cluster,data=numMuts.NonSilent)
+p.value.NonSilent    = summary(test.NonSilent)[[1]][["Pr(>F)"]][[1]]
+test.NonSilent.Any    = aov(count~cluster,data=numMuts.NonSilent.Any)
+p.value.NonSilent.Any    = summary(test.NonSilent.Any)[[1]][["Pr(>F)"]][[1]]
+
+p.values <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","NonSilent","Any","Missense.Any","Silent.Any","NonSilent.Any"),
+                       p.value=c(p.value.All,p.value.Missense,p.value.Silent,p.value.Nonsense,p.value.Other,p.value.NonSilent,p.value.Any,p.value.Missense.Any,p.value.Silent.Any,p.value.NonSilent.Any))
 
 # Combine
 numMuts.All.combo    = rbind(numMuts.All,numMuts.Missense,numMuts.Silent,numMuts.Nonsense,numMuts.Other)
@@ -70,6 +78,10 @@ colnames(numMuts.All.combo) = c( "count", "cluster", "mut.type")
 numMuts.Any.combo    = rbind(numMuts.All,numMuts.Any,numMuts.Missense,numMuts.Missense.Any,numMuts.Silent,numMuts.Silent.Any )
 rownames(numMuts.Any.combo) = NULL
 colnames(numMuts.Any.combo) = c( "count", "cluster", "mut.type")
+
+numMuts.Silent.combo = rbind(numMuts.All,numMuts.Silent,numMuts.NonSilent,numMuts.Any,numMuts.Silent.Any,numMuts.NonSilent.Any )
+rownames(numMuts.Silent.combo) = NULL
+colnames(numMuts.Silent.combo) = c( "count", "cluster", "mut.type")
 
 #Pick the one to blot
 if (Plot.type =='All') {
@@ -84,7 +96,11 @@ if (Plot.type =='All') {
   numMuts.blot = numMuts.Missense
   blot.width = 300
   blot.font.size = 13
-  }
+  } else if (Plot.type =='NonSilent') {
+  numMuts.blot = numMuts.Silent.combo
+  blot.width = 1000
+  blot.font.size = 25
+}
 numMuts.blot = numMuts.blot[complete.cases(numMuts.blot),]
 meds = ddply(numMuts.blot, .(mut.type, cluster), summarise, med = median(count)) ## median
 meds$p.value = p.values$p.value [match(meds$mut.type,p.values$mut.type)]
