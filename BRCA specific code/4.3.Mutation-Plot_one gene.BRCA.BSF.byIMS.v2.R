@@ -62,6 +62,15 @@ Mutation.selected.data <- rbind(Mutation.selected.data,Mutation.selected.data.lu
 Cluster_IMS.counts <- count(unique(Mutation.selected.data[,c("Patient_ID","Subtype","Cluster")]),vars = c("Subtype","Cluster"))
 Cluster_IMS.counts$Group <- paste0(Cluster_IMS.counts$Cluster,".",Cluster_IMS.counts$Subtype)
 
+# TEST : Number of IMS/cluster from Clindata.subset+Consensus.class vs mutationselected.data
+test.df <- ClinicalData.subset[,"TCGA.PAM50.RMethod.RNASeq",drop=FALSE]
+test.df$Cluster <- Consensus.class$Cluster[match(rownames(test.df),Consensus.class$Patient_ID)]
+test.df <- test.df[complete.cases(test.df),]
+test.count <- count(test.df)
+test.count$Group <- paste0(test.count$Cluster,".",test.count$TCGA.PAM50.RMethod.RNASeq)
+test.count$Matched <- Cluster_IMS.counts$freq[match(test.count$Group,Cluster_IMS.counts$Group)]
+#NOT EQUAL ???
+
 #Filter by GOF
 Mutation.selected.data.gof <- Mutation.selected.data [Mutation.selected.data$Hugo_Symbol == GOF,]
 
@@ -87,6 +96,7 @@ colnames(blot.df) <- c("Mutation_Type","Molecular_Subtype","Cluster_Assignment",
 class (blot.df$Mutation_Count) <-"numeric"
 blot.df$Group <- paste0(blot.df$Cluster_Assignment,".",blot.df$Molecular_Subtype)
 blot.df$Group_Count <- Cluster_IMS.counts$freq[match(blot.df$Group,Cluster_IMS.counts$Group)]
+#blot.df$Group_Count <- test.count$freq[match(blot.df$Group,test.count$Group)] #alternative group count
 class (blot.df$Group_Count) <-"numeric"
 blot.df$Mutation_Frequency <- round((blot.df$Mutation_Count / blot.df$Group_Count) *100,1)
 
@@ -100,3 +110,6 @@ png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"
 dev.off()
 
 write.csv (blot.df,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS",".csv", sep=""))
+
+
+
