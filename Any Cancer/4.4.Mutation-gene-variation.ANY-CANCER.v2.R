@@ -15,6 +15,7 @@ Geneset = "DBGS3.FLTR"         # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                          # SET K here
 Filter = 1                     # at least one clutser has to have x% mutation frequency
 mutation.type = "NonSilent"    # Alterantives "Any" , "Missense" , "NonSilent"
+clusters = paste0(rep("ICR",4), 1:4)
 
 ## Read the mutation frequency file  (Mutation.Frequency.Gene)
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
@@ -38,8 +39,23 @@ variation.table = NULL
 ## for each gene, pick the 4 clusters, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
 for (gene in gene.list.selected){
   #print(gene)
+  
   gene.data = Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol==gene),]   # select a gene
+  gene.data[is.na(gene.data)] = 0
+  # Add missing clusters data
+  gene.clusters = gene.data$Cluster
+  if(length(gene.clusters)<4){
+  missing.clusters = clusters[which(!(clusters %in% gene.clusters))]
+  gene.missingdata = data.frame(matrix(ncol=ncol(gene.data), nrow=length(missing.clusters)))
+  colnames(gene.missingdata) = colnames(gene.data)
+  gene.missingdata$Hugo_Symbol = gene
+  gene.missingdata$Cluster = missing.clusters
+  gene.missingdata[is.na(gene.missingdata)] = 0
+  gene.data = rbind(gene.data, gene.missingdata)
+  }
+  
   gene.data = gene.data[order(gene.data$Cluster),]                                         # sort the cluster
+  
   if (mutation.type=="Any") {
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]           # add the percentages
     gene.patients = gene.data$Freq.Any
@@ -52,6 +68,14 @@ for (gene in gene.list.selected){
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.NonSilent.Any.pct"] # add the percentages
     gene.patients = gene.data$Freq.NonSilent.Any
   }
+  ## FIsher exact test ICR1 vs ICR4
+  gene.patients[is.na(gene.patients)] = 0
+  gene.patients.wt = gene.data$N-gene.patients
+  test.matrix = cbind(gene.patients[c(1,4)],gene.patients.wt[c(1,4)])
+  res = fisher.test(test.matrix)
+  #print(gene)
+  #print( res$p.value)
+  
   variation = max(gene.data.pct) - min(gene.data.pct)                                      # calculate max variation
   trend = sign(diff(gene.data.pct))                                                        # add direction of change
   trend.test = (trend[which(trend!=0)])                                                    # exclude 0's from trend
@@ -63,10 +87,11 @@ for (gene in gene.list.selected){
   trend.results = prop.trend.test(gene.patients, all.patients)
   trend.pval = trend.results[[3]]
   
-  gene.data.row = data.frame(gene, paste0(gene.data.pct, collapse=" : "), variation, paste0((trend), collapse=" : "), flag, trend.pval)  
+    
+  gene.data.row = data.frame(gene, paste0(gene.data.pct, collapse=" : "), variation, paste0((trend), collapse=" : "), flag, trend.pval, res$p.value)  
   variation.table = rbind(variation.table, gene.data.row)
 }
-colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared")
+colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared","Fisher_ICR1vs4")
 
 # significance filter
 SL1 = 0.0005 #chisquare p for LOW OR trend = TRUE
