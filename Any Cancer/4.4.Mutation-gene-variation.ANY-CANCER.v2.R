@@ -10,11 +10,11 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "COAD"         # FOR BRCA use BRCA.PCF or BRCA.BSF
-Geneset = "DBGS3.FLTR"      # SET GENESET HERE !!!!!!!!!!!!!!
-K = 4                       # SET K here
-Filter = 3                  # at least one clutser has to have x% mutation frequency
-mutation.type = "Any"  # Alterantives "Any" , "Missense"
+Cancerset <- "BRCA.BSF"        # FOR BRCA use BRCA.PCF or BRCA.BSF
+Geneset = "DBGS3.FLTR"         # SET GENESET HERE !!!!!!!!!!!!!!
+K = 4                          # SET K here
+Filter = 1                     # at least one clutser has to have x% mutation frequency
+mutation.type = "NonSilent"    # Alterantives "Any" , "Missense" , "NonSilent"
 
 ## Read the mutation frequency file  (Mutation.Frequency.Gene)
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
@@ -30,6 +30,9 @@ if (mutation.type=="Any") {
 if (mutation.type=="Missense") {
   gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.Missense.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
 } 
+if (mutation.type=="NonSilent") {
+  gene.list.selected = unique(Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Freq.NonSilent.Any.pct>Filter),"Hugo_Symbol"]) #filter one clutser has to have x% mutation
+} 
 variation.table = NULL
 
 ## for each gene, pick the 4 clusters, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
@@ -38,10 +41,16 @@ for (gene in gene.list.selected){
   gene.data = Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol==gene),]   # select a gene
   gene.data = gene.data[order(gene.data$Cluster),]                                         # sort the cluster
   if (mutation.type=="Any") {
-    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]             # add the percentages
+    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]           # add the percentages
+    gene.patients = gene.data$Freq.Any
   }
   if (mutation.type=="Missense") {
-    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Missense.Any.pct"]             # add the percentages
+    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Missense.Any.pct"]  # add the percentages
+    gene.patients = gene.data$Freq.Missense.Any
+  }
+  if (mutation.type=="NonSilent") {
+    gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.NonSilent.Any.pct"] # add the percentages
+    gene.patients = gene.data$Freq.NonSilent.Any
   }
   variation = max(gene.data.pct) - min(gene.data.pct)                                      # calculate max variation
   trend = sign(diff(gene.data.pct))                                                        # add direction of change
@@ -50,12 +59,6 @@ for (gene in gene.list.selected){
   if(all(trend.test==0)){flag=FALSE}                                                       # 0,0,0 = no trend
   gene.data[is.na(gene.data)] <- 0
   ## Add Chi-square
-  if (mutation.type=="Any") {
-    gene.patients = gene.data$Freq.Any
-  }
-  if (mutation.type=="Missense") {
-    gene.patients = gene.data$Freq.Missense.Any
-  }
   all.patients = gene.data$N
   trend.results = prop.trend.test(gene.patients, all.patients)
   trend.pval = trend.results[[3]]

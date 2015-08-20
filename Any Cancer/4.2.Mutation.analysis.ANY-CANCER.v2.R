@@ -115,10 +115,12 @@ Mutation.Frequency.Gene$Freq.Missense <- Count.Missense.Gene$freq [match(rowname
 Mutation.Frequency.Gene$Freq.Silent   <- Count.Silent.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Silent.Gene))]
 Mutation.Frequency.Gene$Freq.Nonsense <- Count.Nonsense.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Nonsense.Gene))]
 Mutation.Frequency.Gene$Freq.Other    <- Count.Other.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Other.Gene))]
+Mutation.Frequency.Gene$Freq.NonSilent<- rowSums(data.frame(Mutation.Frequency.Gene$Freq.All,-Mutation.Frequency.Gene$Freq.Silent),na.rm = TRUE)
 
 Mutation.Frequency.Gene$Freq.Any          <- Count.Any.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Any.Gene))]
 Mutation.Frequency.Gene$Freq.Missense.Any <- Count.Missense.Any.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Missense.Any.Gene))]
 Mutation.Frequency.Gene$Freq.Silent.Any   <- Count.Silent.Any.Gene$freq [match(rownames(Mutation.Frequency.Gene),rownames(Count.Silent.Any.Gene))]
+Mutation.Frequency.Gene$Freq.NonSilent.Any <- rowSums(data.frame(Mutation.Frequency.Gene$Freq.Any,-Mutation.Frequency.Gene$Freq.Silent.Any),na.rm = TRUE)
 
 #Patient mutation frequency by Cluster table
 count.Patient.bycluster <- function (Mutation.x){
@@ -142,12 +144,12 @@ Mutation.Frequency.Patient$Freq.Missense  <- Count.Missense.Patient$freq [match(
 Mutation.Frequency.Patient$Freq.Nonsense  <- Count.Nonsense.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Nonsense.Patient))]
 Mutation.Frequency.Patient$Freq.Silent    <- Count.Silent.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Silent.Patient))]
 Mutation.Frequency.Patient$Freq.Other     <- Count.Other.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Other.Patient))]
-Mutation.Frequency.Patient$Freq.NonSilent <- Mutation.Frequency.Patient$Freq.All-Mutation.Frequency.Patient$Freq.Silent
+Mutation.Frequency.Patient$Freq.NonSilent <- rowSums(data.frame(Mutation.Frequency.Patient$Freq.All,-Mutation.Frequency.Patient$Freq.Silent),na.rm = TRUE)
 
 Mutation.Frequency.Patient$Freq.Any           <- Count.Any.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Any.Patient))]
 Mutation.Frequency.Patient$Freq.Missense.Any  <- Count.Missense.Any.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Missense.Any.Patient))]
 Mutation.Frequency.Patient$Freq.Silent.Any    <- Count.Silent.Any.Patient$freq [match(rownames(Mutation.Frequency.Patient),rownames(Count.Silent.Any.Patient))]
-Mutation.Frequency.Patient$Freq.NonSilent.Any <- Mutation.Frequency.Patient$Freq.Any-Mutation.Frequency.Patient$Freq.Silent.Any
+Mutation.Frequency.Patient$Freq.NonSilent.Any <- rowSums(data.frame(Mutation.Frequency.Patient$Freq.Any,-Mutation.Frequency.Patient$Freq.Silent.Any),na.rm = TRUE)
 
 
 ## Count the number of samples in the mutation table per cluster (N)
@@ -159,6 +161,7 @@ colnames (sample.cluster.count) <- c("Cluster","N")
 Mutation.Frequency.Gene$N <- sample.cluster.count$N [match(Mutation.Frequency.Gene$Cluster,sample.cluster.count$Cluster)]
 Mutation.Frequency.Gene$Freq.Any.pct <- floor((Mutation.Frequency.Gene$Freq.Any / Mutation.Frequency.Gene$N)*100)
 Mutation.Frequency.Gene$Freq.Missense.Any.pct <- floor((Mutation.Frequency.Gene$Freq.Missense.Any / Mutation.Frequency.Gene$N)*100)
+Mutation.Frequency.Gene$Freq.NonSilent.Any.pct <- floor((Mutation.Frequency.Gene$Freq.NonSilent.Any / Mutation.Frequency.Gene$N)*100)
 
 #Save as R object or CVS
 write.csv (Mutation.Frequency.Gene,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",Geneset,".Gene.by.Cluster.csv"))

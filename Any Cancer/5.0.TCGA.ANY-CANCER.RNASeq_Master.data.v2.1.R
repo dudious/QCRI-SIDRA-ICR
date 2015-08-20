@@ -17,7 +17,7 @@
   setwd("~/Dropbox/BREAST_QATAR/")
 
 # Set Parameters
-  Cancerset <- "COAD-hiseq"
+  Cancerset <- "BRCA.BSF"
   Parent.Cancerset <- substring(Cancerset,1,4)
   Geneset   <- "DBGS3.FLTR"       # SET GENESET HERE
   Parent.Geneset <- substring(Geneset,1,5)
@@ -29,7 +29,7 @@
   rownames(ClinicalData.subset) <- ClinicalData.subset$X 
   ClinicalData.subset$X <-NULL
   #RNASeq data
-  load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
+  load (paste0("./2 DATA/SUBSETS/",Parent.Cancerset,"/TCGA.",Parent.Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
   #Consensus clustering data
   CC.RNASeq <- read.csv (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",
                                 Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",
@@ -39,15 +39,15 @@
   colnames(CC.RNASeq) <- c("PatientID",paste0("Cluster.",Geneset,".RNSeq"))
   CC.RNASeq$PatientID <-NULL
   #immunoscore data
-  immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Cancerset,".",Parent.Geneset,".csv"))                            # Immunoscore
+  immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Parent.Cancerset,".",Parent.Geneset,".csv"))                            # Immunoscore
   rownames(immunoscore) <- immunoscore$X
   immunoscore$X <- NULL
   #mutation frequnecy data
-  mutation.freq <- read.csv (paste0("./3 ANALISYS/Mutations/",Parent.Cancerset,"/Mutations.TCGA.",Parent.Cancerset,".",Geneset,".Patient.by.Cluster.csv"))      # mutation frequencies
+  mutation.freq <- read.csv (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",Geneset,".Patient.by.Cluster.csv"))      # mutation frequencies
   rownames(mutation.freq) <- mutation.freq$Patient_ID
   mutation.freq <-  mutation.freq[,c("Freq.All","Freq.Missense")]
   #TP53.mutaion status
-  TP53.patients <- read.csv (paste0("./3 ANALISYS/Mutations/",Parent.Cancerset,"/",Cancerset,".TP53.mutations.",Geneset,".bypatient.csv"))      # TP53 
+  TP53.patients <- read.csv (paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".TP53.mutations.",Geneset,".bypatient.csv"))      # TP53 
   rownames(TP53.patients) <- TP53.patients$Patient_ID
   TP53.patients$Patient_ID <- NULL
   TP53.patients$X <- NULL
