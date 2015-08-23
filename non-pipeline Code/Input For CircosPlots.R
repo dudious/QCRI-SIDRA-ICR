@@ -31,7 +31,7 @@ subMaster<-subMaster[,-1]
 #absolute values
 subMaster<-as.data.frame(subMaster)
 Stage<-table(subMaster$Cluster.DBGS3.FLTR.RNSeq,subMaster$ajcc_pathologic_tumor_stage)
-save(Stage, file="StageForBRCA-BSF-23July2015.RDATA")
+save(Stage, file="StageForBRCA-BSF-23Ag2015.RDATA")
 Type<-table(subMaster$Cluster.DBGS3.FLTR.RNSeq,subMaster$TCGA.PAM50.RMethod.RNASeq)
-save(Type,file="SubtypeForBRCA-BSF-23July2015.RDATA")
+save(Type,file="SubtypeForBRCA-BSF-23Ag2015.RDATA")
 ############################££££
