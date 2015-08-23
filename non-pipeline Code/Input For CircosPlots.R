@@ -4,7 +4,6 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 #load BRCA BSF Master File
-#ClusterAss<-read.csv("./3 ANALISYS/CLUSTERING/RNAseq/BRCA.BSF/BRCA.BSF.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000/BRCA.BSF.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000.k=4.consensusClass.ICR.csv", sep=",")
 Master<-read.delim("./3 ANALISYS/MASTER FILES/TCGA.BRCA.BSF.RNASeq_subset_DBGS3.FLTR.Master.csv",sep=",")
 colnames(Master)# to select the col of interst
 subMaster<- as.matrix(Master[,c(1,15,30,34)])
@@ -34,4 +33,4 @@ Stage<-table(subMaster$Cluster.DBGS3.FLTR.RNSeq,subMaster$ajcc_pathologic_tumor_
 save(Stage, file="StageForBRCA-BSF-23Ag2015.RDATA")
 Type<-table(subMaster$Cluster.DBGS3.FLTR.RNSeq,subMaster$TCGA.PAM50.RMethod.RNASeq)
 save(Type,file="SubtypeForBRCA-BSF-23Ag2015.RDATA")
-############################
+##########################
