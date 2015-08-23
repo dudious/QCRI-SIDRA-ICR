@@ -11,13 +11,15 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 # Set Parameters
-Geneset <- "DBGS1"       # SET GENESET HERE !!!!!!!!!!!!!!
-Cancerset <- "BRCA"
+Geneset <- "DBGS3.FLTR"       # SET GENESET HERE
+Parent.Geneset <- substring(Geneset,1,5)
+Cancerset <- "BRCA.BSF"
+Parent.Cancerset <- substring(Cancerset,1,4)
 K <- 4
 GOF <- "TP53"
 
 ## Load Data
-immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Cancerset,".",Geneset,".csv"))
+immunoscore <- read.csv (paste0("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.",Parent.Cancerset,".",Parent.Geneset,".csv"))
 rownames(immunoscore) <- immunoscore$X
 immunoscore$X <- NULL
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".split.RDATA"))
@@ -70,7 +72,8 @@ rownames (GOFmutated.patients) <- NULL
 levels(GOFmutated.patients$GOF_mutation) <- c("TRUE","FALSE")
 levels(GOFmutated.patients$GOF_missense) <- c("TRUE","FALSE")
 GOFmutated.patients[is.na(GOFmutated.patients)] <- "FALSE"
-write.csv (GOFmutated.patients,file = paste0("./3 ANALISYS/Mutations/",Cancerset,"/",GOF,".mutations.",Geneset,".bypatient.csv"))
+dir.create(paste0("./3 ANALISYS/Mutations/",Cancerset,"/"), showWarnings = FALSE)
+write.csv (GOFmutated.patients,file = paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",GOF,".mutations.",Geneset,".bypatient.csv"))
 
 #GOF imunoscore by cluster and by type of mutation
 
@@ -91,5 +94,5 @@ GOF.IS <- cbind (GOF.IS.All,GOF.IS.Any,GOF.IS.Missense,GOF.IS.Nonsense,GOF.IS.Ot
 GOF.IS <- GOF.IS[,-c(3,5,7,9)]
 
 print (GOF.IS)
-save(GOF.IS,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",GOF,".IS.",Geneset,".RData"))
-write.table(GOF.IS,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",GOF,".IS.",Geneset,".txt"),sep="\t")
+save(GOF.IS,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",GOF,".IS.",Geneset,".RData"))
+write.table(GOF.IS,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",GOF,".IS.",Geneset,".txt"),sep="\t")

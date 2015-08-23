@@ -19,8 +19,8 @@ if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
 # load data
-load ("./2 DATA/SUBSETS/METABRIC.RNASEQ.DATA.1.genesubset.25G.DB.RData") # Select subset here !!!!!
-load ("./2 DATA/SUBSETS/METABRIC.RNASEQ.DATA.2.genesubset.25G.DB.RData") # Select subset here !!!!!
+load ("./2 DATA/SUBSETS/METABRIC/METABRIC.RNASEQ.DATA.1.genesubset.25G.DB.RData") # Select subset here !!!!!
+load ("./2 DATA/SUBSETS/METABRIC/METABRIC.RNASEQ.DATA.2.genesubset.25G.DB.RData") # Select subset here !!!!!
 RNASEQ.DATA.ALL.subset <- rbind(RNASEQ.DATA.1.subset,RNASEQ.DATA.2.subset)
 
 # Corelation matrix
@@ -47,7 +47,7 @@ RNASeq.subset.cor.sign <- cor.mtest(RNASeq.subset.cor, 0.95)
                                 
 
 # Correlation plot
-png("./4 FIGURES/CORRELATION/correlation.METABRIC.ALL.25G.DB.RNASeq.png",res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+png("./4 FIGURES/CORRELATION/correlation.METABRIC.ALL.25G.DB.RNASeq.test.png",res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
 cex.before <- par("cex")
 par(cex = 0.45)
 corrplot.mixed(RNASeq.subset.cor,

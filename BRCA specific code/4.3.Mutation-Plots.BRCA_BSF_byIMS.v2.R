@@ -20,10 +20,10 @@ library("plyr")
 
 ## Parameters
 Cancerset <- "BRCA.BSF"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
-gene = "MAP2K4"
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
-Plot.type = "NonSilent"       # Alterantives "All" , "Any" , "Missense", "NonSilent"
+Plot.type = "NonSilent" # Alterantives "All" , "Any" , "Missense", "NonSilent"
+IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2"
 
 ## Ines RNASeq Clustering k = 4
 num.clusters = 4
@@ -31,6 +31,22 @@ clusters = rep(paste0("ICR", 1:num.clusters))
 
 ## Read the mutation frequency file 
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
+#clinical data
+ClinicalData.subset <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"))                       # Clinical data including IMS
+rownames(ClinicalData.subset) <- ClinicalData.subset$X 
+ClinicalData.subset$X <-NULL
+
+#add subtype to Mutation.Frequency.Patient Table
+Mutation.Frequency.Patient$Subtype <- ClinicalData.subset$TCGA.PAM50.RMethod.RNASeq[match(Mutation.Frequency.Patient$Patient_ID,rownames(ClinicalData.subset))]
+
+#Filer  Mutation.Frequency.Patient Table by IMS
+if (IMS.filter == "Luminal") {
+  Mutation.Frequency.Patient <- Mutation.Frequency.Patient[Mutation.Frequency.Patient$Subtype %in% c("Luminal A","Luminal B"),]
+} else if (IMS.filter == "Basal"){
+  Mutation.Frequency.Patient <- Mutation.Frequency.Patient[Mutation.Frequency.Patient$Subtype %in% c("Basal-like"),]
+} else if (IMS.filter == "Her2"){
+  Mutation.Frequency.Patient <- Mutation.Frequency.Patient[Mutation.Frequency.Patient$Subtype %in% c("HER2-enriched"),]
+}
 
 #Prepare Data for Boxplots
 numMuts.All           = data.frame(count=Mutation.Frequency.Patient$Freq.All          ,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "All")
@@ -110,7 +126,7 @@ meds.limit = 4*max(meds$med)
 if (Cancerset == "COAD"){meds.limit = 6*max(meds$med)}
 mean.n = function(x){ return(c(y = 0 , label = round(mean(x),1))) } ## mean
 
-png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".png"), height = 1000, width= blot.width)   #set filename
+png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".",IMS.filter,".png"), height = 1000, width= blot.width)   #set filename
 cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
 colors = c("blue", "green", "orange", "red")
 gg = ggplot(numMuts.blot, aes(cluster, count, fill=cluster)) +
@@ -145,28 +161,11 @@ gg = gg + stat_summary(fun.data = mean.n,
 gg = gg + geom_text(data = meds,
                     aes(y = meds.limit, label = p.value.label),
                     size = 7, vjust = 1.2)
-gg = gg + ggtitle(paste0("Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type)) +
+gg = gg + ggtitle(paste0("Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".",IMS.filter)) +
           theme(plot.title = element_text(size = blot.font.size, lineheight=5, face="bold"))
 
 print(gg)
 dev.off()
 
-## Create data frame for plotting the percentage of TP53 patients per cluster
-mut.df = merge (sample.cluster.count,Mutation.Frequency.Gene[Mutation.Frequency.Gene$Hugo_Symbol==gene,c("Hugo_Symbol","Cluster","Freq.Any.pct")],by="Cluster",all=TRUE)
-mut.df[is.na(mut.df)] = 0
-mut.df$label = paste0(sprintf("%.0f", mut.df$Freq.Any.pct), "%")
-dir.create(paste0("./4 FIGURES/Mutation Plots/",gene,"/"), showWarnings = FALSE)
 
-## Plot TP53 percetage barplot
-png(paste0("./4 FIGURES/Mutation Plots/",gene,"/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
-cluster.order = rev(clusters)
-gg = ggplot(mut.df, aes(x = clusters, y = Freq.Any.pct))  +
-  geom_bar(stat = "identity", width = 0.8, position="dodge") +
-  geom_text( aes(y = Freq.Any.pct+2, label = label), size = 7, position=position_dodge(width = 0.8)) 
-gg = gg + scale_x_discrete(limits = cluster.order) +
-          xlab("Clusters") + ylab("Percentage") + theme_bw()
-gg = gg+ theme(legend.position="none", strip.text.x = element_text(size = 14)) +
-         scale_fill_manual(values=c("gold", "lightsalmon4")) +
-         ggtitle((paste0("Mutation Frequency.",gene,".",Cancerset,".",Geneset,".k:",num.clusters)))
-print(gg)
-dev.off()
+

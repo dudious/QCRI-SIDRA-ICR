@@ -22,12 +22,12 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("Hmisc")
 
 # Set Parameters
-Cancerset <- "COAD-hiseq"
+Cancerset <- "COAD-GA"
 
 #read in available maf files
 path <- paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations")
 maf.all   <- list.files(path,recursive=TRUE,pattern=".maf",full.names=TRUE)
-maf.total.number <- length(maf.all)
+maf.total.number <- length(maf.all) - length(list.files(path,recursive=TRUE,pattern=".maf.Rdata",full.names=TRUE))
 print (paste0("Total number of maf files available : ",maf.total.number))
 
 # load curated data if availabe

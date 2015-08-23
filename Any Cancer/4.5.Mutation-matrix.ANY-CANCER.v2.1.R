@@ -15,34 +15,70 @@
 # Setup environment
 rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
+# Dependencies
+required.packages <- c("beepr")
+missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
+if(length(missing.packages)) install.packages(missing.packages)
+library("beepr")
 
 ## Parameters
-Cancerset <- "BRCA"
-Geneset = "DBGS1"
-matrix.type = "Any"       # Alterantives "Any" , "Missense"
+Cancerset      = "COAD"
+Geneset        = "DBGS3.FLTR"
+BRCA.Filter    = "PCF"
+matrix.type    = "Any"         # Alterantives "Any" , "Missense"
+selected.genes = c("TP53","MAP2K4","MAP3K1")
 
-## Read the mutation .maf file 
-load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+##load data
+## Read the mutation .maf file and cluster assignments
+if (Cancerset %in% c("COAD","READ","UCEC")) {
+  #GA data
+  Cancerset <- paste0(Cancerset,"-GA")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  maf.merged.table.GA <- maf.merged.table
+  Consensus.class.GA <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.GA <- Consensus.class.GA[,-1]
+  colnames (Consensus.class.GA) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.GA) <- Consensus.class.GA[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #hiseq data
+  Cancerset <- paste0(Cancerset,"-hiseq")
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  maf.merged.table.hiseq <- maf.merged.table 
+  Consensus.class.hiseq <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class.hiseq <- Consensus.class.hiseq[,-1]
+  colnames (Consensus.class.hiseq) <- c("Patient_ID","Cluster")
+  rownames(Consensus.class.hiseq) <- Consensus.class.hiseq[,1]
+  rm(maf.merged.table)
+  Cancerset <- substring(Cancerset,1,4)
+  #merge GA-hiseq
+  Consensus.class <- unique(rbind (Consensus.class.hiseq,Consensus.class.GA))
+  maf.merged.table   <- unique(rbind (maf.merged.table.hiseq,maf.merged.table.GA))
+} else {
+  load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
+  if (Cancerset == "BRCA"){
+    if (substring(Geneset,7,10)=="FLTR"){
+      Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+    }
+  }
+  Consensus.class = read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+  Consensus.class = Consensus.class[,-1]
+  colnames (Consensus.class) = c("Patient_ID","Cluster")
+  rownames(Consensus.class) = Consensus.class[,1]
+} 
 muts = maf.merged.table
-
-#muts = read.csv("BRCA.mutation.TCGA.txt", sep="\t" )
+rm(maf.merged.table)
 muts$sample.name = substr(muts$Tumor_Sample_Barcode, 1, 12)
-
-## RNASeq clustering
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
-Consensus.class <- Consensus.class[,-1]
-colnames (Consensus.class) <- c("Patient_ID","Cluster")
-rownames(Consensus.class) <- Consensus.class[,1]
-cluster.assignment <- Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data
-
-## Read the gene list (373 genes)
-genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
-## Load the mutation variation data
-load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".VariationTables.RData"))
+cluster.assignment = Consensus.class[which(rownames(Consensus.class) %in% muts$sample.name),] # drop samples without any mutation data  
 
 ## Merge the cluster info and Remove the mutations with samples not having cluster information
 muts$cluster = cluster.assignment$Cluster[match(muts$sample.name, as.character(cluster.assignment$Patient_ID))]
 muts =  (muts[-which(is.na(muts$cluster)), ])
+
+## Read the gene list (373 genes)
+genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
+## Load the mutation variation data
+load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",matrix.type,".VariationTables.RData"))
 
 ## Pick the Missense Mutations only
 if (matrix.type =="Missense") {muts = muts[which(muts$Variant_Classification=="Missense_Mutation"), ]}
@@ -68,7 +104,9 @@ for(i in 1:nrow(muts)){
 genes.mutations.373genes = genes.mutations[,colnames(genes.mutations) %in% as.character(genes.list$V1)]
 genes.mutations.low = genes.mutations[,colnames(genes.mutations) %in% as.character(low.significant.variation.table$Gene)]
 genes.mutations.high = genes.mutations[,colnames(genes.mutations) %in% as.character(high.significant.variation.table$Gene)]
-save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,
+genes.mutations.auto = genes.mutations[,colnames(genes.mutations) %in% as.character(auto.significant.variation.table$Gene)]
+genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selected.genes]
+save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,genes.mutations.auto,genes.mutations.selected,
       file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 
 #### Get the number of genes that are mutated in more than 2,3, 5% of the samples

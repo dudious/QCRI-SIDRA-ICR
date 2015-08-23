@@ -24,18 +24,25 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
 
 # Set Parameters
-Cancerset <- "BRCA"                     # SET Cancertype
-Geneset <- "DBGS3.FLTR"              # SET GENESET and pruclustering filter 
-Parent.Geneset <- substring(Geneset,1,5)
-K <- 4                                  # SET K here
+Cancerset <- "BRCA"              # SET Cancertype
+BRCA.Filter <- "PCF"             # "PCF" or "BSF" Pancer or Breast specific
+Geneset <- "DBGS3.FLTR"          # SET GENESET and pruclustering filter 
+K <- 4                           # SET K here
 
 # Load Data
+Parent.Geneset <- substring(Geneset,1,5)
+load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
+RNASeq.subset <- as.matrix(RNASeq.subset)
+if (Cancerset == "BRCA"){
+  if (substring(Geneset,7,10)=="FLTR"){
+    Cancerset <- paste0(Cancerset,".",BRCA.Filter)
+  }
+}
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
-RNASeq.subset <- as.matrix(RNASeq.subset)
 load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
+
 
 ## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])

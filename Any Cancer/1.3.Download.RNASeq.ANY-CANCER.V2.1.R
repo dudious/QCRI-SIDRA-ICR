@@ -28,7 +28,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_A.r")
 source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/TCGA-Assembler/Module_B.r")
 
 # Set Parameters
-Cancerset           <- "BRCA"
+Cancerset           <- "LGG"
 TCGA.structure.file <- "./2 DATA/DirectoryTraverseResult_Jul-02-2015.rda"
 
 # Paths and flies
@@ -54,11 +54,12 @@ file.GA <- list.files(Download.path,full.names = TRUE,pattern = "illuminaga" )
 GA <- length(file.GA)
 if (GA==1){
   file.hiseq.new <- paste0(str_split(file.hiseq,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"hiseq.DATA.txt")
-  file.GA.new <- paste0(str_split(file.hiseq,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"GA.DATA.txt")
+  file.GA.new    <- paste0(str_split(file.hiseq,paste0("DATA__",Cancerset,"__"))[[1]][[1]],"GA.DATA.txt")
   file.list.old  <- c(file.hiseq,file.GA)
   file.list.new  <- c(file.hiseq.new,file.GA.new)
   tech="hiseq"
-  Input.file  <- paste0(Download.path,Cancerset,".RNASeq.TCGA.ASSEMBLER.",tech,".DATA.txt")
+  Input.file     <- paste0(Download.path,Cancerset,".RNASeq.TCGA.ASSEMBLER.",tech,".DATA.txt")
+  Download.file  <- paste0(Cancerset,".RNASeq.TCGA.ASSEMBLER.hiseq.DATA")  
 }
 if (GA==0){
   file.list.old  <- list.files(Download.path,full.names = TRUE,pattern = paste0("__",Cancerset,"__"))
