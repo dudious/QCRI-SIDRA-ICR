@@ -35,7 +35,7 @@ NL<-subMasterFile[who5,]
 #select the file of interest
 #MutStatus<-BRCA.genes.mutations.nonsilent
 #MutStatus<-BRCA.genes.mutations.silent
-#
+#MutStatus<-BRCA.genes.mutations.missense
 MutStatus<-as.matrix(MutStatus)
 Mutmatrix<- matrix(0,nrow=length(rownames(MutStatus)),ncol=length(colnames(MutStatus)))
 rownames(Mutmatrix)<- rownames(MutStatus)
@@ -77,10 +77,11 @@ WilcoxonAll <- cbind(WilcoxonAll, FDR=pvfdr)
 Wilcoxon_O<-WilcoxonAll[order(WilcoxonAll[,3]),]
 wwho<-which(Wilcoxon_O [,3] <= 0.05)#0
 # Save
-save(Wilcoxon_O,file="Wilcoxon-test_BRCA-ALL_DBGS3_SILENT.RDATA")
-#NO CYT
+save(Wilcoxon_O,file="Wilcoxon-test_BRCA-ALL_DBGS3_missense.RDATA")
+#NO CYT Analysis
 
 #BASAL-LIKE
+Mutmatrix<-t(Mutmatrix)
 who<-which(rownames(Mutmatrix)%in% rownames(BL))#N=168
 BLMutMatrix<-Mutmatrix[who,]
 BLMutMatrix<-t(BLMutMatrix)
@@ -109,7 +110,7 @@ WilcoxonBL <- cbind(WilcoxonBL, FDR=pvfdr)
 Wilcoxon_O<-WilcoxonBL[order(WilcoxonBL[,3]),]
 wwho<-which(Wilcoxon_O [,3] <= 0.05)#0
 # Save
-save(Wilcoxon_O,file="Wilcoxon-test_BRCA-BASAL-LIKE_DBGS3_SILENT.RDATA")
+save(Wilcoxon_O,file="Wilcoxon-test_BRCA-BASAL-LIKE_DBGS3_missense.RDATA")
 
 #output file for CYT
 WilcoxonBL_CYT <- matrix(0, nrow= nrow(BLMutMatrix), ncol=2)
@@ -169,7 +170,7 @@ WilcoxonHer <- cbind(WilcoxonHer, FDR=pvfdr)
 Wilcoxon_O<-WilcoxonHer[order(WilcoxonHer[,3]),]
 wwho<-which(Wilcoxon_O [,3] <= 0.05)#0
 # Save
-save(Wilcoxon_O,file="Wilcoxon-test_BRCA-Her2Enriched_DBGS3-SILENT.RDATA")
+save(Wilcoxon_O,file="Wilcoxon-test_BRCA-Her2Enriched_DBGS3-missense.RDATA")
 
 
 #output file for CYT
@@ -229,7 +230,7 @@ WilcoxonLA <- cbind(WilcoxonLA, FDR=pvfdr)
 Wilcoxon_O<-WilcoxonLA[order(WilcoxonLA[,3]),]
 wwho<-which(Wilcoxon_O [,3] <= 0.05)#0
 # Save
-save(Wilcoxon_O,file="Wilcoxon-test_BRCA-LuminalA_DBGS3-SILENT.RDATA")
+save(Wilcoxon_O,file="Wilcoxon-test_BRCA-LuminalA_DBGS3-missense.RDATA")
 
 #output file for CYT
 WilcoxonLA_CYT <- matrix(0, nrow= nrow(LAMutMatrix), ncol=2)
@@ -289,7 +290,7 @@ WilcoxonLB <- cbind(WilcoxonLB, FDR=pvfdr)
 Wilcoxon_O<-WilcoxonLB[order(WilcoxonLB[,3]),]
 wwho<-which(Wilcoxon_O [,3] <= 0.05)#0
 # Save
-save(Wilcoxon_O,file="Wilcoxon-test_BRCA-LuminaLB_DBGS3-SILENT.RDATA")
+save(Wilcoxon_O,file="Wilcoxon-test_BRCA-LuminaLB_DBGS3-missense.RDATA")
 
 
 #output file for CYT
@@ -324,7 +325,6 @@ who<-which(rownames(Mutmatrix)%in% rownames(NL))#N=0
 ##############################################################
 
 #plotP53
-Mutmatrix<-t(Mutmatrix)
 tp53<-which(colnames(Mutmatrix)=="TP53")
 P53<-as.matrix(Mutmatrix[,tp53])
 colnames(P53)<-"MutStatusTP53ALL"
@@ -397,20 +397,21 @@ rownames(HER2E)<-HER2E[,1]
 HER2E$Row.names<-NULL
 ###################################################
 #Plotting:make the plot; change the data
-pdf("ICRvsTP53Mutstatus-SILENTinHER2enriched.pdf")
+pdf("ICRvsTP53Mutstatus-missenseinAllsubtype.pdf")
+boxplot(DBGS3mean~ MutStatusTP53ALL, data= P53, col= c("gray","White"),
+        main="Association between TP53 mutational status and ICR score",
+        ylab="ICR score",
+        xlab="All BC subtypes")
+text(x=1,y=2.2,labels="q= 0.003", col="black",adj=1, pos=3,cex=1.2, font=4)
+dev.off()
+########################
+#subtype.order = c("Basal-like", "HER2-enriched","Luminal A", "Luminal B")
+#colors = c( "darkorchid","darkgoldenrod3","darkblue","dodgerblue2")
+#Change the data and the information
+pdf("ICRvsTP53Mutstatus-missenseinHER2Enriched.pdf")
 boxplot(DBGS3mean~ MutStatusTP53HER2, data= HER2E, col= c("darkgoldenrod3","White"),
         main="Association between TP53 mutational status and ICR score",
         ylab="ICR score",
-        xlab="HER2-enriched subtype")
-text(x=1.3,labels="q= NA", col="black",adj=1, pos=3,cex=1.2, font=4)
-
-dev.off()
-########################
-pdf("ICRvsTP53Mutstatus-SILENTinBasal-like.pdf")
-boxplot(DBGS3mean~ MutStatusTP53BL, data= Basal, col= c("darkorchid","White"),
-        main="Association between TP53 mutational status and ICR score",
-        ylab="ICR score",
-        xlab="Basal-like")
-text(x=1.6,labels="q= 0.822", col="black",adj=1, pos=3,cex=1.2, font=4)
-
+        xlab="HER2-enriched")
+text(x=1.5,labels="q= 0.964", col="black",adj=1, pos=3,cex=1.2, font=4)
 dev.off()
