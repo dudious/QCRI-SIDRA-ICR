@@ -404,7 +404,7 @@ boxplot(DBGS3mean~ MutStatusTP53ALL, data= P53, col= c("gray","White"),
         xlab="All BC subtypes")
 text(x=1,y=2.2,labels="q= 0.003", col="black",adj=1, pos=3,cex=1.2, font=4)
 dev.off()
-########################
+#######################
 #subtype.order = c("Basal-like", "HER2-enriched","Luminal A", "Luminal B")
 #colors = c( "darkorchid","darkgoldenrod3","darkblue","dodgerblue2")
 #Change the data and the information
