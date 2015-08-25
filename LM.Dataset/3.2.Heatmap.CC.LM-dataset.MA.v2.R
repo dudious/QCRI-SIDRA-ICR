@@ -1,7 +1,7 @@
 #################################################################
 ###
 ### This Script PLots Heatmaps based on 
-### Consensus Clustering grouping of ",Cancerset," RNASeq Data
+### Consensus Clustering grouping of LM.BCRA MA Data
 ### 
 ### Input data :
 ### ./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/...
@@ -25,7 +25,7 @@ library("gplots")
 
 # Set Parameters
 Cancerset <- "LM.Dataset"
-Geneset <- "DBGS1" # SET GENESET HERE !!!!!!!!!!!!!!
+Geneset <- "DBGS3" # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4             # SET K here
 
 # Load Data
@@ -35,6 +35,7 @@ rownames(Consensus.class) <- Consensus.class[,1]
 load (paste0("./2 DATA/SUBSETS/",Cancerset,"/",Cancerset,".MA.subset.",Geneset,".RData"))
 MA.subset <- as.matrix(MA.subset)
 load (paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.Rdata") 
 
 ## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
@@ -77,6 +78,13 @@ MA.subset$Group <- NULL
 #re-order the labels
 Consensus.class <- Consensus.class[rownames(MA.subset),]
 
+MA.bygene.matrix <- data.frame(t(MA.subset))
+MA.bygene.matrix$Gene <- Gene.Meta.data$Symbol[match(rownames(MA.bygene.matrix),Gene.Meta.data$Affy_Probe_ID)]
+#rownames(MA.bygene.matrix) <- MA.bygene.matrix$Gene  # Genbe names are not unique
+Genes.names <- paste0(MA.bygene.matrix$Gene,"(",sapply(strsplit(rownames(MA.bygene.matrix),"AFFX-HUMISGF3A/"),tail,1),")")
+MA.bygene.matrix$Gene <-NULL
+MA.bygene.matrix <- as.matrix(MA.bygene.matrix)
+                              
 # Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
 levels (patientcolors$Group) <- c(levels (patientcolors$Group),c("#FF0000","#FFA500","#00FF00","#0000FF"))  #Aply color scheme to patients
@@ -88,10 +96,10 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png(paste0("./4 FIGURES/Heatmaps/Heatmap.MA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
-heatmap.2(t(MA.subset),
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.MA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=7,unit="in")     # set filename
+heatmap.2(MA.bygene.matrix,
           main = paste0("Heatmap MA - ",Geneset," sel., K=",K),
-          col=my.palette,                   #set color sheme RED High, GREEN low
+          col=my.palette,                   #set color sheme red High, Yellow low
           breaks=my.colors,                                 
           ColSideColors=patientcolors,      #set goup colors                 
           key=TRUE,
@@ -102,7 +110,8 @@ heatmap.2(t(MA.subset),
           density.info="none",
           trace="none",
           labCol=FALSE,
-          cexRow=1.3,cexCol=0.1,margins=c(2,7),
+          labRow=Genes.names,
+          cexRow=1,cexCol=0.1,margins=c(2,12),
           Colv=FALSE)
 par(lend = 1)
 legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),

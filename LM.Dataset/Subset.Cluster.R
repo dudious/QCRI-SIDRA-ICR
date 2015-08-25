@@ -28,15 +28,15 @@ if(length(missing.packages)) biocLite(missing.packages)
 
 library(ConsensusClusterPlus)
 library(clue)
-source("./1 CODE/R tools/stefanofunctions.R")
+source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Parameters
 Cancerset <- "LM.Dataset"
-Geneset <- "DBGS1"
+Geneset <- "DBGS3"
 
 # load data
-load ("~/Dropbox/Data_LM/LM.Dataset.split.Rdata")                                
-gene.list <- read.csv ("./2 DATA/SUBSETS/Gene_selection_v2.2.txt")                                 # Select subset here !!!!! and change filename below !!!!
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.Rdata")                                
+gene.list <- read.csv ("./2 DATA/SUBSETS/Gene_selection_v2.6.txt")                                 # Select subset here !!!!! and change filename below !!!!
 gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
 
 # check availabilety of the genes in the dataset

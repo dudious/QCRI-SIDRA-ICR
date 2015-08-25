@@ -30,15 +30,15 @@ library(reshape)
 library(ggplot2)
 library(plyr)
 
-source ("./1 CODE/R tools/ggkm.R")
+source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset <- "LM.Dataset"
-Filtersamples <- "UnFiltered" # altervatives : Filtered , UnFiltered
-Geneset <- "DBGS1"          # SET GENESET HERE !!!!!!!!!!!!!!
-K <- 4                      # SET K here
+Cancerset         <- "LM.Dataset"
+Filtersamples     <- "UnFiltered" # altervatives : Filtered , UnFiltered
+Geneset           <- "DBGS3"          # SET GENESET HERE !!!!!!!!!!!!!!
+K                 <- 4                      # SET K here
 Surv.cutoff.years <- 10     # SET cut-off here
-Km.type <- "1vs2vs3vs4"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type           <- "4vs123"     # altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 # Load data
 #Clusters.names <- rep(paste0("ICR",1:K))
@@ -47,7 +47,7 @@ Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",C
                                    Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 rownames(Consensus.class) <- Consensus.class$PatientID
-load ("~/Dropbox/Data_LM/LM.Dataset.split.Rdata") 
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.Rdata") 
 
 #if (Filtersamples=="Filtered"){     
 #  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude == "No")     # remove excluded patients
