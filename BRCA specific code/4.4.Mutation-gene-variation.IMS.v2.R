@@ -16,12 +16,14 @@ K = 4                          # SET K here
 Filter = 1                     # at least one clutser has to have x% mutation frequency
 mutation.type = "NonSilent"    # Alterantives "Any" , "Missense" , "NonSilent"
 clusters = paste0(rep("ICR",4), 1:4)
-IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
+
 
 ## Read the mutation frequency file  (Mutation.Frequency.Gene)
-load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".Frequencies.RDATA"))
+load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.IMS.RDATA"))
 #numMuts.Any      = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
 #numMuts.Missense = data.frame(count=Mutation.Frequency.Patient$Freq.Missense,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense")
+
+subtypes = levels(Mutation.Frequency.Patient$Subtype)
 
 ## Pick genes based on cutoff (Freq.Any.pct OR Freq.Missense.Any.pct) (present in at least "cutoff" samples for each cluster)
 gene.list = as.character(unique(Mutation.Frequency.Gene$Hugo_Symbol))
@@ -37,48 +39,44 @@ if (mutation.type=="NonSilent") {
 } 
 variation.table = NULL
 
-## for each gene, pick the 4 clusters, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
+## for each gene, pick the 4 subtypes, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
 for (gene in gene.list.selected){
-  #print(gene)
-  
   gene.data = Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol==gene),]   # select a gene
   gene.data[is.na(gene.data)] = 0
-  # Add missing clusters data
-  gene.clusters = gene.data$Cluster
-  if(length(gene.clusters)<4){
-  missing.clusters = clusters[which(!(clusters %in% gene.clusters))]
-  gene.missingdata = data.frame(matrix(ncol=ncol(gene.data), nrow=length(missing.clusters)))
-  colnames(gene.missingdata) = colnames(gene.data)
-  gene.missingdata$Hugo_Symbol = gene
-  gene.missingdata$Cluster = missing.clusters
-  gene.missingdata[is.na(gene.missingdata)] = 0
-  gene.data = rbind(gene.data, gene.missingdata)
+  
+  # Add missing subtypes data
+  gene.subtypes = gene.data$Subtype
+  if(length(gene.subtypes)<5){
+   missing.subtypes = subtypes[which(!(subtypes %in% gene.subtypes))]
+   gene.missingdata = data.frame(matrix(ncol=ncol(gene.data), nrow=length(missing.subtypes)))
+   colnames(gene.missingdata) = colnames(gene.data)
+   gene.missingdata$Hugo_Symbol = gene
+   gene.missingdata$Subtype = missing.subtypes
+   gene.missingdata[is.na(gene.missingdata)] = 0
+   gene.data = rbind(gene.data, gene.missingdata)
   }
   
-  gene.data = gene.data[order(gene.data$Cluster),]                                         # sort the cluster
-  
   if (mutation.type=="Any") {
+    gene.data = gene.data[order(gene.data$Freq.Any.pct),]
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]           # add the percentages
     gene.patients = gene.data$Freq.Any
   }
   if (mutation.type=="Missense") {
+    gene.data = gene.data[order(gene.data$Freq.Missense.Any.pct),]
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Missense.Any.pct"]  # add the percentages
     gene.patients = gene.data$Freq.Missense.Any
   }
   if (mutation.type=="NonSilent") {
+    gene.data = gene.data[order(gene.data$Freq.NonSilent.Any.pct),]
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.NonSilent.Any.pct"] # add the percentages
     gene.patients = gene.data$Freq.NonSilent.Any
   }
+  gene.subtype.order = gene.data$Subtype
   ## FIsher exact test ICR1 vs ICR4
   gene.patients[is.na(gene.patients)] = 0
-  gene.patients.wt = sample.cluster.count$N-gene.patients
-  test.matrix = cbind(gene.patients[c(1,4)],gene.patients.wt[c(1,4)])
-  res.f = fisher.test(test.matrix)
- 
-  if (sum(rowSums(test.matrix))>0) {
-    res.c = chisq.test(test.matrix)
-  }
-  
+  gene.patients.wt = gene.data$N-gene.patients
+  test.matrix = cbind(gene.patients[c(1,5)],gene.patients.wt[c(1,5)])
+  res = fisher.test(test.matrix)
   #print(gene)
   #print( res$p.value)
   
@@ -94,72 +92,60 @@ for (gene in gene.list.selected){
   trend.pval = trend.results[[3]]
   db.test=FALSE
   if (gene.data.pct[1]<=1) {
-    if ((gene.data.pct[4] - gene.data.pct[1])>=4){
-      db.test=TRUE
+    if ((gene.data.pct[5] - gene.data.pct[1])>=4){
+     db.test=TRUE
     }
   }
   if (gene.data.pct[4]<=1) {
-    if ((gene.data.pct[1] - gene.data.pct[4])>=4){
+    if ((gene.data.pct[1] - gene.data.pct[5])>=4){
       db.test=TRUE
     }
   }  
-  gene.data.row = data.frame(gene,
-                             paste0(gene.data.pct, collapse=" : "),
+  gene.data.row = data.frame(gene, paste0(gene.data.pct, collapse=" : "),
+                             paste0(gene.subtype.order, collapse=" : "),
                              variation,
-                             paste0((trend), collapse=" : "),
-                             flag,
-                             trend.pval,
-                             paste0(test.matrix, collapse=" : "),
-                             res.f$p.value,
-                             res.c$p.value,
+                             #paste0((trend), collapse=" : "),
+                             #flag,
+                             #trend.pval,
+                             res$p.value,
                              db.test)  
   variation.table = rbind(variation.table, gene.data.row)
-  res.c$p.value = NA
 }
 colnames(variation.table) = c("Gene",
-                              "Cluster_Percentages",
+                              "Subtype_Percentages",
+                              "Subtype_Order",
                               "Max_Variation",
-                              "Direction",
-                              "Trend",
-                              "Trend_pVal_ChiSquared",
-                              "testmatrix",
-                              "Fisher_ICR1vs4",
-                              "ChiSquare_ICR1vs4",
-                              "db.test")
-
-write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTable.csv"))
-variation.table <- read.csv(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTable.csv"))
+                              #"Direction",
+                              #"Trend",
+                              #"Trend_pVal_ChiSquared",
+                              "Fisher_HighestVsLowest",
+                              "db.test_HighestVsLowest") 
 
 # significance filter
-SL1 = 0.0005 #chisquare p for LOW OR trend = TRUE
-SL2 = 4   #maxvar Filter multiplier for LOW
-SH1 = SL1/10 #chisquare p for HIGH OR trend = TRUE
-SH2 = SL2*2 #maxvar Filter multiplier for HIGH
-low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
-high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
-db.test.significant.variation.table = variation.table[which(variation.table$db.test | variation.table$ChiSquare_ICR1vs4<0.05), ]
-db.test.strict.significant.variation.table = variation.table[which(variation.table$db.test & variation.table$ChiSquare_ICR1vs4<0.05), ]
-
+#SL1 = 0.0005 #chisquare p for LOW OR trend = TRUE
+#SL2 = 4   #maxvar Filter multiplier for LOW
+#SH1 = SL1/10 #chisquare p for HIGH OR trend = TRUE
+#SH2 = SL2*2 #maxvar Filter multiplier for HIGH
+#low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
+#high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
 # COAD  (0.0005,4,0.00005,8)
 
 #automatic significance filter
-ASF1     = 0.001
-ASF2     = 1
-ASF.stop = 30
-L.sig = nrow(variation.table)
-while (L.sig > ASF.stop){
-  auto.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<ASF1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*ASF2), ]
-  ASF2 = ASF2+0.1
-  L.sig = nrow(auto.significant.variation.table)
-}
+#ASF1     = 0.001
+#ASF2     = 1
+#ASF.stop = 30
+#L.sig = nrow(variation.table)
+#while (L.sig > ASF.stop){
+#  auto.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<ASF1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*ASF2), ]
+#  ASF2 = ASF2+0.1
+#  L.sig = nrow(auto.significant.variation.table)
+#}
 
-save(low.significant.variation.table,
-     high.significant.variation.table,
-     auto.significant.variation.table,
-     db.test.significant.variation.table,
-     db.test.strict.significant.variation.table,
+save(#low.significant.variation.table,
+     #high.significant.variation.table,
+     #auto.significant.variation.table,
      variation.table,
-     file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTables.RData"))
-
+     file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTables.IMS.RData"))
+write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTable.IMS.csv"))

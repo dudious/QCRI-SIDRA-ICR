@@ -23,15 +23,18 @@ library("gplots")
 library("plyr")
 library("beepr")
 
-## Parameters
-Cancerset   = "BRCA.BSF"     # FOR BRCA use BRCA.PCF or BRCA.BSF
-Geneset     = "DBGS3.FLTR"   # SET GENESET HERE 
-matrix.type = "Missense"          # Alterantives "Any" , "Missense"
-plot.type   = "auto"         # Alterantives "low" , "high" , "373genes"  ,"auto"," selected"
+source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 
+## Parameters
+Cancerset   = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
+Geneset     = "DBGS3.FLTR"  # SET GENESET HERE 
+matrix.type = "NonSilent"   # Alterantives "Any" , "Missense" , "NonSilent"
+plot.type   = "db.test"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test"
+IMS.filter  = "Luminal"     # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 
 # Load Data
-load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
+load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
+
 if (Cancerset %in% c("COAD","READ","UCEC")) {
   #GA data
   Cancerset <- paste0(Cancerset,"-GA")
@@ -59,6 +62,7 @@ if (Cancerset %in% c("COAD","READ","UCEC")) {
 if (plot.type == "low"){allmuts.mutatedgenes <- genes.mutations.low}
 if (plot.type == "high"){allmuts.mutatedgenes <- genes.mutations.high}
 if (plot.type == "auto"){allmuts.mutatedgenes <- genes.mutations.auto}
+if (plot.type == "db.test"){allmuts.mutatedgenes <- genes.mutations.dbtest}
 if (plot.type == "373genes"){allmuts.mutatedgenes <- genes.mutations.373genes}
 if (plot.type == "selected"){allmuts.mutatedgenes <- genes.mutations.selected}
 allmuts.mutatedgenes[is.na(allmuts.mutatedgenes)] = 0
@@ -110,7 +114,7 @@ patientcolors$Cluster[patientcolors$Cluster=="ICR1"] <- "#0000FF"
 patientcolors <- as.character(patientcolors$Cluster)
 
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".reordered_alphabetic.png"),res=600,height=9,width=25,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".reordered_alphabetic.png"),res=600,height=9,width=25,unit="in")     # set filename
 heatmap.2(allmuts.mutatedgenes,
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -126,7 +130,7 @@ heatmap.2(allmuts.mutatedgenes,
           cexRow=1,cexCol=2,
           margins=c(10,2),
           labRow=FALSE,
-          Colv=FALSE, Rowv=FALSE                              # reorder row/columns by dendogram
+          Colv=TRUE, Rowv=FALSE                              # reorder row/columns by dendogram
           )
 par(lend = 1)
 legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
@@ -138,7 +142,7 @@ dev.off()
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 patientcolors <- c("#0000FF","#00FF00","#FFA500","#FF0000")
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".Mean.png"),res=600,height=5,width=50,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".Mean.png"),res=600,height=5,width=50,unit="in")     # set filename
 par(mar=c(1,1,1,1))
 heatmap.2(allmuts.mutatedgenes.mean,
           main = "HeatMap-MutatedGenes frequency",

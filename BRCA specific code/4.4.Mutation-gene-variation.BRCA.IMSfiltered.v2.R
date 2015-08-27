@@ -10,16 +10,15 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BRCA.BSF2"        # FOR BRCA use BRCA.PCF or BRCA.BSF
+Cancerset <- "BRCA.BSF"        # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset = "DBGS3.FLTR"         # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                          # SET K here
 Filter = 1                     # at least one clutser has to have x% mutation frequency
 mutation.type = "NonSilent"    # Alterantives "Any" , "Missense" , "NonSilent"
 clusters = paste0(rep("ICR",4), 1:4)
-IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 
 ## Read the mutation frequency file  (Mutation.Frequency.Gene)
-load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".Frequencies.RDATA"))
+load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".Frequencies.RDATA"))
 #numMuts.Any      = data.frame(count=Mutation.Frequency.Patient$Freq.Any,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Any")
 #numMuts.Missense = data.frame(count=Mutation.Frequency.Patient$Freq.Missense,cluster=Mutation.Frequency.Patient$Cluster,mut.type = "Missense")
 
@@ -71,14 +70,9 @@ for (gene in gene.list.selected){
   }
   ## FIsher exact test ICR1 vs ICR4
   gene.patients[is.na(gene.patients)] = 0
-  gene.patients.wt = sample.cluster.count$N-gene.patients
+  gene.patients.wt = gene.data$N-gene.patients
   test.matrix = cbind(gene.patients[c(1,4)],gene.patients.wt[c(1,4)])
-  res.f = fisher.test(test.matrix)
- 
-  if (sum(rowSums(test.matrix))>0) {
-    res.c = chisq.test(test.matrix)
-  }
-  
+  res = fisher.test(test.matrix)
   #print(gene)
   #print( res$p.value)
   
@@ -103,32 +97,10 @@ for (gene in gene.list.selected){
       db.test=TRUE
     }
   }  
-  gene.data.row = data.frame(gene,
-                             paste0(gene.data.pct, collapse=" : "),
-                             variation,
-                             paste0((trend), collapse=" : "),
-                             flag,
-                             trend.pval,
-                             paste0(test.matrix, collapse=" : "),
-                             res.f$p.value,
-                             res.c$p.value,
-                             db.test)  
+  gene.data.row = data.frame(gene, paste0(gene.data.pct, collapse=" : "), variation, paste0((trend), collapse=" : "), flag, trend.pval, res$p.value,db.test)  
   variation.table = rbind(variation.table, gene.data.row)
-  res.c$p.value = NA
 }
-colnames(variation.table) = c("Gene",
-                              "Cluster_Percentages",
-                              "Max_Variation",
-                              "Direction",
-                              "Trend",
-                              "Trend_pVal_ChiSquared",
-                              "testmatrix",
-                              "Fisher_ICR1vs4",
-                              "ChiSquare_ICR1vs4",
-                              "db.test")
-
-write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTable.csv"))
-variation.table <- read.csv(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTable.csv"))
+colnames(variation.table) = c("Gene", "Cluster_Percentages", "Max_Variation",  "Direction", "Trend", "Trend_pVal_ChiSquared","Fisher_ICR1vs4","db.test")
 
 # significance filter
 SL1 = 0.0005 #chisquare p for LOW OR trend = TRUE
@@ -137,9 +109,6 @@ SH1 = SL1/10 #chisquare p for HIGH OR trend = TRUE
 SH2 = SL2*2 #maxvar Filter multiplier for HIGH
 low.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SL1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SL2), ]  
 high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
-db.test.significant.variation.table = variation.table[which(variation.table$db.test | variation.table$ChiSquare_ICR1vs4<0.05), ]
-db.test.strict.significant.variation.table = variation.table[which(variation.table$db.test & variation.table$ChiSquare_ICR1vs4<0.05), ]
-
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
 # COAD  (0.0005,4,0.00005,8)
@@ -155,11 +124,5 @@ while (L.sig > ASF.stop){
   L.sig = nrow(auto.significant.variation.table)
 }
 
-save(low.significant.variation.table,
-     high.significant.variation.table,
-     auto.significant.variation.table,
-     db.test.significant.variation.table,
-     db.test.strict.significant.variation.table,
-     variation.table,
-     file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTables.RData"))
-
+save(low.significant.variation.table, high.significant.variation.table,auto.significant.variation.table,variation.table, file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTables.RData"))
+write.csv (variation.table,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",mutation.type,".VariationTable.csv"))

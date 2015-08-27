@@ -65,8 +65,8 @@ MA.subset[which(is.na(MA.subset))] <- 0 # set NA to 0
 sHc <- hclust(ddist <- dist(MA.subset), method = "ward.D2")                              # hierachical clustering
 
 # Change WD for Consensusclustering
-dir.create(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/"), showWarnings = FALSE)
-setwd(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/"))                            # temporary change in WD as path in CCP doesnt work
+dir.create(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/"), showWarnings = FALSE)
+setwd(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/"))                            # temporary change in WD as path in CCP doesnt work
 
 # Perform Calinsky for optimal K
 aCalinsky <- calinsky(sHc,gMax=10)

@@ -22,10 +22,11 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("beepr")
 
 ## Parameters
-Cancerset      = "COAD"
+Cancerset      = "BRCA"
 Geneset        = "DBGS3.FLTR"
-BRCA.Filter    = "PCF"
-matrix.type    = "Any"         # Alterantives "Any" , "Missense"
+BRCA.Filter    = "BSF2"
+matrix.type    = "NonSilent"         # Alterantives "Any" , "Missense", "NonSilent"
+IMS.filter     = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 selected.genes = c("TP53","MAP2K4","MAP3K1")
 
 ##load data
@@ -77,11 +78,15 @@ muts =  (muts[-which(is.na(muts$cluster)), ])
 
 ## Read the gene list (373 genes)
 genes.list = read.table("./2 DATA/Frequently mutated cancer genes.csv")
+
 ## Load the mutation variation data
-load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".",matrix.type,".VariationTables.RData"))
+load(paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",matrix.type,".VariationTables.RData"))
 
 ## Pick the Missense Mutations only
 if (matrix.type =="Missense") {muts = muts[which(muts$Variant_Classification=="Missense_Mutation"), ]}
+
+## Pick the NonSilent Mutations only
+if (matrix.type =="NonSilent") {muts = muts[which(muts$Variant_Classification!="Silent"), ]}
 
 ## Get the unique list of genes and samples
 all.genes = unique(as.character(muts$Hugo_Symbol))
@@ -99,6 +104,9 @@ for(i in 1:nrow(muts)){
   genes.mutations[sample.name,gene] = 1
   #genes.mutations[sample,gene] =  cluster.assignment$cluster[which(cluster.assignment$sample.name==sample.name)]
 }
+save (genes.mutations,
+      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
+load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 
 ## Pick the genes from the provided (373 genes)list or significant variation File
 genes.mutations.373genes = genes.mutations[,colnames(genes.mutations) %in% as.character(genes.list$V1)]
@@ -106,8 +114,17 @@ genes.mutations.low = genes.mutations[,colnames(genes.mutations) %in% as.charact
 genes.mutations.high = genes.mutations[,colnames(genes.mutations) %in% as.character(high.significant.variation.table$Gene)]
 genes.mutations.auto = genes.mutations[,colnames(genes.mutations) %in% as.character(auto.significant.variation.table$Gene)]
 genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selected.genes]
-save (genes.mutations,genes.mutations.373genes,genes.mutations.low,genes.mutations.high,genes.mutations.auto,genes.mutations.selected,
-      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
+genes.mutations.dbtest = genes.mutations[,colnames(genes.mutations) %in% db.test.significant.variation.table$Gene]
+genes.mutations.dbtest.strict = genes.mutations[,colnames(genes.mutations) %in% db.test.strict.significant.variation.table$Gene]
+save (genes.mutations,
+      genes.mutations.373genes,
+      genes.mutations.low,
+      genes.mutations.high,
+      genes.mutations.auto,
+      genes.mutations.dbtest,
+      genes.mutations.dbtest.strict,
+      genes.mutations.selected,
+      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 
 #### Get the number of genes that are mutated in more than 2,3, 5% of the samples
 ## for each gene, compute the frequency and percentage of samples that have the gene mutated
