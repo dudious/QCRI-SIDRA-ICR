@@ -19,7 +19,7 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BRCA.BSF"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
+Cancerset <- "BRCA.BSF2"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
 Plot.type = "NonSilent" # Alterantives "All" , "Any" , "Missense", "NonSilent"

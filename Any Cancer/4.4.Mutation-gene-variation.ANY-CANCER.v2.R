@@ -139,6 +139,7 @@ low.significant.variation.table = variation.table[which((variation.table$Trend_p
 high.significant.variation.table = variation.table[which((variation.table$Trend_pVal_ChiSquared<SH1 | variation.table$Trend) & variation.table$Max_Variation>=Filter*SH2), ] 
 db.test.significant.variation.table = variation.table[which(variation.table$db.test | variation.table$ChiSquare_ICR1vs4<0.05), ]
 db.test.strict.significant.variation.table = variation.table[which(variation.table$db.test & variation.table$ChiSquare_ICR1vs4<0.05), ]
+chisq.significant.variation.table = variation.table[which(variation.table$ChiSquare_ICR1vs4<0.05), ]
 
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
@@ -160,6 +161,7 @@ save(low.significant.variation.table,
      auto.significant.variation.table,
      db.test.significant.variation.table,
      db.test.strict.significant.variation.table,
+     chisq.significant.variation.table,
      variation.table,
      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTables.RData"))
 

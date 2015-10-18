@@ -17,7 +17,7 @@
   setwd("~/Dropbox/BREAST_QATAR/")
 
 # Set Parameters
-  Cancerset <- "BRCA.BSF"
+  Cancerset <- "BRCA.BSF2"
   Parent.Cancerset <- substring(Cancerset,1,4)
   Geneset   <- "DBGS3.FLTR"       # SET GENESET HERE
   Parent.Geneset <- substring(Geneset,1,5)

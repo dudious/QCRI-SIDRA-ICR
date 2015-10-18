@@ -27,7 +27,7 @@ Geneset        = "DBGS3.FLTR"
 BRCA.Filter    = "BSF2"
 matrix.type    = "NonSilent"         # Alterantives "Any" , "Missense", "NonSilent"
 IMS.filter     = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
-selected.genes = c("TP53","MAP2K4","MAP3K1")
+selected.genes = c("TP53","MAP2K4","MAP3K1","CTCF","FCGBP")
 
 ##load data
 ## Read the mutation .maf file and cluster assignments
@@ -116,6 +116,7 @@ genes.mutations.auto = genes.mutations[,colnames(genes.mutations) %in% as.charac
 genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selected.genes]
 genes.mutations.dbtest = genes.mutations[,colnames(genes.mutations) %in% db.test.significant.variation.table$Gene]
 genes.mutations.dbtest.strict = genes.mutations[,colnames(genes.mutations) %in% db.test.strict.significant.variation.table$Gene]
+genes.mutations.chisqr = genes.mutations[,colnames(genes.mutations) %in% chisq.significant.variation.table$Gene]
 save (genes.mutations,
       genes.mutations.373genes,
       genes.mutations.low,
@@ -123,6 +124,7 @@ save (genes.mutations,
       genes.mutations.auto,
       genes.mutations.dbtest,
       genes.mutations.dbtest.strict,
+      genes.mutations.chisqr,
       genes.mutations.selected,
       file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".Rdata"))
 

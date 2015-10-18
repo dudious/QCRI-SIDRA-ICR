@@ -161,8 +161,8 @@ dir.create(paste0("./4 FIGURES/Mutation Plots/",gene,"/"), showWarnings = FALSE)
 png(paste0("./4 FIGURES/Mutation Plots/",gene,"/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
 cluster.order = rev(clusters)
 gg = ggplot(mut.df, aes(x = clusters, y = Freq.Any.pct))  +
-  geom_bar(stat = "identity", width = 0.8, position="dodge") +
-  geom_text( aes(y = Freq.Any.pct+2, label = label), size = 7, position=position_dodge(width = 0.8)) 
+  geom_bar(stat = "identity", width = 0.8, position="dodge") #+
+  #geom_text( aes(y = Freq.Any.pct+2, label = label), size = 7, position=position_dodge(width = 0.8)) 
 gg = gg + scale_x_discrete(limits = cluster.order) +
           xlab("Clusters") + ylab("Percentage") + theme_bw()
 gg = gg+ theme(legend.position="none", strip.text.x = element_text(size = 14)) +
