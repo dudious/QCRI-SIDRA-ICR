@@ -20,7 +20,7 @@ library("plyr")
 ## Parameters
 Cancerset  = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
 Geneset    = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
-IMS.filter = "All"   # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
+IMS.filter = "Luminal B"         # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
 stats      = ""            # Alterantives : "stats" ""
 GOF        = "FALSE"
 
@@ -63,6 +63,7 @@ mutated.allele.data$Cluster <- Consensus.class$Cluster [match(mutated.allele.dat
 mutated.allele.data <- mutated.allele.data [-which(is.na(mutated.allele.data$Cluster)),]
 #add subtype to mutation data
 mutated.allele.data$Subtype <- ClinicalData.subset$TCGA.PAM50.RMethod.RNASeq[match(mutated.allele.data$Patient_ID,rownames(ClinicalData.subset))]
+mutated.allele.data <- mutated.allele.data [-which(is.na(mutated.allele.data$Subtype)),]
 #Filter  mutation data Table by IMS
 if (IMS.filter == "Luminal") {
   mutated.allele.data.filtered <- mutated.allele.data[mutated.allele.data$Subtype %in% c("Luminal A","Luminal B"),]
@@ -104,6 +105,9 @@ gg = gg + ggtitle(tittle) +
 gg = gg + geom_text(data = mutated.allele.blot.count,
                     aes(y = max(frequency)/10, label = paste0("Tot.Count = ",cluster.Count)),
                     size = 4, vjust = 1.2)
+gg = gg + theme_bw() +
+          theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+          
 print(gg)
 dev.off()
 
@@ -121,13 +125,15 @@ mutated.allele.blot.bysamp <- mutated.allele.blot.bysamp[order(-mutated.allele.b
 
 # plot
 dir.create("./4 FIGURES/mutationspectrum/",showWarnings = FALSE)
-tittle = paste0(GOF,".mutation.spectrum.from.",IMS.filter,".frequency.bysample.ICR4.")
+tittle = paste0(GOF,".mutation.spectrum.from.",IMS.filter,".LOG.bysample.ICR4.")
 png (filename = paste0("./4 FIGURES/mutationspectrum/",tittle,".stacked.png") , height = 600, width= 2000)
-gg = ggplot(mutated.allele.blot.bysamp, aes(x = reorder(Patient_ID,-sample.Count),y=frequency ,fill = allele.both))  +
-  geom_bar(stat = "identity", width = 0.95)
+gg = ggplot(mutated.allele.blot.bysamp, aes(x = reorder(Patient_ID,-sample.Count),y=log(freq) ,fill = allele.both))  +
+  geom_bar(stat = "identity", width = 1) + scale_y_continuous(limits = c(0,30))# + scale_y_log10(limits = c(1,1e10))
 gg = gg + ggtitle(tittle) +
   theme(plot.title = element_text(size = 15, lineheight=5, face="bold")) +
-  theme(axis.text=element_blank())
+  theme_bw() +
+  theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme (axis.text.x=element_blank())
 #gg = gg + geom_text(data = mutated.allele.blot.bysamp,
 #                    aes(y = max(frequency)/10, label = paste0("Tot.Count = ",sample.Count)),
 #                   size = 4, vjust = 1.2)
@@ -135,4 +141,28 @@ gg = gg + ggtitle(tittle) +
 print(gg)
 dev.off()
 
+
+# My IMS blot
+mutated.allele.blot.byIMS <- count(mutated.allele.blot,vars=c("allele.both","Subtype"))
+mutations.per.subtype <- as.data.frame(table(mutated.allele.blot$Subtype))
+colnames(mutations.per.subtype) <- c("Subtype","Count")
+mutated.allele.blot.byIMS$Subtype.Count <- mutations.per.subtype$Count[match(mutated.allele.blot.byIMS$Subtype,mutations.per.subtype$Subtype)]
+mutated.allele.blot.byIMS$frequency <- mutated.allele.blot.byIMS$freq / mutated.allele.blot.byIMS$Subtype.Count * 100
+
+# plot
+dir.create("./4 FIGURES/mutationspectrum/",showWarnings = FALSE)
+tittle = paste0(GOF,".mutation.spectrum.from.",IMS.filter,".byIMS")
+png (filename = paste0("./4 FIGURES/mutationspectrum/",tittle,".stacked.png") , height = 600, width= 800)
+gg = ggplot(mutated.allele.blot.byIMS, aes(x = Subtype,y=frequency ,fill = allele.both))  +
+  geom_bar(stat = "identity", width = 0.8)
+gg = gg + ggtitle(tittle) +
+  theme(plot.title = element_text(size = 15, lineheight=5, face="bold"))
+gg = gg + geom_text(data = mutated.allele.blot.byIMS,
+                    aes(y = max(frequency)/10, label = paste0("Tot.Count = ",Subtype.Count)),
+                    size = 4, vjust = 1.2)
+gg = gg + theme_bw() +
+  theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+print(gg)
+dev.off()
 

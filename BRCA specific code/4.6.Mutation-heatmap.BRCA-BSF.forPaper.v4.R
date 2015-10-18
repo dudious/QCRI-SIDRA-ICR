@@ -29,9 +29,9 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 Cancerset      = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset        = "DBGS3.FLTR"  # SET GENESET HERE 
 matrix.type    = "NonSilent"   # Alterantives "Any" , "Missense" , "NonSilent"
-plot.type      = "selected"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
+plot.type      = "db.test"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
 IMS.filter     = "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
-cluster.select = "All"         # Alternatives "1vs4" , "All"
+cluster.select = "1vs4"         # Alternatives "1vs4" , "All"
 gene.filter    = "FALSE"        # Alternatives "TRUE" , "FALSE"
 selected.genes = c("TP53","MAP3K1","CXCL9")
 
@@ -66,6 +66,11 @@ decile.colors=(colfunc(10))
 Mut.freq.decile$label <- Mut.freq.decile$decile
 levels(Mut.freq.decile$label) <- decile.colors
 Mut.freq.decile$order <- as.numeric(Mut.freq.decile$decile)
+Mut.freq.decile$HiLo <- Mut.freq.decile$order
+Mut.freq.decile$HiLo[Mut.freq.decile$HiLo>7] <- "High"
+Mut.freq.decile$HiLo[Mut.freq.decile$HiLo<8 & Mut.freq.decile$HiLo>3] <- "Medium"
+Mut.freq.decile$HiLo[Mut.freq.decile$HiLo<4] <- "Low"
+
 #cluster selection
 if (cluster.select == "1vs4") {
   Consensus.class <- Consensus.class[Consensus.class$Cluster %in% c("ICR1","ICR4"),]
@@ -132,6 +137,9 @@ if (length(which(is.na(allmuts.mutatedgenes$TCGA.PAM50.RMethod.RNASeq)))>0) {
 }
 allmuts.mutatedgenes.mean <- ddply(allmuts.mutatedgenes[,-ncol(allmuts.mutatedgenes)],.(Cluster),colwise(mean))                             # Calculate frequency (mean)
 allmuts.mutatedgenes.mean.byIMS <- ddply(allmuts.mutatedgenes,.(Cluster,TCGA.PAM50.RMethod.RNASeq),colwise(mean))
+allmuts.mutatedgenes$HiLo <- Mut.freq.decile$HiLo[match(rownames(allmuts.mutatedgenes),rownames(Mut.freq.decile))]
+allmuts.mutatedgenes.mean.byIMS.byHilo <- ddply(allmuts.mutatedgenes,.(Cluster,TCGA.PAM50.RMethod.RNASeq,HiLo),colwise(mean))
+allmuts.mutatedgenes$HiLo <- NULL
 Meansorder <- t(allmuts.mutatedgenes.mean[nrow(allmuts.mutatedgenes.mean),-1])-t(allmuts.mutatedgenes.mean[1,-1])
 colnames(Meansorder) <- "order.value"
 Meansorder[which(Meansorder[,"order.value"]<0),] <- Meansorder[which(Meansorder[,"order.value"]<0),]-1
@@ -141,20 +149,33 @@ Meansorder <- as.data.frame(Meansorder[order(-abs(Meansorder)),,drop=FALSE])
 #ordering means.byIMS
 allmuts.mutatedgenes.mean.byIMS <- allmuts.mutatedgenes.mean.byIMS[order(factor(allmuts.mutatedgenes.mean.byIMS$Cluster,levels = c("ICR4","ICR3","ICR2","ICR1")),
                                                                          factor(allmuts.mutatedgenes.mean.byIMS$TCGA.PAM50.RMethod.RNASeq,levels = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like"))),]
+allmuts.mutatedgenes.mean.byIMS.byHilo <- allmuts.mutatedgenes.mean.byIMS.byHilo[order(factor(allmuts.mutatedgenes.mean.byIMS.byHilo$Cluster,levels = c("ICR4","ICR3","ICR2","ICR1")),
+                                                                                       factor(allmuts.mutatedgenes.mean.byIMS.byHilo$TCGA.PAM50.RMethod.RNASeq,levels = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like")),
+                                                                                       factor(allmuts.mutatedgenes.mean.byIMS.byHilo$HiLo,levels = c("Low","Medium","High"))),]
+
 #generate numeric mutation matrix
 allmuts.mutatedgenes$Cluster <- NULL
 allmuts.mutatedgenes.mean$Cluster <- NULL
 allmuts.mutatedgenes.mean.byIMS <- allmuts.mutatedgenes.mean.byIMS[allmuts.mutatedgenes.mean.byIMS$TCGA.PAM50.RMethod.RNASeq != "Normal-like",] #remove normal like for meansplot
+allmuts.mutatedgenes.mean.byIMS.byHilo <- allmuts.mutatedgenes.mean.byIMS.byHilo[allmuts.mutatedgenes.mean.byIMS.byHilo$TCGA.PAM50.RMethod.RNASeq != "Normal-like",] #remove normal like for meansplot
 Meanby.IMS.colors <- data.frame (Cluster = allmuts.mutatedgenes.mean.byIMS$Cluster,subtype = allmuts.mutatedgenes.mean.byIMS$TCGA.PAM50.RMethod.RNASeq)
+Meanby.IMS.Hilo.colors <- data.frame (Cluster = allmuts.mutatedgenes.mean.byIMS.byHilo$Cluster,
+                                      subtype = allmuts.mutatedgenes.mean.byIMS.byHilo$TCGA.PAM50.RMethod.RNASeq,
+                                      Hilo = allmuts.mutatedgenes.mean.byIMS.byHilo$HiLo)
 allmuts.mutatedgenes.mean.byIMS$Cluster <- NULL
 allmuts.mutatedgenes.mean.byIMS$TCGA.PAM50.RMethod.RNASeq <- NULL
+allmuts.mutatedgenes.mean.byIMS.byHilo$Cluster <- NULL
+allmuts.mutatedgenes.mean.byIMS.byHilo$TCGA.PAM50.RMethod.RNASeq <- NULL
+allmuts.mutatedgenes.mean.byIMS.byHilo$HiLo <- NULL
 allmuts.mutatedgenes$TCGA.PAM50.RMethod.RNASeq <- NULL
 allmuts.mutatedgenes <- as.matrix(allmuts.mutatedgenes)
 allmuts.mutatedgenes.mean <- as.matrix(allmuts.mutatedgenes.mean)
 allmuts.mutatedgenes.mean.byIMS <- as.matrix(allmuts.mutatedgenes.mean.byIMS)
+allmuts.mutatedgenes.mean.byIMS.byHilo <- as.matrix(allmuts.mutatedgenes.mean.byIMS.byHilo)
 mode(allmuts.mutatedgenes) <- "numeric"
 mode(allmuts.mutatedgenes.mean) <- "numeric"
 mode(allmuts.mutatedgenes.mean.byIMS) <- "numeric"
+mode(allmuts.mutatedgenes.mean.byIMS.byHilo) <- "numeric"
 
 #ordering columns (genes)
 allmuts.mutatedgenes.sd <- as.data.frame(apply(allmuts.mutatedgenes.mean,2,sd))                             # Calculate frequency SD 
@@ -165,9 +186,10 @@ allmuts.mutatedgenes.mean <- as.data.frame(allmuts.mutatedgenes.mean[,rownames(a
 #allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,rownames(allmuts.mutatedgenes.sd)])            # order mutation count by SD freq
 #allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,order(colnames(allmuts.mutatedgenes))])         # order mutation count alphabeticaly
 allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,rownames(Meansorder)])
-allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,c("TP53","MAP3K1","CXCL9")])                    # manual overwrite
+#allmuts.mutatedgenes <- as.data.frame(allmuts.mutatedgenes[,c("TP53","MAP3K1","CXCL9")])                    # manual overwrite
 #order depending tables
 allmuts.mutatedgenes.mean.byIMS <- as.data.frame(allmuts.mutatedgenes.mean.byIMS[,rownames(Meansorder)])
+allmuts.mutatedgenes.mean.byIMS.byHilo <- as.data.frame(allmuts.mutatedgenes.mean.byIMS.byHilo[,rownames(Meansorder)])
 Consensus.class<-as.data.frame(Consensus.class[rownames(allmuts.mutatedgenes),])                            # sort cluster asignments like mutation matrix
 
 #enforce numeric mutation matrix
@@ -215,7 +237,7 @@ plot.height<- 10
 # Heatmap for gene mutation 
 color.matrix <- as.matrix(rbind (patientcolors,subtypecolors,decile))
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_combo_DEC.png"),res=600,height=plot.height,width=(plot.width/2)+8,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_combo_DEC.png"),res=600,height=plot.height,width=(plot.width/2)+16,unit="in")     # set filename
 heatmap.3(allmuts.mutatedgenes,
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -253,7 +275,7 @@ Meanby.IMS.colors$subtype[Meanby.IMS.colors$subtype=="Normal-like"]   <- "#d3d3d
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 Meanby.IMS.colors <- as.matrix(t(Meanby.IMS.colors))
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN.png"),res=600,height=plot.height,width=(plot.width/2)+8,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
 par(mar=c(1,1,1,1))
 heatmap.3(allmuts.mutatedgenes.mean.byIMS,
           main = "HeatMap-MutatedGenes frequency",
@@ -277,6 +299,48 @@ par(lend = 1)
 legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR3","ICR2","ICR1"),
        col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
 dev.off()
+
+# Heatmap for gene mutation frequency by cluster/subtype for the same selection of genes HiLo edition
+
+levels(Meanby.IMS.Hilo.colors$Cluster) <- rev(c("#FF0000","#FFA500","#00FF00","#0000FF"))
+levels (Meanby.IMS.Hilo.colors$subtype) <- c(levels (Meanby.IMS.Hilo.colors$subtype),c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3"))
+levels (Meanby.IMS.Hilo.colors$Hilo) <- c(levels (Meanby.IMS.Hilo.colors$Hilo),c("green","yellow","red"))
+Meanby.IMS.Hilo.colors$Hilo[Meanby.IMS.Hilo.colors$Hilo=="Low"]     <- "green"    
+Meanby.IMS.Hilo.colors$Hilo[Meanby.IMS.Hilo.colors$Hilo=="Medium"]  <- "yellow"     
+Meanby.IMS.Hilo.colors$Hilo[Meanby.IMS.Hilo.colors$Hilo=="High"]    <- "red"
+Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="Luminal A"]     <- "#eaff00"    
+Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="Luminal B"]     <- "#00c0ff"     
+Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="Basal-like"]    <- "#da70d6"   
+Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="HER2-enriched"] <- "#daa520"            
+Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="Normal-like"]   <- "#d3d3d3"
+my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
+my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
+Meanby.IMS.Hilo.colors <- as.matrix(t(Meanby.IMS.Hilo.colors))
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN_HiLo.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
+par(mar=c(1,1,1,1))
+heatmap.3(allmuts.mutatedgenes.mean.byIMS.byHilo,
+          main = "HeatMap-MutatedGenes frequency",
+          col=my.palette,                                     # set color scheme RED High, GREEN low
+          #breaks=my.colors,                                   # set manual color gradient of color scheme
+          RowSideColors=Meanby.IMS.Hilo.colors,                        # set goup colors
+          key=TRUE,
+          symm=FALSE,
+          symkey=FALSE,
+          symbreaks=TRUE,             
+          scale="col", 
+          #density.info="none",
+          trace="none",
+          labCol=colnames(allmuts.mutatedgenes.mean.byIMS.byHilo),
+          cexRow=1,cexCol=2.6,
+          margins=c(15,15),
+          labRow=FALSE,
+          Colv=FALSE,Rowv=FALSE                               # reorder row/columns by dendogram
+        )
+par(lend = 1)
+legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR3","ICR2","ICR1","","Low (1-3)","Medium (4-7)","High (8-10)"),
+       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","orange","green","blue","white","green","yellow","red"),lty= 1,lwd = 5,cex = 0.9)
+dev.off()
+
 
 if (plot.type == "selected"){
   
@@ -320,7 +384,7 @@ if (plot.type == "selected"){
   #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
   #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
   dev.off()
-}
+
 # Heatmap for matching GISTC data
 gistic.genes <- c(colnames(allmuts.exclusion.matrix.reordered))
 selected.data <- merged.matrix[rownames(allmuts.exclusion.matrix.reordered),gistic.genes]
@@ -448,3 +512,4 @@ par(lend = 1)
 #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
 #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
 dev.off()
+}

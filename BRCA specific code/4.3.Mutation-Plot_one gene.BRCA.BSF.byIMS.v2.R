@@ -22,7 +22,7 @@ library("plyr")
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-GOF = "FCGBP"
+GOF = "MAPX"
 
 ## Load Mutaion data
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
@@ -132,14 +132,14 @@ class(blot.df$Group_Count) <- "numeric"
 }
 #dud values for CTCF
 if (GOF == "CTCF") {
-  blot.df <- rbind(blot.df,c("In_Frame_Del","Normal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("In_Frame_Del","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
   class (blot.df$Mutation_Frequency) <- "numeric"
   class(blot.df$Mutation_Count) <- "numeric"
   class(blot.df$Group_Count) <- "numeric"
 }
 #dud values for FCGBP
 if (GOF == "FCGBP") {
-  blot.df <- rbind(blot.df,c("Frame_Shift","Normal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("Frame_Shift","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
   blot.df <- rbind(blot.df,c("Splice_Site","HER2-enriched","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
   class (blot.df$Mutation_Frequency) <- "numeric"
   class(blot.df$Mutation_Count) <- "numeric"
@@ -151,17 +151,20 @@ blot.df$Mutation_Type <- gsub("_"," ",blot.df$Mutation_Type)
 dir.create(paste0("./4 FIGURES/Mutation Plots/",GOF,"/"), showWarnings = FALSE)
 
 
-#remove silent/nonsilent
+#remove silent/nonsilent/normal-like
 
 blot.df.stack <- blot.df[blot.df$Mutation_Type!="NonSilent",]
 blot.df.stack <- blot.df.stack[blot.df.stack$Mutation_Type!="Silent",]
+blot.df.stack <- blot.df.stack[blot.df.stack$Molecular_Subtype!="Normal-like",]
+blot.df.stack$Mutation_Type <- as.factor(blot.df.stack$Mutation_Type)
 
-subtype = c("Basal-Like","Her2-enriched","Luminal A","Luminal B","Normal-like","Luminal","Overall")
-IMS_colors  = c("#da70d6"   ,"#daa520"      ,"#eaff00"  ,"#00c0ff"  ,"#d3d3d3"    ,"#009999","#696969")
-MUT_colors  = c("#b30000"   ,"#483d8b"      ,"#006400"  ,"#cccc00"  ,"#9370db")
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked",".png", sep=""), height = 500, width= 2000)
+subtype = c("Basal-Like"    ,"Her2-enriched","Luminal A"        ,"Luminal B"        ,"Normal-like"  ,"Luminal"  ,"Overall")
+IMS_colors  = c("#da70d6"   ,"#daa520"      ,"#eaff00"          ,"#00c0ff"          ,"#d3d3d3"      ,"#009999"  ,"#696969")
+mut_type = c("Frame Shift"  ,"In Frame Del" ,"Missense Mutation","Nonsense Mutation","Splice Site" )
+MUT_colors  = c("#00c800"   ,"#aa14f0"      ,"#dd3768"          ,"#ec9b2b"          ,"#12e1d5") #green , purple , auquamarine , orange , redish
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor",".png", sep=""), height = 500, width= 2000)
  gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency, colour = Molecular_Subtype , fill = Mutation_Type )) +
-              geom_bar(stat="identity",size=1,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
+              geom_bar(stat="identity",size=0,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
               facet_grid(.~Molecular_Subtype, space="free") +
               xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
               scale_fill_manual(values = MUT_colors) +
