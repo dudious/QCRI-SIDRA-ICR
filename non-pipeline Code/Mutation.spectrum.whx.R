@@ -20,7 +20,7 @@ library("plyr")
 ## Parameters
 Cancerset  = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
 Geneset    = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
-IMS.filter = "Luminal B"         # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
+IMS.filter = "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
 stats      = ""            # Alterantives : "stats" ""
 GOF        = "FALSE"
 
@@ -113,21 +113,26 @@ dev.off()
 
 # by sample
 mutated.allele.blot.bysamp <- count(mutated.allele.blot,vars=c("allele.both","Patient_ID","Cluster"))
+#mutations.per.sample.2 <- count(mutated.allele.blot,vars=c("Patient_ID"))
 mutations.per.sample <- as.data.frame(table(mutated.allele.blot$Patient_ID))
 colnames(mutations.per.sample) <- c("Patien_ID","Count")
+rownames(mutations.per.sample) <- mutations.per.sample$Patien_ID
 mutated.allele.blot.bysamp$sample.Count <- mutations.per.sample$Count[match(mutated.allele.blot.bysamp$Patient_ID,mutations.per.sample$Patien_ID)]
 mutated.allele.blot.bysamp$frequency <- mutated.allele.blot.bysamp$freq / mutated.allele.blot.bysamp$sample.Count * 100
-# ICR 1, 4 only
-mutated.allele.blot.bysamp <- mutated.allele.blot.bysamp[mutated.allele.blot.bysamp$Cluster== "ICR4",]
-
+mutated.allele.blot.bysamp$logCount <- log(mutated.allele.blot.bysamp$freq)
+agg <- aggregate(mutated.allele.blot.bysamp$logCount, by= list(mutated.allele.blot.bysamp$Patient_ID), FUN=sum)
+mutated.allele.blot.bysamp$logCount.summed <-agg$x[match(mutated.allele.blot.bysamp$Patient_ID,agg$Group.1)]
 #order by mutation load
-mutated.allele.blot.bysamp <- mutated.allele.blot.bysamp[order(-mutated.allele.blot.bysamp$sample.Count),]
+mutated.allele.blot.bysamp <- mutated.allele.blot.bysamp[order(-mutated.allele.blot.bysamp$logCount.summed),]
+
+# ICR 1, 4 only
+mutated.allele.blot.bysamp <- mutated.allele.blot.bysamp[mutated.allele.blot.bysamp$Cluster== "ICR1",]
 
 # plot
 dir.create("./4 FIGURES/mutationspectrum/",showWarnings = FALSE)
-tittle = paste0(GOF,".mutation.spectrum.from.",IMS.filter,".LOG.bysample.ICR4.")
+tittle = paste0(GOF,".mutation.spectrum.from.",IMS.filter,".LOG.bysample.ICR1.")
 png (filename = paste0("./4 FIGURES/mutationspectrum/",tittle,".stacked.png") , height = 600, width= 2000)
-gg = ggplot(mutated.allele.blot.bysamp, aes(x = reorder(Patient_ID,-sample.Count),y=log(freq) ,fill = allele.both))  +
+gg = ggplot(mutated.allele.blot.bysamp, aes(x = reorder(Patient_ID,-logCount.summed),y=logCount ,fill = allele.both))  +
   geom_bar(stat = "identity", width = 1) + scale_y_continuous(limits = c(0,30))# + scale_y_log10(limits = c(1,1e10))
 gg = gg + ggtitle(tittle) +
   theme(plot.title = element_text(size = 15, lineheight=5, face="bold")) +

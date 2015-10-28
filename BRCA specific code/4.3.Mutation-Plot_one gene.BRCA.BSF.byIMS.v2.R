@@ -22,7 +22,7 @@ library("plyr")
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-GOF = "MAPX"
+GOF = "FCGBP"
 
 ## Load Mutaion data
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
@@ -163,14 +163,14 @@ IMS_colors  = c("#da70d6"   ,"#daa520"      ,"#eaff00"          ,"#00c0ff"      
 mut_type = c("Frame Shift"  ,"In Frame Del" ,"Missense Mutation","Nonsense Mutation","Splice Site" )
 MUT_colors  = c("#00c800"   ,"#aa14f0"      ,"#dd3768"          ,"#ec9b2b"          ,"#12e1d5") #green , purple , auquamarine , orange , redish
 png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor",".png", sep=""), height = 500, width= 2000)
- gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency, colour = Molecular_Subtype , fill = Mutation_Type )) +
+ gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
               geom_bar(stat="identity",size=0,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
               facet_grid(.~Molecular_Subtype, space="free") +
               xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
               scale_fill_manual(values = MUT_colors) +
               scale_colour_manual(values = IMS_colors) +
-              theme(strip.text.x = element_text(size = 14),strip.text.y = element_text(size = 14)) +
-              theme(text = element_text(size=14),axis.text.x = element_text(size=14,angle=90),axis.text.y = element_text(size=14)) +
+              theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
+              theme(text = element_text(size=20),axis.text.x = element_text(size=20,angle=0),axis.text.y = element_text(size=20)) +
               ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) + 
               theme(plot.title = element_text(vjust = 3))
  print(gg)

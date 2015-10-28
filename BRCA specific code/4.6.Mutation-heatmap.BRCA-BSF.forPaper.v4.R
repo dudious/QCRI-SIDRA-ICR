@@ -29,11 +29,11 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 Cancerset      = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset        = "DBGS3.FLTR"  # SET GENESET HERE 
 matrix.type    = "NonSilent"   # Alterantives "Any" , "Missense" , "NonSilent"
-plot.type      = "db.test"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
+plot.type      = "selected"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
 IMS.filter     = "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
-cluster.select = "1vs4"         # Alternatives "1vs4" , "All"
+cluster.select = "All"         # Alternatives "1vs4" , "All"
 gene.filter    = "FALSE"        # Alternatives "TRUE" , "FALSE"
-selected.genes = c("TP53","MAP3K1","CXCL9")
+selected.genes = c("TP53","MAP3K1","MAP2K4","CTCF","FCGBP","CXCL9")
 
 # Load Data
 load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".oncoplot.Rdata"))

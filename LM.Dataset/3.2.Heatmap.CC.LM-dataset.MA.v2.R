@@ -22,6 +22,7 @@ required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
+library (corrplot)
 
 # Set Parameters
 Cancerset <- "LM.Dataset"
@@ -82,6 +83,11 @@ MA.bygene.matrix <- data.frame(t(MA.subset))
 MA.bygene.matrix$Gene <- Gene.Meta.data$Symbol[match(rownames(MA.bygene.matrix),Gene.Meta.data$Affy_Probe_ID)]
 #rownames(MA.bygene.matrix) <- MA.bygene.matrix$Gene  # Genbe names are not unique
 Genes.names <- paste0(MA.bygene.matrix$Gene,"(",sapply(strsplit(rownames(MA.bygene.matrix),"AFFX-HUMISGF3A/"),tail,1),")")
+MA.bygene.matrix.ag <- aggregate(MA.bygene.matrix,list(MA.bygene.matrix$Gene),FUN=mean)
+rownames(MA.bygene.matrix.ag) <- MA.bygene.matrix.ag$Group.1
+MA.bygene.matrix.ag$Group.1 <- NULL
+MA.bygene.matrix.ag$Gene <-NULL
+MA.bygene.matrix.ag <- t(MA.bygene.matrix.ag)
 MA.bygene.matrix$Gene <-NULL
 MA.bygene.matrix <- as.matrix(MA.bygene.matrix)
                               
@@ -118,3 +124,54 @@ legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
        col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
 dev.off()
 
+
+# Corelation matrix
+MA.subset.cor <- cor (MA.bygene.matrix.ag,method="spearman")
+
+# cor significance
+cor.mtest <- function(mat, conf.level = 0.95) {
+  mat <- as.matrix(mat)
+  n <- ncol(mat)
+  p.mat <- lowCI.mat <- uppCI.mat <- matrix(NA, n, n)
+  diag(p.mat) <- 0
+  diag(lowCI.mat) <- diag(uppCI.mat) <- 1
+  for (i in 1:(n - 1)) {
+    for (j in (i + 1):n) {
+      tmp <- cor.test(mat[, i], mat[, j], conf.level = conf.level)
+      p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+      lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
+      uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
+    }
+  }
+  return(list(p.mat, lowCI.mat, uppCI.mat))
+}
+MA.subset.cor.sign <- cor.mtest(MA.subset.cor, 0.95)
+
+
+
+
+# Correlation plot
+png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+cex.before <- par("cex")
+par(cex = 0.45)
+col1 = colorRampPalette(c("blue", "white", "#009900"))
+lims=c(-1,1)
+if (length(MA.subset.cor[MA.subset.cor<0]) == 0) {lims=c(0,1)} 
+corrplot.mixed (MA.subset.cor,
+                #type="lower",
+                #p.mat = RNASeq.subset.cor.sign[[1]],    # add significance to correlations
+                col = col1(100),
+                lower = "square",
+                upper = "number",
+                order="FPC",
+                cl.lim=lims,                      # only positive correlations
+                tl.pos ="lt",
+                tl.col = "#c00000",
+                #insig="pch",                          # remove insignificant correlations
+                tl.cex = 1/par("cex"),
+                cl.cex = 1/par("cex"),
+                title = paste0("Spearman LM.MA (",Cancerset,".",Geneset," avg:",round(mean(MA.subset.cor),2),")"),
+                cex.main = 1.4/par("cex"),
+                mar=c(5.1,4.1,4.1,2.1))
+par(cex = cex.before)
+dev.off()
