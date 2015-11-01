@@ -116,3 +116,10 @@ write.csv (ClinicalData.subset, file = paste0("./3 ANALISYS/CLINICAL DATA/TCGA."
 write.xlsx (ClinicalData.subset, file = paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.xlsx"), sheetName ="RNASeq subset clinical data", row.names=TRUE);
 print (paste0("Data on all Samples are saved in TCGA.",Cancerset,".RNASeq_subset_clinicaldata.xlsx and TCGA.",Cancerset,".RNASeq_subset_clinicaldata.txt."))
 
+ClinicalData.subset.filtered <- ClinicalData.subset[-which(is.na(ClinicalData.subset$TCGA.PAM50.RMethod.RNASeq)),] #NO RNASEQ
+ClinicalData.subset.filtered <- ClinicalData.subset.filtered[-which(ClinicalData.subset.filtered$exclude.pre == "Yes"),] #NO preclust filter
+
+load("./2 DATA/TCGA Mutations/BRCA/Somatic_Mutations/BRCA.TCGA.combined.Mutation.Data.maf.Rdata")
+mutation.patients <- unique(substr(maf.merged.table$Tumor_Sample_Barcode,1,12))
+
+ClinicalData.subset.filtered <- ClinicalData.subset.filtered[which(rownames(ClinicalData.subset.filtered) %in% mutation.patients),]

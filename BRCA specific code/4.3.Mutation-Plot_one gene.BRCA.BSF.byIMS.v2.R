@@ -22,7 +22,7 @@ library("plyr")
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-GOF = "FCGBP"
+GOF = "MAPX"
 
 ## Load Mutaion data
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
@@ -178,11 +178,32 @@ dev.off()
 
 write.csv (blot.df,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".By.IMS",".csv", sep=""))
 
-blot.df <- blot.df[blot.df$Molecular_Subtype=="All Subtypes",]
+#simplyfy to all subtypes
+
+blot.df.stack.noIMS <- blot.df.stack[blot.df.stack$Molecular_Subtype=="All Subtypes",]
+
+#simplyfy to all mutation types 
+
 blot.df <- blot.df[blot.df$Mutation_Type=="NonSilent",]
+blot.df <- blot.df[blot.df$Molecular_Subtype=="All Subtypes",]
 test.trend <- prop.trend.test(blot.df$Mutation_Count,blot.df$Group_Count)
 
-
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stacked..png", sep=""), height = 500, width= 700)
+gg = ggplot(blot.df.stack.noIMS, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
+  geom_bar(stat="identity",size=0,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
+  xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
+  scale_fill_manual(values = MUT_colors) +
+  scale_colour_manual(values = IMS_colors) +
+  theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
+  theme(text = element_text(size=20),axis.text.x = element_text(size=20,angle=0),axis.text.y = element_text(size=20)) +
+  theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  ylim(0,max(blot.df$Mutation_Frequency)+10) +
+  ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) + 
+  theme(plot.title = element_text(vjust = 3))+
+  annotate("text", label = paste0("trend : p = ",signif(test.trend$p.value,digits=3)), size = 6, x=1.5 , y = max(blot.df$Mutation_Frequency)+10) #(nlevels(blot.df$Cluster_Assignment)-1)
+  #geom_text(label=paste0(blot.df$Mutation_Frequency," %"), size = 6,y = blot.df$Mutation_Frequency+1)
+print(gg)
+dev.off()
 
 
 
