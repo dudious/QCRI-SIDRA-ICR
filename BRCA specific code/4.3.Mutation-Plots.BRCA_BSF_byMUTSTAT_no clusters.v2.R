@@ -23,7 +23,7 @@ Cancerset <- "BRCA.BSF2"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA o
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
 Plot.type = "NonSilent" # Alterantives "All" , "Any" , "Missense", "NonSilent"
-IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2"
+IMS.filter = "Luminal"      # Alterantives "All" , "Luminal" , "Basal", "Her2"
 stats = "stats"              # Alterantives : "stats" ""
 
 ## Ines RNASeq Clustering k = 4
@@ -36,9 +36,14 @@ load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerse
 ClinicalData.subset <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"))                       # Clinical data including IMS
 rownames(ClinicalData.subset) <- ClinicalData.subset$X 
 ClinicalData.subset$X <-NULL
+#MAPK MUTSTAT
+Mutstat<-read.csv("./3 ANALISYS/DIFFERENTIAL EXPRESSION/15Oct/MAPKs/FinalClassification.csv")
 
 #add subtype to Mutation.Frequency.Patient Table
 Mutation.Frequency.Patient$Subtype <- ClinicalData.subset$TCGA.PAM50.RMethod.RNASeq[match(Mutation.Frequency.Patient$Patient_ID,rownames(ClinicalData.subset))]
+
+#add MUTSTAT to Mutation.Frequency.Patient Table
+Mutation.Frequency.Patient$Mutstat <- Mutstat$MAP2K4.MAP3K1[match(Mutation.Frequency.Patient$Patient_ID,Mutstat$Sample)]
 
 #Filer  Mutation.Frequency.Patient Table by IMS
 if (IMS.filter == "Luminal") {
@@ -50,40 +55,40 @@ if (IMS.filter == "Luminal") {
 }
 
 #Prepare Data for Boxplots
-numMuts.All           = data.frame(count=Mutation.Frequency.Patient$Freq.All          ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "All")
-numMuts.Missense      = data.frame(count=Mutation.Frequency.Patient$Freq.Missense     ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Missense")
-numMuts.Nonsense      = data.frame(count=Mutation.Frequency.Patient$Freq.Nonsense     ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Nonsense")
-numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Silent")
-numMuts.Other         = data.frame(count=Mutation.Frequency.Patient$Freq.Other        ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Other")
-numMuts.NonSilent     = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent    ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "NonSilent")
-numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Silent")
-numMuts.Any           = data.frame(count=Mutation.Frequency.Patient$Freq.Any          ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Any")
-numMuts.Missense.Any  = data.frame(count=Mutation.Frequency.Patient$Freq.Missense.Any ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Missense.Any")
-numMuts.Silent.Any    = data.frame(count=Mutation.Frequency.Patient$Freq.Silent.Any   ,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "Silent.Any")
-numMuts.NonSilent.Any = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent.Any,subtype=Mutation.Frequency.Patient$Subtype,mut.type = "NonSilent.Any")
+numMuts.All           = data.frame(count=Mutation.Frequency.Patient$Freq.All          ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "All")
+numMuts.Missense      = data.frame(count=Mutation.Frequency.Patient$Freq.Missense     ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Missense")
+numMuts.Nonsense      = data.frame(count=Mutation.Frequency.Patient$Freq.Nonsense     ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Nonsense")
+numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Silent")
+numMuts.Other         = data.frame(count=Mutation.Frequency.Patient$Freq.Other        ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Other")
+numMuts.NonSilent     = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent    ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "NonSilent")
+numMuts.Silent        = data.frame(count=Mutation.Frequency.Patient$Freq.Silent       ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Silent")
+numMuts.Any           = data.frame(count=Mutation.Frequency.Patient$Freq.Any          ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Any")
+numMuts.Missense.Any  = data.frame(count=Mutation.Frequency.Patient$Freq.Missense.Any ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Missense.Any")
+numMuts.Silent.Any    = data.frame(count=Mutation.Frequency.Patient$Freq.Silent.Any   ,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "Silent.Any")
+numMuts.NonSilent.Any = data.frame(count=Mutation.Frequency.Patient$Freq.NonSilent.Any,Mutstat=Mutation.Frequency.Patient$Mutstat,mut.type = "NonSilent.Any")
 
 
 # statistics
 #ANOVA
-test.All.aov    = aov(count~subtype,data=numMuts.All)
+test.All.aov    = aov(count~Mutstat,data=numMuts.All)
 p.value.All.aov = summary(test.All.aov)[[1]][["Pr(>F)"]][[1]]
-test.Missense.aov    = aov(count~subtype,data=numMuts.Missense)
+test.Missense.aov    = aov(count~Mutstat,data=numMuts.Missense)
 p.value.Missense.aov = summary(test.Missense.aov)[[1]][["Pr(>F)"]][[1]]
-test.Silent.aov    = aov(count~subtype,data=numMuts.Silent)
+test.Silent.aov    = aov(count~Mutstat,data=numMuts.Silent)
 p.value.Silent.aov = summary(test.Silent.aov)[[1]][["Pr(>F)"]][[1]]
-test.Nonsense.aov    = aov(count~subtype,data=numMuts.Nonsense)
+test.Nonsense.aov    = aov(count~Mutstat,data=numMuts.Nonsense)
 p.value.Nonsense.aov = summary(test.Nonsense.aov)[[1]][["Pr(>F)"]][[1]]
-test.Other.aov    = aov(count~subtype,data=numMuts.Other)
+test.Other.aov    = aov(count~Mutstat,data=numMuts.Other)
 p.value.Other.aov = summary(test.Other.aov)[[1]][["Pr(>F)"]][[1]]
-test.Any.aov    = aov(count~subtype,data=numMuts.Any)
+test.Any.aov    = aov(count~Mutstat,data=numMuts.Any)
 p.value.Any.aov = summary(test.Any.aov)[[1]][["Pr(>F)"]][[1]]
-test.Missense.Any.aov    = aov(count~subtype,data=numMuts.Missense.Any)
+test.Missense.Any.aov    = aov(count~Mutstat,data=numMuts.Missense.Any)
 p.value.Missense.Any.aov = summary(test.Missense.Any.aov)[[1]][["Pr(>F)"]][[1]]
-test.Silent.Any.aov    = aov(count~subtype,data=numMuts.Silent.Any)
+test.Silent.Any.aov    = aov(count~Mutstat,data=numMuts.Silent.Any)
 p.value.Silent.Any.aov = summary(test.Silent.Any.aov)[[1]][["Pr(>F)"]][[1]]
-test.NonSilent.aov    = aov(count~subtype,data=numMuts.NonSilent)
+test.NonSilent.aov    = aov(count~Mutstat,data=numMuts.NonSilent)
 p.value.NonSilent.aov    = summary(test.NonSilent.aov)[[1]][["Pr(>F)"]][[1]]
-test.NonSilent.Any.aov    = aov(count~subtype,data=numMuts.NonSilent.Any)
+test.NonSilent.Any.aov    = aov(count~Mutstat,data=numMuts.NonSilent.Any)
 p.value.NonSilent.Any.aov    = summary(test.NonSilent.Any.aov)[[1]][["Pr(>F)"]][[1]]
 
 p.values.aov <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","NonSilent","Any","Missense.Any","Silent.Any","NonSilent.Any"),
@@ -92,16 +97,16 @@ p.values.aov <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Othe
 p.values.aov$p.value <-signif(p.values.aov$p.value,digits=3)
 
 #Kruskal-wallis
-test.All.kruskal    = kruskal.test(count~subtype,data=numMuts.All)
-test.Missense.kruskal    = kruskal.test(count~subtype,data=numMuts.Missense)
-test.Silent.kruskal    = kruskal.test(count~subtype,data=numMuts.Silent)
-test.Nonsense.kruskal    = kruskal.test(count~subtype,data=numMuts.Nonsense)
-test.Other.kruskal    = kruskal.test(count~subtype,data=numMuts.Other)
-test.Any.kruskal    = kruskal.test(count~subtype,data=numMuts.Any)
-test.Missense.Any.kruskal    = kruskal.test(count~subtype,data=numMuts.Missense.Any)
-test.Silent.Any.kruskal    = kruskal.test(count~subtype,data=numMuts.Silent.Any)
-test.NonSilent.kruskal    = kruskal.test(count~subtype,data=numMuts.NonSilent)
-test.NonSilent.Any.kruskal    = kruskal.test(count~subtype,data=numMuts.NonSilent.Any)
+test.All.kruskal    = kruskal.test(count~Mutstat,data=numMuts.All)
+test.Missense.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Missense)
+test.Silent.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Silent)
+test.Nonsense.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Nonsense)
+test.Other.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Other)
+test.Any.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Any)
+test.Missense.Any.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Missense.Any)
+test.Silent.Any.kruskal    = kruskal.test(count~Mutstat,data=numMuts.Silent.Any)
+test.NonSilent.kruskal    = kruskal.test(count~Mutstat,data=numMuts.NonSilent)
+test.NonSilent.Any.kruskal    = kruskal.test(count~Mutstat,data=numMuts.NonSilent.Any)
 
 p.values.kruskal <- data.frame(mut.type=c("All","Missense","Silent","Nonsense","Other","NonSilent","Any","Missense.Any","Silent.Any","NonSilent.Any"),
                                p.value=c(test.All.kruskal$p.value,
@@ -119,15 +124,15 @@ p.values.kruskal$p.value <-signif(p.values.kruskal$p.value,digits=3)
 # Combine
 numMuts.All.combo    = rbind(numMuts.All,numMuts.Missense,numMuts.Silent,numMuts.Nonsense,numMuts.Other)
 rownames(numMuts.All.combo) = NULL
-colnames(numMuts.All.combo) = c( "count", "subtype", "mut.type")
+colnames(numMuts.All.combo) = c( "count", "Mutstat", "mut.type")
 
 numMuts.Any.combo    = rbind(numMuts.All,numMuts.Any,numMuts.Missense,numMuts.Missense.Any,numMuts.Silent,numMuts.Silent.Any )
 rownames(numMuts.Any.combo) = NULL
-colnames(numMuts.Any.combo) = c( "count", "subtype", "mut.type")
+colnames(numMuts.Any.combo) = c( "count", "Mutstat", "mut.type")
 
 numMuts.Silent.combo = rbind(numMuts.All,numMuts.Silent,numMuts.NonSilent,numMuts.Any,numMuts.Silent.Any,numMuts.NonSilent.Any )
 rownames(numMuts.Silent.combo) = NULL
-colnames(numMuts.Silent.combo) = c( "count", "subtype", "mut.type")
+colnames(numMuts.Silent.combo) = c( "count", "Mutstat", "mut.type")
 
 #Pick the one to blot
 if (Plot.type =='All') {
@@ -148,7 +153,7 @@ if (Plot.type =='All') {
   blot.font.size = 25
 }
 numMuts.blot = numMuts.blot[complete.cases(numMuts.blot),]
-meds = ddply(numMuts.blot, .(mut.type, subtype), summarise, med = median(count)) ## median
+meds = ddply(numMuts.blot, .(mut.type, Mutstat), summarise, med = median(count)) ## median
 
 meds$p.value.aov = p.values.aov$p.value [match(meds$mut.type,p.values.aov$mut.type)]
 meds$p.value.aov.label = paste0("p = ",meds$p.value.aov) 
@@ -164,19 +169,19 @@ mean.n = function(x){ return(c(y = 0 , label = round(mean(x),1))) } ## mean
 
 #png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".",IMS.filter,".",stats,".IMSONLY.png"), height = 1000, width= blot.width)   #set filename
 dev.new()
-subtype.order = c("HER2-enriched", "Basal-like" , "Luminal B" ,"Luminal A","Normal-like")
+Mutstat.order = c("WT", "MUT")
 colors = c("#daa520","#da70d6","#eaff00","#00c0ff","#d3d3d3")
-gg = ggplot(numMuts.blot, aes(subtype, count, fill=subtype)) +
+gg = ggplot(numMuts.blot, aes(Mutstat, count, fill=Mutstat)) +
   stat_boxplot(geom ='errorbar') +
   geom_boxplot(notch=TRUE) +
   geom_jitter(position=position_jitter(width=0.2,height=0.1))
 #, aes(color="lightgray")) 
 gg = gg + ylab("Number of mutations per sample") +
-  scale_x_discrete(limits=subtype.order) +
+  scale_x_discrete(limits=Mutstat.order) +
   facet_grid(.~mut.type,
              scales = "free",
              space="free") +
-  xlab("Subtypes") + theme_bw() 
+  xlab("MAP3K1 or MAP2K4 Mutation") + theme_bw() 
 gg = gg + scale_fill_manual(values = colors) +
   scale_y_continuous(breaks = seq(0, meds.limit, 100)) +
   coord_cartesian(ylim=c(-15, 250)) 

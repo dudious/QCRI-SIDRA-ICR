@@ -49,11 +49,14 @@ ggkm <- function(sfit,
   if (!"survival" %in% installed.packages()) install.packages("survival")
   if (!"gridExtra" %in% installed.packages()) install.packages("gridExtra")
   if (!"reshape" %in% installed.packages()) install.packages("reshape")
+  if (!"grid" %in% installed.packages()) install.packages("grid")
+
   
   suppressPackageStartupMessages(library(ggplot2, warn.conflicts=FALSE))
   suppressPackageStartupMessages(library(survival, warn.conflicts=FALSE))
   suppressPackageStartupMessages(library(gridExtra, warn.conflicts=FALSE))
   suppressPackageStartupMessages(library(reshape, warn.conflicts=FALSE))
+  suppressPackageStartupMessages(library(grid, warn.conflicts=FALSE))
   
   #################################
   # sorting the use of subsetting #

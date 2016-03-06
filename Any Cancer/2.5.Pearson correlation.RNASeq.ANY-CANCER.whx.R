@@ -18,8 +18,8 @@ if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
 # Set Parameters
-Cancerset <- "SKCM"           # Select the Cancer to use
-Geneset   <- "DBGS3"          # Select the genset to use
+Cancerset <- "BRCA"           # Select the Cancer to use
+Geneset   <- "DBGS3vsPTX3"          # Select the genset to use
 Filter    <- "TRUE"           # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 BRCA.Filter <- "PCF"          # "PCF" or "BSF" Pancer or Breast specific
 
@@ -52,7 +52,8 @@ cor.mtest <- function(mat, conf.level = 0.95) {
 RNASeq.subset.cor.sign <- cor.mtest(RNASeq.subset.cor, 0.95)
 
 # Correlation plot
-png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+#png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+dev.new()
 cex.before <- par("cex")
 par(cex = 0.45)
 col1 = colorRampPalette(c("green", "white", "orange"))
@@ -71,12 +72,11 @@ corrplot.mixed (RNASeq.subset.cor,
                #insig="pch",                          # remove insignificant correlations
                tl.cex = 1/par("cex"),
                cl.cex = 1/par("cex"),
-               title = paste0("Spearman TCGA-RNASeq (",Cancerset,".",Geneset," avg:",round(mean(RNASeq.subset.cor),2),")"),
+               title = paste0("Spearman TCGA-RNASeq (",Cancerset,".",Geneset," avg:",round(mean(RNASeq.subset.cor),2)," N:",nrow(RNASeq.subset),")"),
                cex.main = 1.4/par("cex"),
                mar=c(5.1,4.1,4.1,2.1))
 par(cex = cex.before)
-dev.off()
+#dev.off()
 
-
-
+nrow(RNASeq.subset)
 

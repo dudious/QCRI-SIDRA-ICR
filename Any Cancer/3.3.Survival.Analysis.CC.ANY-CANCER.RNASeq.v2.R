@@ -33,12 +33,12 @@ library(plyr)
 source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset <- "BRCA.PCF"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
+Cancerset <- "BRCA.BSF2"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
 Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
 Geneset <- "DBGS3.FLTR"     # SET GENESET and pruclustering filter 
 K <- 4                      # SET K
 Surv.cutoff.years <- 10     # SET cut-off
-Km.type <- "4vs123"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type <- "1vs4"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
 # Load data
 Parent.Geneset <- substring(Geneset,1,5)
@@ -104,7 +104,8 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".TCGA.",Cancerset,"-",Filtersamples,".RNASeq.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
+#png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".TCGA.",Cancerset,"-",Filtersamples,".RNASeq.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
+dev.new()
 ggkm(mfit,
      timeby=12,
      ystratalabs=Clusters.names ,
@@ -113,7 +114,26 @@ ggkm(mfit,
      xlabs = "Time in months",
      cbPalette = cbPalette
      )
-dev.off()
+#dev.off()
 
 
+mdiff <- survdiff(eval(mfit$call$formula), data = eval(mfit$call$data))
+pval <- pchisq(mdiff$chisq,length(mdiff$n) - 1,lower.tail = FALSE)
+pvaltxt <- ifelse(pval < 0.0001,"p < 0.0001",paste("p =", signif(pval, 3)))
+
+TS.Surv$Group <- relevel(TS.Surv$Group,"ICR4")
+mHR <- coxph(formula = msurv ~ Group ,data = TS.Surv)
+mHR.extract <-extract(mHR, include.aic = TRUE,
+                      include.rsquared = TRUE, include.maxrs=TRUE,
+                      include.events = TRUE, include.nobs = TRUE,
+                      include.missings = TRUE, include.zph = TRUE)
+HRtxt <- paste("Hazard-ratio =", signif(exp(mHR.extract@coef),3),"for",names(mHR$coefficients))
+beta <- coef(mHR)
+se   <- sqrt(diag(mHR$var))
+p    <- 1 - pchisq((beta/se)^2, 1)
+CI   <- confint(mHR)
+CI   <- round(exp(CI),2)
+print(pvaltxt)
+print(HRtxt)
+print(CI)
 

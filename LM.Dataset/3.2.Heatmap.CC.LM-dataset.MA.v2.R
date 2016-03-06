@@ -124,6 +124,8 @@ legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
        col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
 dev.off()
 
+immunescore<-data.frame(unscaled.score=colMeans(MA.bygene.matrix))
+write.csv(immunescore,"./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.BRCA.LMDATA.csv")
 
 # Corelation matrix
 MA.subset.cor <- cor (MA.bygene.matrix.ag,method="spearman")

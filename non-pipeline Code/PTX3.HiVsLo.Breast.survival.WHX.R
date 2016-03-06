@@ -20,15 +20,23 @@ setwd("~/Dropbox/BREAST_QATAR/")
 # Set Parameters
 Filtersamples <- "Filtered" # altervatives : Filtered , UnFiltered
 Surv.cutoff.years <- 10       # SET cut-off
-
-
+Cancerset <- "COAD-hiseq"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
+Geneset <- "DBGS3.FLTR"     # SET GENESET and pruclustering filter 
+Km.type <- "1vs4"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Parent.Cancerset <- Cancerset
 # Load data files
-load ("./2 DATA/TCGA RNAseq/RNASeq_BRCA_EDASeq/BRCA.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData")
-PTX3 <- as.data.frame(t(RNASeq.NORM_Log2["PTX3",,drop=FALSE]))
-rm(RNASeq.NORM_Log2)
-Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.RNASeq_subset_clinicaldata.csv"),header=TRUE)
+#Parent.Cancerset <- substring(Cancerset,1,4)
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",
+                                   Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",
+                                   Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+Consensus.class <- Consensus.class[,-1]
+rownames(Consensus.class) <- Consensus.class$PatientID
+Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"),header=TRUE)
 rownames(Clinical.data) <- Clinical.data[,1]
 Clinical.data[,1] <-NULL
+load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Parent.Cancerset,"_EDASeq/",Parent.Cancerset,".RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData"))
+PTX3 <- as.data.frame(t(RNASeq.NORM_Log2["PTX3",,drop=FALSE]))
+rm(RNASeq.NORM_Log2)
 
 # split into quartiles
 PTX3.HI <- PTX3[PTX3$PTX3<quantile(PTX3$PTX3)["25%"],,drop=FALSE]
@@ -72,7 +80,8 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.PTX3.HiVsLo.TCGA.COAD.",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
+dev.new()
+#png(paste0("./4 FIGURES/KM curves/ggplot.KM.PTX3.HiVsLo.TCGA.COAD.",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
 ggkm(mfit,
      timeby=12,
      ystratalabs=c("High","Low") ,
@@ -81,4 +90,4 @@ ggkm(mfit,
      xlabs = "Time in months",
      cbPalette = cbPalette
 )
-dev.off()
+#dev.off()

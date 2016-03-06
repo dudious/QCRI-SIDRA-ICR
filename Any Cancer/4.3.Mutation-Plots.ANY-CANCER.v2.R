@@ -19,7 +19,7 @@ library("ggplot2")
 library("plyr")
 
 ## Parameters
-Cancerset <- "BRCA.BSF"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
+Cancerset <- "BRCA.BSF2"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA or -hiseq
 gene = "MAP2K4"
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
@@ -110,7 +110,8 @@ meds.limit = 4*max(meds$med)
 if (Cancerset == "COAD"){meds.limit = 6*max(meds$med)}
 mean.n = function(x){ return(c(y = 0 , label = round(mean(x),1))) } ## mean
 
-png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".png"), height = 1000, width= blot.width)   #set filename
+#png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".png"), height = 1000, width= blot.width)   #set filename
+dev.new()
 cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
 colors = c("blue", "green", "orange", "red")
 gg = ggplot(numMuts.blot, aes(cluster, count, fill=cluster)) +
@@ -149,7 +150,7 @@ gg = gg + ggtitle(paste0("Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type))
           theme(plot.title = element_text(size = blot.font.size, lineheight=5, face="bold"))
 
 print(gg)
-dev.off()
+#dev.off()
 
 ## Create data frame for plotting the percentage of TP53 patients per cluster
 mut.df = merge (sample.cluster.count,Mutation.Frequency.Gene[Mutation.Frequency.Gene$Hugo_Symbol==gene,c("Hugo_Symbol","Cluster","Freq.Any.pct")],by="Cluster",all=TRUE)
@@ -158,7 +159,8 @@ mut.df$label = paste0(sprintf("%.0f", mut.df$Freq.Any.pct), "%")
 dir.create(paste0("./4 FIGURES/Mutation Plots/",gene,"/"), showWarnings = FALSE)
 
 ## Plot TP53 percetage barplot
-png(paste0("./4 FIGURES/Mutation Plots/",gene,"/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
+dev.new()
+#png(paste0("./4 FIGURES/Mutation Plots/",gene,"/",gene,".",Cancerset,".",Geneset,".k",num.clusters, ".png", sep=""))
 cluster.order = rev(clusters)
 gg = ggplot(mut.df, aes(x = clusters, y = Freq.Any.pct))  +
   geom_bar(stat = "identity", width = 0.8, position="dodge") #+
@@ -169,4 +171,4 @@ gg = gg+ theme(legend.position="none", strip.text.x = element_text(size = 14)) +
          scale_fill_manual(values=c("gold", "lightsalmon4")) +
          ggtitle((paste0("Mutation Frequency.",gene,".",Cancerset,".",Geneset,".k:",num.clusters)))
 print(gg)
-dev.off()
+#dev.off()

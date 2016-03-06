@@ -63,9 +63,6 @@ print ("Files renamed ...")
   nte.table <- (nte.table [-c(1,2),]) # delete first 2 rows
   row.names(nte.table) <- NULL
 
-  patient.table <- read.csv ("./2 DATA/Clinical Information/COAD/RawData/patient.txt", header = TRUE, sep="\t", as.is=TRUE)
-  patient.table <- (patient.table [-c(1,2),]) # delete first 2 rows
-  row.names(patient.table) <- NULL
 
   radiation.table <- read.csv ("./2 DATA/Clinical Information/COAD/RawData/radiation.txt", header = TRUE, sep="\t", as.is=TRUE)
   radiation.table <- (radiation.table [-c(1,2),]) # delete first 2 rows
@@ -169,4 +166,12 @@ patient.vars <- c("bcr_patient_barcode","gender","race","ethnicity","history_oth
   write.xlsx (clinicaldata.table, file = "./2 DATA/Clinical Information/COAD/selected_clinicaldata.xlsx", sheetName ="selected clinical data", row.names=FALSE);
   print ("Results are saved in selected_clinicaldata.xlsx and selected_clinicaldata.txt.");
 
-
+  export.colnames<-rbind(
+  data.frame(source = "patient.table",variable = colnames(patient.table)),
+  data.frame(source = "cqcf.table",variable = colnames(cqcf.table)),
+  data.frame(source = "drug.table",variable = colnames(drug.table)),
+  data.frame(source = "follow_up.table.1.0",variable = colnames(follow_up.table.1.0)),
+  data.frame(source = "radiation.table",variable = colnames(radiation.table))
+  )
+  write.csv (export.colnames,file = "./2 DATA/Clinical Information/COAD/colnames.csv",row.names=FALSE)
+  

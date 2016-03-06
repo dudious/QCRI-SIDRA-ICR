@@ -52,7 +52,8 @@ cor.mtest <- function(mat, conf.level = 0.95) {
 RNASeq.subset.cor.sign <- cor.mtest(RNASeq.subset.cor, 0.95)
 
 # Correlation plot
-png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+##png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+dev.new()
 cex.before <- par("cex")
 par(cex = 0.45)
 col1 = colorRampPalette(c("blue", "white", "#009900"))
@@ -74,7 +75,7 @@ corrplot.mixed(RNASeq.subset.cor,
                cex.main = 1.4/par("cex"),
                mar=c(5.1,4.1,4.1,2.1))
 par(cex = cex.before)
-dev.off()
+#dev.off()
 
 
 

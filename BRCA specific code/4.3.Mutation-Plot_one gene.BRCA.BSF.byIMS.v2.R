@@ -22,7 +22,7 @@ library("plyr")
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-GOF = "MAPX"
+GOF = "FCGBP"
 
 ## Load Mutaion data
 load (paste0("./2 DATA/TCGA Mutations/",Cancerset,"/Somatic_Mutations/",Cancerset,".TCGA.combined.Mutation.Data.maf.Rdata"))
@@ -123,24 +123,30 @@ blot.df$Mutation_Frequency <- round((blot.df$Mutation_Count / blot.df$Group_Coun
 
 #dud values for MAP2K4
 if (GOF == "MAP2K4") {
-blot.df <- rbind(blot.df,c("NonSilent","All Subtypes","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
-blot.df <- rbind(blot.df,c("Silent","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))
-blot.df <- rbind(blot.df,c("In_Frame_Del","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))
+blot.df <- rbind(blot.df,c("NonSilent","Basal-like","ICR4",1,"ICR4.Basal-like",127,0))  #add missing dud value
+blot.df <- rbind(blot.df,c("NonSilent","All Subtypes","ICR4",0,"ICR4.Basal-like",127,0))  #add missing dud value
+blot.df <- rbind(blot.df,c("Silent","Basal-like","ICR4",0,"ICR4.Basal-like",127,0))
+blot.df <- rbind(blot.df,c("In_Frame_Del","Basal-like","ICR4",0,"ICR4.Basal-like",127,0))
+blot.df <- rbind(blot.df,c("In_Frame_Del","All Subtypes","ICR4",0,"ICR4.Basal-like",127,0))
 class (blot.df$Mutation_Frequency) <- "numeric"
 class(blot.df$Mutation_Count) <- "numeric"
 class(blot.df$Group_Count) <- "numeric"
 }
 #dud values for CTCF
 if (GOF == "CTCF") {
-  blot.df <- rbind(blot.df,c("In_Frame_Del","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("In_Frame_Del","Basal-like","ICR4",0,"ICR4.Basal-like",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("In_Frame_Del","All Subtypes","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
   class (blot.df$Mutation_Frequency) <- "numeric"
   class(blot.df$Mutation_Count) <- "numeric"
   class(blot.df$Group_Count) <- "numeric"
 }
 #dud values for FCGBP
 if (GOF == "FCGBP") {
-  blot.df <- rbind(blot.df,c("Frame_Shift","Basal-like","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
-  blot.df <- rbind(blot.df,c("Splice_Site","HER2-enriched","ICR4",0,"ICR4.All Subtypes",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("Frame_Shift","Basal-like","ICR4",0,"ICR4.Basal-like",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("Frame_Shift","All Subtypes","ICR4",0,"ICR4.Basal-like",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("Splice_Site","HER2-enriched","ICR4",0,"ICR4.HER2-enriched",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("Splice_Site","All Subtypes","ICR4",0,"ICR4.HER2-enriched",127,0))  #add missing dud value
+  blot.df <- rbind(blot.df,c("NonSilent","HER2-enriched","ICR4",1,"ICR4.HER2-enriched",127,0))  #add missing dud value
   class (blot.df$Mutation_Frequency) <- "numeric"
   class(blot.df$Mutation_Count) <- "numeric"
   class(blot.df$Group_Count) <- "numeric"
@@ -152,31 +158,89 @@ dir.create(paste0("./4 FIGURES/Mutation Plots/",GOF,"/"), showWarnings = FALSE)
 
 
 #remove silent/nonsilent/normal-like
-
 blot.df.stack <- blot.df[blot.df$Mutation_Type!="NonSilent",]
 blot.df.stack <- blot.df.stack[blot.df.stack$Mutation_Type!="Silent",]
 blot.df.stack <- blot.df.stack[blot.df.stack$Molecular_Subtype!="Normal-like",]
 blot.df.stack$Mutation_Type <- as.factor(blot.df.stack$Mutation_Type)
 
-subtype = c("Basal-Like"    ,"Her2-enriched","Luminal A"        ,"Luminal B"        ,"Normal-like"  ,"Luminal"  ,"Overall")
-IMS_colors  = c("#da70d6"   ,"#daa520"      ,"#eaff00"          ,"#00c0ff"          ,"#d3d3d3"      ,"#009999"  ,"#696969")
+#reorder subtypes
+blot.df.stack <- blot.df.stack[order(factor(blot.df.stack$Molecular_Subtype,levels = c("All Subtypes","Basal-like","HER2-enriched","Luminal A","Luminal B","Normal-like","Luminal"))),]
+blot.df.stack$Molecular_Subtype <- factor(blot.df.stack$Molecular_Subtype,levels = c("All Subtypes","Basal-like","HER2-enriched","Luminal A","Luminal B","Normal-like","Luminal"))
+
+#stats
+selected.data.NS <- blot.df[blot.df$Mutation_Type=="NonSilent",]
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="All Subtypes",] 
+test.trend.all <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="Basal-like",] 
+test.trend.BL <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="HER2-enriched",] 
+test.trend.HE <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="Luminal A",] 
+test.trend.LA <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="Luminal B",] 
+test.trend.LB <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+selected.data <- selected.data.NS[selected.data.NS$Molecular_Subtype=="Luminal",] 
+test.trend.AB <- prop.trend.test(selected.data$Mutation_Count,selected.data$Group_Count)
+
+
+subtype = c("All Subtypes","Basal-like"    ,"HER2-enriched" ,"Luminal A"        ,"Luminal B"          ,"Luminal")
+IMS_colors  = c("#696969", "#da70d6"   ,"#daa520"      ,"#eaff00"          ,"#00c0ff"            ,"#009999" )
 mut_type = c("Frame Shift"  ,"In Frame Del" ,"Missense Mutation","Nonsense Mutation","Splice Site" )
 MUT_colors  = c("#00c800"   ,"#aa14f0"      ,"#dd3768"          ,"#ec9b2b"          ,"#12e1d5") #green , purple , auquamarine , orange , redish
+
+stats.p.values <- data.frame(Molecular_Subtype = subtype,p.value = paste0("p = ",c(signif(test.trend.all$p.value,digits=3),
+                                                                         signif(test.trend.BL$p.value,digits=3),
+                                                                         signif(test.trend.HE$p.value,digits=3),
+                                                                         signif(test.trend.LA$p.value,digits=3),
+                                                                         signif(test.trend.LB$p.value,digits=3),
+                                                                         signif(test.trend.AB$p.value,digits=3))),
+                             Cluster_Assignment="ICR1",Mutation_Type="Missense Mutation")
+y.value = 18 #TP53 115 , MAP3K1 35, MAP2K4 7, MAPx 40, CTCF 6.5,FCGBP 18, COMBO 42
+
+#creat grid plot of all mutation types en molecular subtypes (stacked bar chart)
+
 png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor",".png", sep=""), height = 500, width= 2000)
  gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
-              geom_bar(stat="identity",size=0,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
+              geom_bar(stat="identity",size=0,width=0.8,drop=FALSE,ylim=c(0,100)) + #position="dodge"
               facet_grid(.~Molecular_Subtype, space="free") +
               xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
               scale_fill_manual(values = MUT_colors) +
               scale_colour_manual(values = IMS_colors) +
               theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
               theme(text = element_text(size=20),axis.text.x = element_text(size=20,angle=0),axis.text.y = element_text(size=20)) +
-              ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) + 
+              ylim(0,y.value) +  
+              ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) +
               theme(plot.title = element_text(vjust = 3))
+ gg = gg + geom_text(data = stats.p.values,
+                     aes(y = y.value, x = 1.3 ,label = p.value),
+                     size = 7, vjust = 1.2)
  print(gg)
 dev.off()
 
 write.csv (blot.df,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".By.IMS",".csv", sep=""))
+
+#drop all Subtypes
+blot.df.stack.IMSonly <- blot.df.stack[blot.df.stack$Molecular_Subtype!="All Subtypes",]
+stats.p.values <- stats.p.values[stats.p.values$Molecular_Subtype!="All Subtypes",]
+
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor.noAllIMS",".png", sep=""), height = 500, width= 2000)
+gg = ggplot(blot.df.stack.IMSonly, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
+  geom_bar(stat="identity",size=0,width=0.8,drop=FALSE,ylim=c(0,100)) + #position="dodge"
+  facet_grid(.~Molecular_Subtype, space="free") +
+  xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
+  scale_fill_manual(values = MUT_colors) +
+  scale_colour_manual(values = IMS_colors) +
+  theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
+  theme(text = element_text(size=20),axis.text.x = element_text(size=20,angle=0),axis.text.y = element_text(size=20)) +
+  ylim(0,y.value) +  #TP53 115 , 
+  ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) +
+  theme(plot.title = element_text(vjust = 3))
+gg = gg + geom_text(data = stats.p.values,
+                    aes(y = y.value, x = 1.3 ,label = p.value),
+                    size = 7, vjust = 1.2)
+print(gg)
+dev.off()
+
 
 #simplyfy to all subtypes
 
@@ -190,17 +254,17 @@ test.trend <- prop.trend.test(blot.df$Mutation_Count,blot.df$Group_Count)
 
 png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stacked..png", sep=""), height = 500, width= 700)
 gg = ggplot(blot.df.stack.noIMS, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
-  geom_bar(stat="identity",size=0,width=0.95,drop=FALSE,ylim=c(0,100)) + #position="dodge"
+  geom_bar(stat="identity",size=0,width=0.8,drop=FALSE,ylim=c(0,100)) + #position="dodge"
   xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
   scale_fill_manual(values = MUT_colors) +
   scale_colour_manual(values = IMS_colors) +
   theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
   theme(text = element_text(size=20),axis.text.x = element_text(size=20,angle=0),axis.text.y = element_text(size=20)) +
   theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  ylim(0,max(blot.df$Mutation_Frequency)+10) +
+  ylim(0,y.value) +
   ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"By.IMS.stacked"))) + 
   theme(plot.title = element_text(vjust = 3))+
-  annotate("text", label = paste0("trend : p = ",signif(test.trend$p.value,digits=3)), size = 6, x=1.5 , y = max(blot.df$Mutation_Frequency)+10) #(nlevels(blot.df$Cluster_Assignment)-1)
+  annotate("text", label = paste0("trend : p = ",signif(test.trend$p.value,digits=3)), size = 6, x=1.5 , y = y.value) #(nlevels(blot.df$Cluster_Assignment)-1)
   #geom_text(label=paste0(blot.df$Mutation_Frequency," %"), size = 6,y = blot.df$Mutation_Frequency+1)
 print(gg)
 dev.off()
@@ -211,12 +275,12 @@ png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"
 #cluster.order = rev(clusters)
 gg = ggplot(blot.df, aes(x = Cluster_Assignment, y = Mutation_Frequency))  +
   geom_bar(stat = "identity", width = 0.8, position="dodge", fill = c("blue", "green", "orange", "red")) +
-  annotate("text", label = paste0("p = ",signif(test.trend$p.value,digits=3)), size = 6, x=1 , y = max(blot.df$Mutation_Frequency)+5) + #(nlevels(blot.df$Cluster_Assignment)-1)
-  geom_text(label=paste0(blot.df$Mutation_Frequency," %"), size = 6,y = blot.df$Mutation_Frequency+1)
+  annotate("text", label = paste0("p = ",signif(test.trend$p.value,digits=3)), size = 6, x=1 , y = y.value) + #(nlevels(blot.df$Cluster_Assignment)-1)
+  geom_text(label=paste0(blot.df$Mutation_Frequency," %"), size = 6,y=y.value)
 gg = gg + #scale_x_discrete(limits = cluster.order) +
   xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
   theme(text = element_text(size=18),axis.text.x = element_text(size=18),axis.text.y = element_text(size=18)) +
-  ylim(0,max(blot.df$Mutation_Frequency)+5)
+  ylim(0,y.value)
 gg = gg+ theme(legend.position="none", strip.text.x = element_text(size = 18)) +
   #scale_fill_manual(values=c("gold")) +
   theme (panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +

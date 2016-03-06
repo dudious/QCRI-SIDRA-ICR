@@ -147,7 +147,7 @@ print(gg)
 dev.off()
 
 
-# My IMS blot
+# By IMS blot
 mutated.allele.blot.byIMS <- count(mutated.allele.blot,vars=c("allele.both","Subtype"))
 mutations.per.subtype <- as.data.frame(table(mutated.allele.blot$Subtype))
 colnames(mutations.per.subtype) <- c("Subtype","Count")

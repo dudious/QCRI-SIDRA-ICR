@@ -51,6 +51,9 @@
   rownames(TP53.patients) <- TP53.patients$Patient_ID
   TP53.patients$Patient_ID <- NULL
   TP53.patients$X <- NULL
+  #MAPK STATUS
+  Mutstat <- read.csv ("./3 ANALISYS/DIFFERENTIAL EXPRESSION/15Oct/MAPKs/FinalClassification.csv")
+  
 
 # merge data
   Master.file <- merge (ClinicalData.subset,CC.RNASeq,by="row.names",all.x=TRUE)
@@ -72,3 +75,14 @@
 # export data to txt and excel
 write.csv (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.csv"),row.names = TRUE);
 write.xlsx (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.xlsx"), sheetName ="RNASeq ISGS.Master data", row.names=TRUE)
+
+#multivariate analysis
+Master.file$Cluster.DBGS3.FLTR.RNSeq
+MV.data <- Master.file[,c("TCGA.PAM50.RMethod.RNASeq","GOF_mutation","Cluster.DBGS3.FLTR.RNSeq")]
+MV.data$MAPKMUT <- Mutstat$MAP2K4.MAP3K1[match(rownames(MV.data),Mutstat$Sample)]
+MV.data <- MV.data[complete.cases(MV.data),]
+MV.data$Basal <- "FALSE"
+MV.data$ICR4 <- "FALSE"
+MV.data[MV.data$TCGA.PAM50.RMethod.RNASeq=="Basal-like",c("Basal")] <- "TRUE"
+MV.data[MV.data$Cluster.DBGS3.FLTR.RNSeq=="ICR4",c("ICR4")] <- "TRUE"
+write.csv (MV.data,"./3 ANALISYS/Multivariate analysis/ICRCluster_TP53_MAPK_IMS.csv")

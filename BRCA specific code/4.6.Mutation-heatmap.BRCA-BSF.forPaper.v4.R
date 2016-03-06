@@ -29,9 +29,9 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 Cancerset      = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset        = "DBGS3.FLTR"  # SET GENESET HERE 
 matrix.type    = "NonSilent"   # Alterantives "Any" , "Missense" , "NonSilent"
-plot.type      = "selected"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
+plot.type      = "db.test"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
 IMS.filter     = "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
-cluster.select = "All"         # Alternatives "1vs4" , "All"
+cluster.select = "1vs4"         # Alternatives "1vs4" , "All"
 gene.filter    = "FALSE"        # Alternatives "TRUE" , "FALSE"
 selected.genes = c("TP53","MAP3K1","MAP2K4","CTCF","FCGBP","CXCL9")
 
@@ -225,10 +225,12 @@ match.matrix <- cbind(colnames(allmuts.mutatedgenes) %in% freq.mut.list$Gene,
                       colnames(allmuts.mutatedgenes) %in% mutsig.list.GDAC$gene)
 #colnames(match.matrix) <- c("373g","TCGA","GDAC")
 rownames(match.matrix) <- colnames(allmuts.mutatedgenes)
-match.matrix[match.matrix[,1]==TRUE,1] <- "#d8d8d8"
-match.matrix[match.matrix[,2]==TRUE,2] <- "#b1b1b1"
+match.matrix[match.matrix[,1]==TRUE,1] <- "#black"
+match.matrix[match.matrix[,2]==TRUE,2] <- "#9a009a"
 match.matrix[match.matrix[,3]==TRUE,3] <- "#808080"
 match.matrix[match.matrix == FALSE] <- "white"
+match.matrix <- cbind (match.matrix,rep("white",nrow(match.matrix)))
+match.matrix[colnames(genes.mutations.chisqr),4] <- "#ff4a6a"
 
 #Plot size automation
 plot.width <- log(ncol(allmuts.mutatedgenes))*4 + 10
@@ -236,13 +238,14 @@ plot.height<- 10
 
 # Heatmap for gene mutation 
 color.matrix <- as.matrix(rbind (patientcolors,subtypecolors,decile))
-my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_combo_DEC.png"),res=600,height=plot.height,width=(plot.width/2)+16,unit="in")     # set filename
+my.palette <- colorRampPalette(c("blue", "#c4f5ff", "#8b0000"))(n = 3)
+#dev.new()
+png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_combo_DEC.v2.png"),res=600,height=plot.height,width=(plot.width/2)+16,unit="in")     # set filename
 heatmap.3(allmuts.mutatedgenes,
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
           RowSideColors=color.matrix,                         # set goup colors
-          ColSideColors=match.matrix,
+          ColSideColors=match.matrix[,c(2,4)],
           key=FALSE,
           symm=FALSE,
           symkey=FALSE,
@@ -275,7 +278,8 @@ Meanby.IMS.colors$subtype[Meanby.IMS.colors$subtype=="Normal-like"]   <- "#d3d3d
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 Meanby.IMS.colors <- as.matrix(t(Meanby.IMS.colors))
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
+dev.new()
+#png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
 par(mar=c(1,1,1,1))
 heatmap.3(allmuts.mutatedgenes.mean.byIMS,
           main = "HeatMap-MutatedGenes frequency",
@@ -298,7 +302,7 @@ heatmap.3(allmuts.mutatedgenes.mean.byIMS,
 par(lend = 1)
 legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR3","ICR2","ICR1"),
        col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
-dev.off()
+#dev.off()
 
 # Heatmap for gene mutation frequency by cluster/subtype for the same selection of genes HiLo edition
 
@@ -316,7 +320,8 @@ Meanby.IMS.Hilo.colors$subtype[Meanby.IMS.Hilo.colors$subtype=="Normal-like"]   
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 299)
 my.colors <- c(seq(0,0.01,length=100),seq(0.01,0.05,length=100),seq(0.05,1,length=100))
 Meanby.IMS.Hilo.colors <- as.matrix(t(Meanby.IMS.Hilo.colors))
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN_HiLo.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
+dev.new()
+#png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".ICR4-1mean_IMS_MEAN_HiLo.png"),res=600,height=plot.height,width=(plot.width/2)+30,unit="in")     # set filename
 par(mar=c(1,1,1,1))
 heatmap.3(allmuts.mutatedgenes.mean.byIMS.byHilo,
           main = "HeatMap-MutatedGenes frequency",
@@ -339,7 +344,7 @@ heatmap.3(allmuts.mutatedgenes.mean.byIMS.byHilo,
 par(lend = 1)
 legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR3","ICR2","ICR1","","Low (1-3)","Medium (4-7)","High (8-10)"),
        col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","orange","green","blue","white","green","yellow","red"),lty= 1,lwd = 5,cex = 0.9)
-dev.off()
+#dev.off()
 
 
 if (plot.type == "selected"){
@@ -360,7 +365,8 @@ if (plot.type == "selected"){
   colnames(color.matrix.exlusion) <- NULL
   
   my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-  png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
+  dev.new()
+  #png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
   heatmap.3(allmuts.exclusion.matrix.reordered,
             main = "HeatMap-MutatedGenes",
             col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -383,7 +389,7 @@ if (plot.type == "selected"){
   #       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.3)
   #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
   #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
-  dev.off()
+  #dev.off()
 
 # Heatmap for matching GISTC data
 gistic.genes <- c(colnames(allmuts.exclusion.matrix.reordered))
@@ -397,7 +403,8 @@ selected.data[is.na(selected.data)] <- 0
 mode(selected.data) <-"numeric"
 
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".gistic.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
+dev.new()
+#png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".gistic.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
 heatmap.3(selected.data,
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -420,7 +427,7 @@ par(lend = 1)
 #       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.3)
 #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
 #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
-dev.off()
+#dev.off()
 
 #allmuts.exclusion.matrix.2 
 allmuts.exclusion.matrix.2 <- cbind(allmuts.exclusion.matrix.reordered,selected.data,t(color.matrix.exlusion))
@@ -460,7 +467,8 @@ color.matrix.exlusion.2 <- color.matrix.exlusion[,rownames(allmuts.exclusion.mat
 colnames(color.matrix.exlusion.2) <- NULL
 
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.2.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
+dev.new()
+#png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.2.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
 heatmap.3(allmuts.exclusion.matrix.2.reordered[,1:3],
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -483,12 +491,13 @@ par(lend = 1)
 #       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.3)
 #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
 #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
-dev.off()
+#dev.off()
 
 # Heatmap for matching GISTC data exclusion2 order
 
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 3)
-png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".gistic.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.2.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
+dev.new()
+#png(paste0("./4 FIGURES/Heatmaps/mutations/",Cancerset,".",IMS.filter,".",Geneset,".gistic.HeatMap.",matrix.type,".",plot.type,".",cluster.select,".gene.filter_",gene.filter,".mutual_exclusion.2.png"),res=600,height=plot.height,width=plot.width/2,unit="in")     # set filename
 heatmap.3(allmuts.exclusion.matrix.2.reordered[,4:6],
           main = "HeatMap-MutatedGenes",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -511,5 +520,5 @@ par(lend = 1)
 #       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.3)
 #legend("topleft",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","",levels(Mut.freq.decile$decile),"","ICR4","ICR3","ICR2","ICR1"),
 #       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white",levels(Mut.freq.decile$label),"white","red","orange","green","blue"),lty= 1,lwd = 5,cex = 1)
-dev.off()
+#dev.off()
 }

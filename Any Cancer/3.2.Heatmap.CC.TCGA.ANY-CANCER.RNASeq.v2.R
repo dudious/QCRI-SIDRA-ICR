@@ -25,7 +25,7 @@ library("gplots")
 
 # Set Parameters
 Cancerset <- "BRCA"              # SET Cancertype
-BRCA.Filter <- "PCF"             # "PCF" or "BSF" Pancer or Breast specific
+BRCA.Filter <- "BSF2"             # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"          # SET GENESET and pruclustering filter 
 K <- 4                           # SET K here
 
