@@ -56,7 +56,7 @@ if (Filtersamples=="Filtered"){
   levels(Clinical.data.subset.TS$PAM50)<-c(levels(Clinical.data.subset.TS$PAM50),"Unknown")
   Clinical.data.subset.TS[which(is.na(Clinical.data.subset.TS$PAM50)),"PAM50"] <- "Unknown"
   # exclude Unknown subtype N=26
-  #Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$PAM50!="Unknown",]
+  Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$PAM50!="Unknown",]
   # exclude normal-like N=257
   Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$PAM50!="Normal",]
   Clinical.data.subset.TS<-Clinical.data.subset.TS[,-ncol(Clinical.data.subset.TS)]
@@ -98,7 +98,7 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".",Cancerset,"-",Filtersamples,".MA.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v3.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".",Cancerset,"-",Filtersamples,".MA.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v4.png"),res=600,height=6,width=6,unit="in")  # set filename
 #dev.new()
 ggkm(mfit,
      timeby=12,

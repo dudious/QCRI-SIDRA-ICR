@@ -55,10 +55,9 @@ rownames(ClinicalData.subset) <- ClinicalData.subset$X
 ClinicalData.subset$X <-NULL
 
 
-mutation.type.count <- count (mutation.type.data,vars="Patient_ID")
-mutation.type.count$Variant_Classification <- "All_types"
-mutation.type.count <- mutation.type.count[order(-mutation.type.count$freq),c("Patient_ID","Variant_Classification","freq")]
-mutation.type.count.All <- mutation.type.count
+mutation.type.count.All <- count (mutation.type.data,vars="Patient_ID")
+mutation.type.count.All$Variant_Classification <- "All_types"
+mutation.type.count.All <- mutation.type.count.All[order(-mutation.type.count.All$freq),c("Patient_ID","Variant_Classification","freq")]
 
 mutation.type.count <- count (mutation.type.data,vars=c("Patient_ID","Variant_Classification"))
 mutation.type.count$log_freq <- log(mutation.type.count$freq)
@@ -66,7 +65,13 @@ mutation.type.count$log_freq <- log(mutation.type.count$freq)
 sumOFlogs<-aggregate(mutation.type.count$log_freq, by= list(mutation.type.count$Patient_ID), FUN=sum)
 colnames(sumOFlogs)<- c("Patient_ID","sum_logs")
 mutation.type.count$sum_logs <- sumOFlogs$sum_logs[match(mutation.type.count$Patient_ID,sumOFlogs$Patient_ID)]
-mutation.type.count <- mutation.type.count[order(-mutation.type.count$sum_logs,mutation.type.count$Variant_Classification),c("Patient_ID","Variant_Classification","freq","sum_logs")]
+mutation.type.count$log_sum <- log(mutation.type.count.All$freq[match(mutation.type.count$Patient_ID,mutation.type.count.All$Patient_ID)])
+mutation.type.count$scaled <- mutation.type.count$log_freq/mutation.type.count$sum_logs*mutation.type.count$log_sum
+#put silent last
+mutation.type.count$Variant_Classification <- factor(mutation.type.count$Variant_Classification)
+mutation.type.count$Variant_Classification <- factor(mutation.type.count$Variant_Classification,levels=levels(mutation.type.count$Variant_Classification)[c(1:7,9,8)])
+#c("Frame Shift","In Frame Del","In Frame Ins","Missense Mutation","Nonsense Mutation","Nonstop Mutation","RNA","Splice Site","Silent"))
+mutation.type.count <- mutation.type.count[order(-mutation.type.count$log_sum,mutation.type.count$Variant_Classification),c("Patient_ID","Variant_Classification","scaled","log_sum")]
 
 
 ## Prepare data for blotting
@@ -80,24 +85,18 @@ mutation.type.count <- mutation.type.count [-which(is.na(mutation.type.count$Sub
 #drop the All_types mutations
 mutation.type.count <- mutation.type.count[mutation.type.count$Variant_Classification!="All_types",]
 
-#put silent last
-mutation.type.count$Variant_Classification <- factor(mutation.type.count$Variant_Classification)
-mutation.type.count$Variant_Classification <- factor(mutation.type.count$Variant_Classification,levels=levels(mutation.type.count$Variant_Classification)[c(1:7,9,8)])
-                                                       #c("Frame Shift","In Frame Del","In Frame Ins","Missense Mutation","Nonsense Mutation","Nonstop Mutation","RNA","Splice Site","Silent"))
 # ICR 1, 4 only
-mutation.type.count.blot <- mutation.type.count[mutation.type.count$Cluster== "ICR3",]
-
-
+mutation.type.count.blot <- mutation.type.count[mutation.type.count$Cluster== "ICR1",]
 
 mut_type    = c("Frame Shift","In Frame Del" ,"In Frame Ins" ,"Missense Mutation","Nonsense Mutation","Nonstop Mutation","RNA"    ,"Splice Site","Silent" )
 MUT_colors  = c("#00c800"    ,"#aa14f0"      ,"#c45cf5"      ,"#dd3768"          ,"#ec9b2b"          ,"#f0b15a"         ,"#0c9a92","#12e1d5"    ,"grey") #green , purple , auquamarine , orange , redish
 
 # plot
 dir.create("./4 FIGURES/mutationspectrum/",showWarnings = FALSE)
-tittle = paste0(GOF,".mutation.type.spectrum.from.",IMS.filter,".LOG.bysample.ICR3.")
-png (filename = paste0("./4 FIGURES/mutationspectrum/",tittle,".stacked.png") , height = 600, width= 2000)
-gg = ggplot(mutation.type.count.blot, aes(x = reorder(Patient_ID,-sum_logs) ,y=log(freq) ,fill = Variant_Classification, order=Variant_Classification ))  +
-  geom_bar(stat = "identity", width = 1) + scale_y_continuous(limits = c(0,40)) + # + scale_y_log10(limits = c(1,1e10))
+tittle = paste0("Mutation.type.spectrum.from.",IMS.filter,".LOG.bysample.ICR1.")
+png (filename = paste0("./4 FIGURES/mutationspectrum/",tittle,".stacked.scaled.png") , height = 600, width= 800)
+gg = ggplot(mutation.type.count.blot, aes(x = reorder(Patient_ID,-log_sum) ,y=scaled ,fill = Variant_Classification, order=Variant_Classification ))  +
+  geom_bar(stat = "identity", width = 1) + scale_y_continuous(limits = c(0,10)) + # + scale_y_log10(limits = c(1,1e10))
   scale_fill_manual(values = MUT_colors)
 gg = gg + ggtitle(tittle) +
   theme(plot.title = element_text(size = 15, lineheight=5, face="bold")) +
