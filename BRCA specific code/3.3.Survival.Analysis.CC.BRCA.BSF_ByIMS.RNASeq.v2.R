@@ -33,13 +33,13 @@ library(plyr)
 source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
-Cancerset         <- "BRCA.BSF"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
-Filtersamples     <- "Filtered"     # altervatives : Filtered , UnFiltered
+Cancerset         <- "BRCA.BSF2"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
+Filtersamples     <- "UnFiltered"     # altervatives : Filtered , UnFiltered
 Geneset           <- "DBGS3.FLTR"   # SET GENESET and pruclustering filter 
 K                 <- 4              # SET K
 Surv.cutoff.years <- 10             # SET cut-off
-Km.type           <- "4vs123"   # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
-IMS.filter        <- "Her2"         # Alterantives "All" , "Luminal" , "Basal", "Her2"
+Km.type           <- "4vs123"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+IMS.filter        <- "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2"
 
 # Load data
 Parent.Geneset <- substring(Geneset,1,5)
@@ -125,5 +125,7 @@ ggkm(mfit,
      )
 dev.off()
 
+
+summary(Clinical.data.subset.TS[Clinical.data.subset.TS$Group=="ICR4","TCGA.PAM50.RMethod.RNASeq"])
 
 

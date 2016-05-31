@@ -25,7 +25,7 @@ library("beepr")
 Cancerset      = "BRCA"
 Geneset        = "DBGS3.FLTR"
 BRCA.Filter    = "BSF2"
-matrix.type    = "NonSilent"         # Alterantives "Any" , "Missense", "NonSilent"
+matrix.type    = "Any"         # Alterantives "Any" , "Missense", "NonSilent"
 IMS.filter     = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 selected.genes = c("TP53","MAP2K4","MAP3K1","CTCF","FCGBP")
 
@@ -171,6 +171,7 @@ genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selec
 genes.mutations.dbtest = genes.mutations[,colnames(genes.mutations) %in% db.test.significant.variation.table$Gene]
 genes.mutations.dbtest.strict = genes.mutations[,colnames(genes.mutations) %in% db.test.strict.significant.variation.table$Gene]
 genes.mutations.chisqr = genes.mutations[,colnames(genes.mutations) %in% chisq.significant.variation.table$Gene]
+genes.mutations.fisher = genes.mutations[,colnames(genes.mutations) %in% fisher.significant.variation.table$Gene]
 save (genes.mutations,
       merged.matrix,
       genes.mutations.373genes,
@@ -180,6 +181,7 @@ save (genes.mutations,
       genes.mutations.dbtest,
       genes.mutations.dbtest.strict,
       genes.mutations.chisqr,
+      genes.mutations.fisher,
       genes.mutations.selected,
       file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".oncoplot.Rdata"))
 

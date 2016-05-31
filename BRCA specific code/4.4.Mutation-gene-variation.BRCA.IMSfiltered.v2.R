@@ -10,7 +10,7 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR/")
 
 ## Parameters
-Cancerset <- "BRCA.BSF"        # FOR BRCA use BRCA.PCF or BRCA.BSF
+Cancerset <- "BRCA.BSF2"        # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset = "DBGS3.FLTR"         # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                          # SET K here
 Filter = 1                     # at least one clutser has to have x% mutation frequency
@@ -86,6 +86,7 @@ for (gene in gene.list.selected){
   all.patients = gene.data$N
   trend.results = prop.trend.test(gene.patients, all.patients)
   trend.pval = trend.results[[3]]
+  ## add dbtest logical
   db.test=FALSE
   if (gene.data.pct[1]<=1) {
     if ((gene.data.pct[4] - gene.data.pct[1])>=4){

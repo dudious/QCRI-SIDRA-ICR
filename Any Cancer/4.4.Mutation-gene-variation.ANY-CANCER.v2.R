@@ -7,7 +7,8 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+#setwd("~/Dropbox/BREAST_QATAR/")
+setwd("c:/Users/whendrickx/Dropbox/BREAST_QATAR/")
 
 ## Parameters
 Cancerset <- "BRCA.BSF2"        # FOR BRCA use BRCA.PCF or BRCA.BSF
@@ -37,11 +38,22 @@ if (mutation.type=="NonSilent") {
 } 
 variation.table = NULL
 
+gene.list.selected = c(as.character(gene.list.selected),"MAPX")
+Test = MAPX.data <- Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol=="MAP3K1" | Mutation.Frequency.Gene$Hugo_Symbol=="MAP2K4"),]
+
+MAPX.data <- Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol=="MAP3K1" | Mutation.Frequency.Gene$Hugo_Symbol=="MAP2K4"),]
+MAPX.data[is.na(MAPX.data)] <- 0
+MAPX.data.sum <- ddply(MAPX.data, "Cluster", numcolwise(sum))
+MAPX.data.sum <- as.data.frame(cbind (Hugo_Symbol="MAPX",MAPX.data.sum))
+MAPX.data.sum <- MAPX.data.sum[order(MAPX.data.sum$Cluster),]
+MAPX.data.sum$N <- sample.cluster.count$N
+
 ## for each gene, pick the 4 clusters, corresponding Freq.Any.pct OR Freq.Missense.Any.pct
 for (gene in gene.list.selected){
   #print(gene)
-  
+
   gene.data = Mutation.Frequency.Gene[which(Mutation.Frequency.Gene$Hugo_Symbol==gene),]   # select a gene
+  if(gene=="MAPX") gene.data = MAPX.data.sum
   gene.data[is.na(gene.data)] = 0
   # Add missing clusters data
   gene.clusters = gene.data$Cluster
@@ -54,8 +66,8 @@ for (gene in gene.list.selected){
   gene.missingdata[is.na(gene.missingdata)] = 0
   gene.data = rbind(gene.data, gene.missingdata)
   }
-  
-  gene.data = gene.data[order(gene.data$Cluster),]                                         # sort the cluster
+  gene.data = gene.data[order(gene.data$Cluster),]
+  gene.data$N = sample.cluster.count$N
   
   if (mutation.type=="Any") {
     gene.data.pct = gene.data[which(gene.data$Hugo_Symbol==gene),"Freq.Any.pct"]           # add the percentages
@@ -91,6 +103,7 @@ for (gene in gene.list.selected){
   ## Add Chi-square
   all.patients = gene.data$N
   trend.results = prop.trend.test(gene.patients, all.patients)
+  trend.matrix = paste0(c(gene.patients, all.patients), collapse = ":")
   trend.pval = trend.results[[3]]
   db.test=FALSE
   if (gene.data.pct[1]<=1) {
@@ -106,8 +119,9 @@ for (gene in gene.list.selected){
   gene.data.row = data.frame(gene,
                              paste0(gene.data.pct, collapse=" : "),
                              variation,
-                             paste0((trend), collapse=" : "),
+                             paste0((trend), collapse=" -> "),
                              flag,
+                             trend.matrix,
                              trend.pval,
                              paste0(test.matrix, collapse=" : "),
                              res.f$p.value,
@@ -121,6 +135,7 @@ colnames(variation.table) = c("Gene",
                               "Max_Variation",
                               "Direction",
                               "Trend",
+                              "Trend_Matrix",
                               "Trend_pVal_ChiSquared",
                               "testmatrix",
                               "Fisher_ICR1vs4",
@@ -140,6 +155,7 @@ high.significant.variation.table = variation.table[which((variation.table$Trend_
 db.test.significant.variation.table = variation.table[which(variation.table$db.test | variation.table$ChiSquare_ICR1vs4<0.05), ]
 db.test.strict.significant.variation.table = variation.table[which(variation.table$db.test & variation.table$ChiSquare_ICR1vs4<0.05), ]
 chisq.significant.variation.table = variation.table[which(variation.table$ChiSquare_ICR1vs4<0.05), ]
+fisher.significant.variation.table = variation.table[which(variation.table$Fisher_ICR1vs4<0.01), ]
 
 # settings Table (SL1,SL2,SH1,SH2)
 # BLCA  (0.01,2,0.005,4)
@@ -162,6 +178,7 @@ save(low.significant.variation.table,
      db.test.significant.variation.table,
      db.test.strict.significant.variation.table,
      chisq.significant.variation.table,
+     fisher.significant.variation.table,
      variation.table,
      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".",mutation.type,".VariationTables.RData"))
 

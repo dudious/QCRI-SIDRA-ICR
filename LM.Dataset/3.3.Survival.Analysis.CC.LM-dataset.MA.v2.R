@@ -34,7 +34,7 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
 Cancerset         <- "LM.Dataset"
-Filtersamples     <- "UnFiltered" # altervatives : Filtered , UnFiltered
+Filtersamples     <- "Filtered" # altervatives : Filtered , UnFiltered
 Geneset           <- "DBGS3"          # SET GENESET HERE !!!!!!!!!!!!!!
 K                 <- 4                      # SET K here
 Surv.cutoff.years <- 10     # SET cut-off here
@@ -47,17 +47,21 @@ Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",C
                                    Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 rownames(Consensus.class) <- Consensus.class$PatientID
-load ("./2 DATA/LM.BRCA/LM.Dataset.split.Rdata") 
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.fixed.Rdata")
 
-#if (Filtersamples=="Filtered"){     
-#  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude == "No")     # remove excluded patients
-#} else if  (Filtersamples=="UnFiltered")
-#  {Clinical.data.subset <- Clinical.data
-#   }       
-                               
-
-
-Clinical.data.subset.TS <- Sample.Meta.data[,c("DMFS 10yr Time:","DMFS 10yr Event:")]  # select relevant data
+Clinical.data.subset.TS <- Sample.Meta.data[,c("DMFS_10y_time","DMFS_10y_event")]  # select relevant data
+if (Filtersamples=="Filtered"){     
+  Clinical.data.subset.TS <- Sample.Meta.data[,c("DMFS_10y_time","DMFS_10y_event","PAM50")]
+  #replace NA with "Unknown"
+  levels(Clinical.data.subset.TS$PAM50)<-c(levels(Clinical.data.subset.TS$PAM50),"Unknown")
+  Clinical.data.subset.TS[which(is.na(Clinical.data.subset.TS$PAM50)),"PAM50"] <- "Unknown"
+  # exclude Unknown subtype N=26
+  #Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$PAM50!="Unknown",]
+  # exclude normal-like N=257
+  Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$PAM50!="Normal",]
+  Clinical.data.subset.TS<-Clinical.data.subset.TS[,-ncol(Clinical.data.subset.TS)]
+}       
+                             
 
 # Add Class to clinical data
 Clinical.data.subset.TS <- merge(Clinical.data.subset.TS,Consensus.class["Group"],by="row.names",all.x=TRUE, all.y=FALSE)
@@ -80,10 +84,11 @@ if (Km.type =='4vs123') {
 Clinical.data.subset.TS$Group <- droplevels(Clinical.data.subset.TS$Group) 
 Clusters.names <- levels(Clinical.data.subset.TS$Group)
 
+
 # time / event object creation
 TS.Surv <- Clinical.data.subset.TS
 colnames(TS.Surv) <- c("Time","Status","Group")
-TS.Surv$Time <- as.numeric(as.character(TS.Surv$Time))
+TS.Surv$Time <- TS.Surv$Time
 TS.Surv$Time <- TS.Surv$Time * 365
 TS.Surv <- subset(TS.Surv,TS.Surv$Time > 1)
 TS.Surv$Status <- TS.Surv$Status == 1
@@ -93,7 +98,7 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".",Cancerset,"-",Filtersamples,".MA.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v2.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".",Cancerset,"-",Filtersamples,".MA.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v3.png"),res=600,height=6,width=6,unit="in")  # set filename
 #dev.new()
 ggkm(mfit,
      timeby=12,

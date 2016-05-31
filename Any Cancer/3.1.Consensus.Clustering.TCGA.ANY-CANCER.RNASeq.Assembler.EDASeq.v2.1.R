@@ -30,7 +30,7 @@ source("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 Cancerset <- "BRCA"           # Select the Cancer to use
 Geneset   <- "DBGS3"          # Select the genset to use
 Filter    <- "TRUE"           # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
-BRCA.Filter <- "PCF"          # "PCF" or "BSF" Pancer or Breast specific
+BRCA.Filter <- "BSF2"          # "PCF" or "BSF2" Pancer or Breast specific
 # Load data
 load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Geneset,".RData"))                  # load subset data to cluster
 if (Cancerset == "BRCA"){

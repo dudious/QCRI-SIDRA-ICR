@@ -10,7 +10,7 @@ library(plotrix)
 source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 
 #parameters
-filter.samples = "Luminal"
+filter.samples = "" #"Luminal" OR "Basal-Like" OR "HER2-enriched"
 #gene ordere derived from clustering DEG MAPK MUT/WT in luminal
 up.genes.order <- c("TAOK2","TP53","MAPK3","MAP3K1","MAPT","HSPA1A","FLNB","TAOK3","CRK","RPS6KA2",
                     "MAP2K4","DUSP5","CACNA1D","MAPK8","RASGRP1","CACNA1G")
@@ -49,6 +49,11 @@ MAPKMUT <- read.csv("./3 ANALISYS/DIFFERENTIAL EXPRESSION/15Oct/MAPKs/FinalClass
 rownames(MAPKMUT) <- MAPKMUT$Sample
 MAPKMUT$X <- NULL
 MAPKMUT$Sample <- NULL
+
+#Load master file
+BRCA.master <- read.csv("./3 ANALISYS/MASTER FILES/TCGA.BRCA.BSF2.RNASeq_subset_DBGS3.FLTR.Master.csv",stringsAsFactors = FALSE)
+rownames(BRCA.master) <- BRCA.master$X
+BRCA.master$X <- NULL
 
 #clinical data
 Cancerset      = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
@@ -89,6 +94,9 @@ levels (mutstat$MAP2K4.MAP3K1) <- c(levels (mutstat$MAP2K4.MAP3K1),c("#8b0000","
 mutstat<-mutstat[!is.na(mutstat$MAP2K4.MAP3K1),,drop=F]
 mutstat$MAP2K4.MAP3K1[mutstat$MAP2K4.MAP3K1=="WT"] <- "grey"
 mutstat$MAP2K4.MAP3K1[mutstat$MAP2K4.MAP3K1=="MUT"] <- "#8b0000"
+mutstat$TP53 <- BRCA.master$TP53.NS.mutations[match(rownames(mutstat),rownames(BRCA.master))]
+mutstat$TP53[mutstat$TP53=="WT"] <- "grey"
+mutstat$TP53[mutstat$TP53=="MUT"] <- "#00468b"
 #drop data without mutation data
 RNASeq.subset.UP <- RNASeq.subset.UP[,which(colnames(RNASeq.subset.UP) %in% rownames(mutstat))]
 RNASeq.subset.DOWN <- RNASeq.subset.DOWN[,which(colnames(RNASeq.subset.DOWN) %in% rownames(mutstat))]
@@ -136,14 +144,32 @@ RNASeq.subset.UP <- RNASeq.subset.UP[,rownames(subtype)]
 RNASeq.subset.DOWN <- RNASeq.subset.DOWN[,rownames(subtype)]
 filter.label <- "LUM."
 }
-
+if (filter.samples == "Basal-Like") {
+  subtype <- subtype[subtype$TCGA.PAM50.RMethod.RNASeq=="#da70d6",,drop=FALSE]
+  cluster <- cluster[rownames(subtype),,drop=FALSE]
+  mutstat <- mutstat[rownames(subtype),,drop=FALSE]
+  means.BOTH <- means.BOTH[rownames(subtype),,drop=FALSE]
+  RNASeq.subset.UP <- RNASeq.subset.UP[,rownames(subtype)]
+  RNASeq.subset.DOWN <- RNASeq.subset.DOWN[,rownames(subtype)]
+  filter.label <- "BASAL."
+}
+if (filter.samples == "HER2-enriched") {
+  subtype <- subtype[subtype$TCGA.PAM50.RMethod.RNASeq=="#daa520",,drop=FALSE]
+  cluster <- cluster[rownames(subtype),,drop=FALSE]
+  mutstat <- mutstat[rownames(subtype),,drop=FALSE]
+  means.BOTH <- means.BOTH[rownames(subtype),,drop=FALSE]
+  RNASeq.subset.UP <- RNASeq.subset.UP[,rownames(subtype)]
+  RNASeq.subset.DOWN <- RNASeq.subset.DOWN[,rownames(subtype)]
+  filter.label <- "HER2."
+}
 #color matrix
-mutcolors <- as.character(mutstat$MAP2K4.MAP3K1)
+mapmutcolors <- as.character(mutstat$MAP2K4.MAP3K1)
+tpmutcolors <- as.character(mutstat$TP53)
 clustercolors <- as.character(cluster$Cluster)
 subtypecolors <- as.character(subtype$TCGA.PAM50.RMethod.RNASeq)
 MAPK.color.scale <-  color.scale(means.BOTH$BOTH.rank,extremes=c("#ffc1cb","#ff284d"),na.color=NA)
-color.matrix <- as.matrix(rbind (clustercolors,subtypecolors,mutcolors,MAPK.color.scale))
-rownames(color.matrix) <- c("Cluster","Subtype","MAPK-mutation","MAPK.color.scale")
+color.matrix <- as.matrix(rbind (clustercolors,subtypecolors,mapmutcolors,tpmutcolors,MAPK.color.scale))
+rownames(color.matrix) <- c("Cluster","Subtype","MAPK-mutation","TP53-mutation","MAPK.color.scale")
 
 #reorder rows (genes)
 RNASeq.subset.UP <- RNASeq.subset.UP[up.genes.order,]
@@ -154,7 +180,7 @@ my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-6,-1,length=100),seq(-1,1,length=100),seq(1,6,length=100)))
 
 #dev.new(width=6, height=6)
-png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.UP.rankmixorder.ICR1vs4.png"),res=600,height=6,width=6,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.UP.rankmixorder.ICR1vs4.TP53.png"),res=600,height=6,width=6,unit="in")     # set filename
 heatmap.3(RNASeq.subset.UP,
           main = "SIGN.UP.MUTvsWT",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -184,7 +210,7 @@ dim(RNASeq.subset.UP)
 my.palette <- colorRampPalette(c("red", "yellow", "blue"))(n = 297)
 my.colors = unique(c(seq(-6,-1,length=100),seq(-1,1,length=100),seq(1,6,length=100)))
 #dev.new(width=10, height=10)
-png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.DOWN.rankmixorder.ICR1vs4.png"),res=600,height=6,width=6,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.DOWN.rankmixorder.ICR1vs4.TP53.png"),res=600,height=6,width=6,unit="in")     # set filename
 heatmap.3(RNASeq.subset.DOWN,
           main = "SIGN.DOWN.rev.MUTvsWT",
           col=my.palette,                                     # set color scheme RED High, GREEN low

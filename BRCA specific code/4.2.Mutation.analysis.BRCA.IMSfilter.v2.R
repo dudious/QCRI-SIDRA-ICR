@@ -28,7 +28,7 @@ Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
 K <- 4                        # SET K here
-IMS.filter = "Her2"           # Alterantives "All" , "Luminal" , "Basal", "Her2","LumA","LumB"
+IMS.filter = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2","LumA","LumB"
 
 ## Load Data
 if (Cancerset %in% c("COAD","READ","UCEC")) {

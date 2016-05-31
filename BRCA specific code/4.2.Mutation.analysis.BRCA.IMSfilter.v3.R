@@ -16,7 +16,7 @@
 
 ## Setup environment
 rm(list=ls())
-setwd("c:/Users/whendrickx/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox/BREAST_QATAR/")
  #Dependencies
  required.packages <- c("plyr")
  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -27,8 +27,8 @@ library("plyr")
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 K <- 4                        # SET K here
+IMS.filter = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2","LumA","LumB"
 
 ## Load Data
 if (Cancerset %in% c("COAD","READ","UCEC")) {
@@ -70,6 +70,9 @@ if (Cancerset %in% c("COAD","READ","UCEC")) {
  colnames (Consensus.class) <- c("Patient_ID","Cluster")
  rownames(Consensus.class) <- Consensus.class[,1]
  Consensus.class <- Consensus.class[which(rownames(Consensus.class) %in% as.character(Mutation.selected.data$Patient_ID)),] # drop samples without any mutation data
+ Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"),header=TRUE)
+ rownames(Clinical.data) <- Clinical.data[,1]
+ Clinical.data[,1] <-NULL
  rm(maf.merged.table)
 }
 
@@ -77,7 +80,23 @@ dir.create (paste0("./3 ANALISYS/Mutations/",Cancerset,"/"),showWarnings=FALSE)
 
 # Add Class to mutation data
 Mutation.selected.data$Cluster <- Consensus.class$Cluster [match(Mutation.selected.data$Patient_ID,Consensus.class$Patient_ID)]
+Mutation.selected.data$Subtype <- Clinical.data$TCGA.PAM50.RMethod.RNASeq [match(Mutation.selected.data$Patient_ID,rownames(Clinical.data))]
 Mutation.selected.data <- Mutation.selected.data [-which(is.na(Mutation.selected.data$Cluster)),]
+Mutation.selected.data <- Mutation.selected.data [-which(is.na(Mutation.selected.data$Subtype)),]
+
+
+#Filer  Mutation.selected.data Table by IMS
+if (IMS.filter == "Luminal") {
+  Mutation.selected.data <- Mutation.selected.data[Mutation.selected.data$Subtype %in% c("Luminal A","Luminal B"),]
+} else if (IMS.filter == "Basal"){
+  Mutation.selected.data <- Mutation.selected.data[Mutation.selected.data$Subtype %in% c("Basal-like"),]
+} else if (IMS.filter == "Her2"){
+  Mutation.selected.data <- Mutation.selected.data[Mutation.selected.data$Subtype %in% c("HER2-enriched"),]
+} else if (IMS.filter == "LumA"){
+  Mutation.selected.data <- Mutation.selected.data[Mutation.selected.data$Subtype %in% c("Luminal A"),]
+} else if (IMS.filter == "LumB"){
+  Mutation.selected.data <- Mutation.selected.data[Mutation.selected.data$Subtype %in% c("Luminal B"),]
+}
 
 # split mutation types
 # Raw count
@@ -95,7 +114,7 @@ Mutation.NonSilent.Any<- unique (Mutation.NonSilent[c("Patient_ID","Hugo_Symbol"
 
 save (Mutation.All,Mutation.Missense,Mutation.Silent,Mutation.Nonsense,Mutation.Other,Mutation.NonSilent,
       Mutation.Any,Mutation.Missense.Any,Mutation.Silent.Any,Mutation.NonSilent.Any,
-      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",Geneset,".split.RDATA"))
+      file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".split.RDATA"))
 
 #### ByGene ####
 
@@ -136,13 +155,11 @@ muts.uniquesamples <- Mutation.All[which(!duplicated(Mutation.All$Patient_ID)),c
 sample.cluster.count <- as.data.frame(table(muts.uniquesamples$Cluster))
 colnames (sample.cluster.count) <- c("Cluster","N")
 
-#count(unique(Mutation.All[,c("Patient_ID","Cluster")]),vars ="Cluster")
-
 # Gene mutation freq in percent
 Mutation.Frequency.Gene$N <- sample.cluster.count$N [match(Mutation.Frequency.Gene$Cluster,sample.cluster.count$Cluster)]
-Mutation.Frequency.Gene$Freq.Any.pct <- round((Mutation.Frequency.Gene$Freq.Any / Mutation.Frequency.Gene$N)*100,1)
-Mutation.Frequency.Gene$Freq.Missense.Any.pct <- round((Mutation.Frequency.Gene$Freq.Missense.Any / Mutation.Frequency.Gene$N)*100,1)
-Mutation.Frequency.Gene$Freq.NonSilent.Any.pct <- round((Mutation.Frequency.Gene$Freq.NonSilent.Any / Mutation.Frequency.Gene$N)*100,1)
+Mutation.Frequency.Gene$Freq.Any.pct <- round((Mutation.Frequency.Gene$Freq.Any / Mutation.Frequency.Gene$N)*100)
+Mutation.Frequency.Gene$Freq.Missense.Any.pct <- round((Mutation.Frequency.Gene$Freq.Missense.Any / Mutation.Frequency.Gene$N)*100)
+Mutation.Frequency.Gene$Freq.NonSilent.Any.pct <- round((Mutation.Frequency.Gene$Freq.NonSilent.Any / Mutation.Frequency.Gene$N)*100)
 
 #### ByPAtient ####
 
@@ -180,8 +197,8 @@ Mutation.Frequency.Patient$Freq.NonSilent.Any <- Count.NonSilent.Any.Patient$fre
 
 
 ### Save as R object or CVS ###
-write.csv (Mutation.Frequency.Gene,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".Gene.by.Cluster.csv"))
-write.csv (Mutation.Frequency.Patient,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".Patient.by.Cluster.csv"))
+write.csv (Mutation.Frequency.Gene,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",IMS.filter ,".",Geneset,".Gene.by.Cluster.csv"))
+write.csv (Mutation.Frequency.Patient,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutations.TCGA.",Cancerset,".",IMS.filter ,".",Geneset,".Patient.by.Cluster.csv"))
 save (Mutation.Frequency.Gene,Mutation.Frequency.Patient,sample.cluster.count,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".",IMS.filter,".",Geneset,".Frequencies.RDATA"))
 
 

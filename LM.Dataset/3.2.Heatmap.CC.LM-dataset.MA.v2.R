@@ -33,10 +33,11 @@ K <- 4             # SET K here
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/",Cancerset,".MA.k7.",Geneset,".reps5000.k=4.consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
+Consensus.class<-Consensus.class[-nrow(Consensus.class),]
 load (paste0("./2 DATA/SUBSETS/",Cancerset,"/",Cancerset,".MA.subset.",Geneset,".RData"))
 MA.subset <- as.matrix(MA.subset)
 load (paste0("./3 ANALISYS/CLUSTERING/MA/",Cancerset,"/",Cancerset,".MA.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
-load ("./2 DATA/LM.BRCA/LM.Dataset.split.Rdata") 
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.fixed.Rdata") 
 
 ## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
@@ -52,7 +53,7 @@ MA.subset$Row.names <- NULL
 MA.subset$PatientID <- NULL
 
 #Rename ICR clusters
-MA.subset <- MA.subset[-1783,] # remove ALL-NA sample
+#MA.subset <- MA.subset[-1783,] # remove ALL-NA sample
 Cluster.order <- data.frame(Group=MA.subset[,ncol(MA.subset)], avg=rowMeans (MA.subset[,1:(ncol(MA.subset)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
 Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
@@ -102,9 +103,9 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png(paste0("./4 FIGURES/Heatmaps/Heatmap.MA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=7,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.MA.",Cancerset,".",Geneset,".new.png"),res=600,height=6,width=7,unit="in")     # set filename
 heatmap.2(MA.bygene.matrix,
-          main = paste0("Heatmap MA - ",Geneset," sel., K=",K),
+          #main = paste0("Heatmap MA - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme red High, Yellow low
           breaks=my.colors,                                 
           ColSideColors=patientcolors,      #set goup colors                 

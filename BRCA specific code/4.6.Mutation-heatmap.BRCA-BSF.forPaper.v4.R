@@ -29,7 +29,7 @@ source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 Cancerset      = "BRCA.BSF2"   # FOR BRCA use BRCA.PCF or BRCA.BSF
 Geneset        = "DBGS3.FLTR"  # SET GENESET HERE 
 matrix.type    = "NonSilent"   # Alterantives "Any" , "Missense" , "NonSilent"
-plot.type      = "db.test"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
+plot.type      = "fisher"     # Alterantives "low" , "high" , "373genes"  ,"auto"," selected", "db.test", "db.test.strict", "chisqr"
 IMS.filter     = "All"         # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 cluster.select = "1vs4"         # Alternatives "1vs4" , "All"
 gene.filter    = "FALSE"        # Alternatives "TRUE" , "FALSE"
@@ -56,7 +56,7 @@ load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerse
 
 #mutation deciles
 Mut.freq.decile <- Mutation.Frequency.Patient[,c("Patient_ID","Freq.NonSilent")]
-Mut.freq.decile <- rbind(Mut.freq.decile,c("TCGA-E9-A54Y",0.0))
+#Mut.freq.decile <- rbind(Mut.freq.decile,c("TCGA-E9-A54Y",0.0))
 rownames(Mut.freq.decile) <- Mut.freq.decile$Patient_ID
 class(Mut.freq.decile$Freq.NonSilent) <- "numeric"
 Mut.freq.decile$decile <- with(Mut.freq.decile,cut(Freq.NonSilent,breaks=quantile(Freq.NonSilent, type=5 , probs=seq(0,1, by=0.1)), 
@@ -92,6 +92,7 @@ genes.mutations.selected = genes.mutations[,colnames(genes.mutations) %in% selec
 genes.mutations.dbtest = genes.mutations[,colnames(genes.mutations) %in% db.test.significant.variation.table$Gene]
 genes.mutations.dbtest.strict = genes.mutations[,colnames(genes.mutations) %in% db.test.strict.significant.variation.table$Gene]
 genes.mutations.chisqr = genes.mutations[,colnames(genes.mutations) %in% chisq.significant.variation.table$Gene]
+genes.mutations.fisher = genes.mutations[,colnames(genes.mutations) %in% fisher.significant.variation.table$Gene]
 
 if (plot.type == "low"){allmuts.mutatedgenes <- genes.mutations.low}
 if (plot.type == "high"){allmuts.mutatedgenes <- genes.mutations.high}
@@ -101,6 +102,7 @@ if (plot.type == "db.test.strict"){allmuts.mutatedgenes <- genes.mutations.dbtes
 if (plot.type == "373genes"){allmuts.mutatedgenes <- genes.mutations.373genes}
 if (plot.type == "selected"){allmuts.mutatedgenes <- genes.mutations.selected}
 if (plot.type == "chisqr"){allmuts.mutatedgenes <- genes.mutations.chisqr}
+if (plot.type == "fisher"){allmuts.mutatedgenes <- genes.mutations.fisher}
 allmuts.mutatedgenes[allmuts.mutatedgenes=="MUT"] = 1
 allmuts.mutatedgenes[is.na(allmuts.mutatedgenes)] = 0
 allmuts.mutatedgenes <- as.matrix(allmuts.mutatedgenes)
@@ -230,7 +232,7 @@ match.matrix[match.matrix[,2]==TRUE,2] <- "#9a009a"
 match.matrix[match.matrix[,3]==TRUE,3] <- "#808080"
 match.matrix[match.matrix == FALSE] <- "white"
 match.matrix <- cbind (match.matrix,rep("white",nrow(match.matrix)))
-match.matrix[colnames(genes.mutations.chisqr),4] <- "#ff4a6a"
+match.matrix[which(rownames(match.matrix) %in% colnames(genes.mutations.chisqr)),4] <- "#ff4a6a"
 
 #Plot size automation
 plot.width <- log(ncol(allmuts.mutatedgenes))*4 + 10

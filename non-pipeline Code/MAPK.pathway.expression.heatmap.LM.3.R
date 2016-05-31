@@ -11,7 +11,7 @@ library (data.table)
 source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 
 #parameters
-filter.samples = "Luminal"
+filter.samples = "Basal-Like" #"Luminal" OR "Basal-Like" OR "HER2-enriched"
 genes.probes = "genes"
 
 #load MAPK pathway and MAPKDEG data
@@ -79,12 +79,20 @@ heatmap.table <- heatmap.table[complete.cases(heatmap.table),]
 heatmap.table<-heatmap.table[-which(heatmap.table$subtype=="Normal"),]
 heatmap.table<-heatmap.table[-which(heatmap.table$subtype=="ClaudinLow"),]
 table(heatmap.table$subtype)
-#Filter
+#subtype filter
 filter.label <- ""
 if (filter.samples == "Luminal") {
   heatmap.table <- heatmap.table[heatmap.table$subtype == "LumA" | heatmap.table$subtype == "LumB",]
   filter.label <-"LUM."
-  }
+}
+if (filter.samples == "Basal-Like") {
+  heatmap.table <- heatmap.table[heatmap.table$subtype == "Basal",]
+  filter.label <- "BASAL."
+}
+if (filter.samples == "HER2-enriched") {
+  heatmap.table <- heatmap.table[heatmap.table$subtype == "Her2",]
+  filter.label <- "HER2."
+}
 #heatmap.table <- heatmap.table[heatmap.table$subtype == "LumB",]
 heatmap.table <- heatmap.table[heatmap.table$cluster == "ICR1" | heatmap.table$cluster == "ICR4",]
 

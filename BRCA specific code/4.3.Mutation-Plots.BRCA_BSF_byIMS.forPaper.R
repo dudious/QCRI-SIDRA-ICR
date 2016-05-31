@@ -23,7 +23,7 @@ Cancerset <- "BRCA.BSF2"     # FOR BRCA use BRCA.PCF or BRCA.BSF ,Dont use -GA o
 Geneset = "DBGS3.FLTR"  # SET GENESET HERE !!!!!!!!!!!!!!
 K = 4                   # SET K here
 Plot.type = "NonSilent" # Alterantives "All" , "Any" , "Missense", "NonSilent"
-IMS.filter = "Her2"      # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
+IMS.filter = "Basal"      # Alterantives "All" , "Luminal" , "Basal", "Her2" "Luminal A" "Luminal B"
 stats = ""         # Alterantives : "stats" ""
 
 ## Ines RNASeq Clustering k = 4
@@ -164,7 +164,7 @@ meds.limit = 250
 if (Cancerset == "COAD"){meds.limit = 6*max(meds$med)}
 mean.n = function(x){ return(c(y = 0 , label = round(mean(x),1))) } ## mean
 
-png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".",IMS.filter,".",stats,".png"), height = 1000, width= blot.width)   #set filename
+png(paste0("./4 FIGURES/Mutation Plots/Mutations.TCGA.",Cancerset,".",Geneset,".",Plot.type,".",IMS.filter,".",stats,".redo.png"), height = 1000, width= blot.width)   #set filename
 cluster.order = c("ICR4", "ICR3", "ICR2", "ICR1")
 colors = c("blue", "green", "orange", "red")
 gg = ggplot(numMuts.blot, aes(cluster, count, fill=cluster)) +
