@@ -24,7 +24,7 @@ setwd("~/Dropbox/BREAST_QATAR/")
 library("plyr")
 
 # Set Parameters
-Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
+Cancerset <- "OV"           # do not use -GA or -hiseq (data is merged)
 BRCA.Filter <- "BSF2"         # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
 IMS.filter = "All"            # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
