@@ -51,7 +51,7 @@ MAPKMUT$X <- NULL
 MAPKMUT$Sample <- NULL
 
 #Load master file
-BRCA.master <- read.csv("./3 ANALISYS/MASTER FILES/TCGA.BRCA.BSF2.RNASeq_subset_DBGS3.FLTR.Master.csv",stringsAsFactors = FALSE)
+BRCA.master <- read.csv("./3 ANALISYS/MASTER FILES/TCGA.BRCA.BSF2.RNASeq_subset_DBGS3.FLTR.Master.Summary.csv",stringsAsFactors = FALSE)
 rownames(BRCA.master) <- BRCA.master$X
 BRCA.master$X <- NULL
 
@@ -177,10 +177,10 @@ RNASeq.subset.DOWN <- RNASeq.subset.DOWN[down.genes.order,]
 
 #heatmap UP
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
-my.colors = unique(c(seq(-6,-1,length=100),seq(-1,1,length=100),seq(1,6,length=100)))
+my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,0.5,length=100),seq(0.5,4,length=100)))
 
 #dev.new(width=6, height=6)
-png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.UP.rankmixorder.ICR1vs4.TP53.png"),res=600,height=6,width=6,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.UP.rankmixorder.ICR1vs4.TP53.HC.png"),res=600,height=6,width=6,unit="in")     # set filename
 heatmap.3(RNASeq.subset.UP,
           main = "SIGN.UP.MUTvsWT",
           col=my.palette,                                     # set color scheme RED High, GREEN low
@@ -207,10 +207,9 @@ dev.off()
 dim(RNASeq.subset.UP)
 
 #heatmap DOWN
-my.palette <- colorRampPalette(c("red", "yellow", "blue"))(n = 297)
-my.colors = unique(c(seq(-6,-1,length=100),seq(-1,1,length=100),seq(1,6,length=100)))
+#SAME as above
 #dev.new(width=10, height=10)
-png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.DOWN.rankmixorder.ICR1vs4.TP53.png"),res=600,height=6,width=6,unit="in")     # set filename
+png(paste0("./4 FIGURES/Heatmaps/DEG_heatmap.TCGA.",filter.label,"SIGN.DOWN.rankmixorder.ICR1vs4.TP53.HC.png"),res=600,height=6,width=6,unit="in")     # set filename
 heatmap.3(RNASeq.subset.DOWN,
           main = "SIGN.DOWN.rev.MUTvsWT",
           col=my.palette,                                     # set color scheme RED High, GREEN low

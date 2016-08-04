@@ -276,7 +276,7 @@ if (GOF == "TP53") {y.value = 110}
 if (GOF == "MAP3K1") {y.value = 20}
 if (GOF == "MAP2K4") {y.value = 15}
 
-#creat grid plot of all mutation types en molecular subtypes (stacked bar chart)
+#create grid plot of all mutation types en molecular subtypes (stacked bar chart)
 
 png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor",".png", sep=""), height = 500, width= 2000)
  gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
@@ -351,9 +351,9 @@ dev.off()
 #simplyfy to all subtypes
 
 blot.df.stack.noIMS <- blot.df.stack[blot.df.stack$Molecular_Subtype=="All Subtypes",]
-if (GOF == "TP53") {y.value = 110}
+if (GOF == "TP53") {y.value = 70}
 if (GOF == "MAP3K1") {y.value = 15}
-if (GOF == "MAP2K4") {y.value = 15}
+if (GOF == "MAP2K4") {y.value = 7}
 if (GOF == "MAPX") {y.value = 20}
 #simplyfy to all mutation types 
 
@@ -364,7 +364,7 @@ test.trend <- prop.trend.test(blot.df$Mutation_Count,blot.df$Group_Count)
 png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stacked.scaled.png", sep=""), height = 500, width= 700)
 gg = ggplot(blot.df.stack.noIMS, aes(x = Cluster_Assignment, y = scaled.freq , fill = Mutation_Type )) + #, colour = Molecular_Subtype
   geom_bar(stat="identity",size=0,width=0.8) + #position="dodge",drop=FALSE,ylim=c(0,100)
-  xlab("ICR Cluster Assignment") + ylab("Mutation Frequency") + theme_bw() +
+  xlab("ICR Cluster Assignment") + ylab("Mutation Frequency (%)") + theme_bw() +
   scale_fill_manual(values = MUT_colors) +
   scale_colour_manual(values = IMS_colors) +
   theme(strip.text.x = element_text(size = 20),strip.text.y = element_text(size = 20)) +
@@ -373,8 +373,8 @@ gg = ggplot(blot.df.stack.noIMS, aes(x = Cluster_Assignment, y = scaled.freq , f
   ylim(0,y.value) +
   ggtitle((paste0(GOF,".",Cancerset,".",Geneset,"Scaled.By.IMS.stacked"))) + 
   theme(plot.title = element_text(vjust = 3))+
-  annotate("text", label = paste0("trend : p = ",signif(test.trend.all$p.value,digits=3)), size = 6, x=1.5 , y = y.value) #(nlevels(blot.df$Cluster_Assignment)-1)
-  #geom_text(label=paste0(blot.df$Mutation_Frequency," %"), size = 6,y = blot.df$Mutation_Frequency+1)
+  annotate("text", label = paste0("trend : p = ",signif(test.trend.all$p.value,digits=3)), size = 6, x=1.5 , y = y.value) + #(nlevels(blot.df$Cluster_Assignment)-1)
+  annotate("text", label = blot.df$Mutation_Frequency, size = 6, x=blot.df$Cluster_Assignment , y = blot.df$Mutation_Frequency+1)
 print(gg)
 dev.off()
 

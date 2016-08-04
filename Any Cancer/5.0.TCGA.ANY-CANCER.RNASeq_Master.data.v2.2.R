@@ -155,8 +155,9 @@
   Master.file$Row.names <- NULL
   
 
-# export data to txt and excel
-write.csv (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.csv"),row.names = TRUE);
+# export data to Rdata , csv and excel
+save (Master.file,file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.Summary.Rdata"))
+write.csv (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.Summary.csv"),row.names = TRUE);
 #write.xlsx (Master.file, file = paste0("./3 ANALISYS/MASTER FILES/TCGA.",Cancerset,".RNASeq_subset_",Geneset,".Master.xlsx"), sheetName ="RNASeq ISGS.Master data", row.names=TRUE)
 
 #multivariate analysis

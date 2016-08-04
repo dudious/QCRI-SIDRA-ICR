@@ -16,7 +16,7 @@
 
 ## Setup environment
 rm(list=ls())
-setwd("c:/Users/whendrickx/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox/BREAST_QATAR/")
  #Dependencies
  required.packages <- c("plyr")
  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -25,9 +25,9 @@ library("plyr")
 
 # Set Parameters
 Cancerset <- "BRCA"           # do not use -GA or -hiseq (data is merged)
-BRCA.Filter <- "BSF2"          # "PCF" or "BSF" Pancer or Breast specific
+BRCA.Filter <- "BSF2"         # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3.FLTR"       # SET GENESET HERE !!!!!!!!!!!!!!
-IMS.filter = "All"      # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
+IMS.filter = "All"            # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 K <- 4                        # SET K here
 
 ## Load Data
@@ -78,6 +78,11 @@ dir.create (paste0("./3 ANALISYS/Mutations/",Cancerset,"/"),showWarnings=FALSE)
 # Add Class to mutation data
 Mutation.selected.data$Cluster <- Consensus.class$Cluster [match(Mutation.selected.data$Patient_ID,Consensus.class$Patient_ID)]
 Mutation.selected.data <- Mutation.selected.data [-which(is.na(Mutation.selected.data$Cluster)),]
+
+Mutation.gene.freq <- count(unique(Mutation.selected.data[,c("Patient_ID","Hugo_Symbol")]),vars=c("Hugo_Symbol"))
+Mutation.gene.freq$PCTofN <- round(Mutation.gene.freq$freq/length(unique(Mutation.selected.data$Patient_ID))*100,2)
+nrow(Mutation.gene.freq[Mutation.gene.freq$PCTofN>0.5,])
+write.csv(Mutation.gene.freq,file=paste0("./3 ANALISYS/Mutations/",Cancerset,"/Mutation.Data.TCGA.",Cancerset,".Gene.mutation.frequency.csv"),row.names = FALSE)
 
 # split mutation types
 # Raw count

@@ -191,13 +191,14 @@ ggkm <- function(sfit,
   } else {
     Factor <- factor(summary(sfit,times = times,extend = TRUE)$strata[subs3])
   }
-  
+  #browser()
   if(table) {
     risk.data <- data.frame(
       strata = Factor,
       time = summary(sfit,times = times,extend = TRUE)$time[subs3],
       n.risk = summary(sfit,times = times,extend = TRUE)$n.risk[subs3]
     )
+    risk.data$n.risk[seq(1,length(risk.data$n.risk),by=11)] <- sfit$n #fix bug in summary
     risk.data$strata <- factor(risk.data$strata, levels=rev(levels(risk.data$strata)))
     
     data.table <- ggplot(risk.data,aes(x = time, y = strata, label = format(n.risk, nsmall = 0))) +
