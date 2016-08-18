@@ -14,7 +14,8 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+#setwd("~/Dropbox/BREAST_QATAR/")
+setwd("f:/DropBox Wouter/Dropbox (TBI-Lab)/BREAST_QATAR/")
 # Dependencies
 required.packages <- c("beepr")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -22,9 +23,9 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("beepr")
 
 ## Parameters
-Cancerset      = "OV"
+Cancerset      = "BRCA"
 Geneset        = "DBGS3.FLTR"
-BRCA.Filter    = "BSF2"
+BRCA.Filter    = "PCF"
 matrix.type    = "NonSilent"         # Alterantives "Any" , "Missense", "NonSilent"
 IMS.filter     = "All"           # Alterantives "All" , "Luminal" , "Basal", "Her2" ,"LumA" ,"LumB"
 selected.genes = c("TP53","MAP2K4","MAP3K1","CTCF","FCGBP")

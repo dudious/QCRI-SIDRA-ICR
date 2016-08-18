@@ -54,8 +54,8 @@ print (time)
 
 # prepare and save data
 
+dir.create(Download.path, showWarnings = FALSE)
 data <- GDCprepare(query,
                    save = TRUE,
                    save.filename = paste0(Download.path,Download.file,".RDA"))
-
 Matrix <- assay(data,"raw_counts")
