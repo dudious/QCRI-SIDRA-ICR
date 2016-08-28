@@ -1,10 +1,10 @@
 #################################################################
 ###
-### This Script creates a subset of the MA and RNAseq data 
+### This Script creates a subset RNAseq AND/OR MA data 
 ### for a selected set  genes.(Gene_selection_XXX.txt)
 ### source data :
 ### "./2 DATA/TCGA ",Cancerset," MA/",Cancerset,".MA.TCGA.ASSEMBLER.CLEANED.RData" 
-### "./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData"
+### "./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".NORMALIZED.LOG2.RData"
 ### "./2 DATA/SUBSETS/Gene_selection_xxx.txt" (SELECTED GENES)
 ### Results are saved in
 ### ./2 DATA/SUBSETS/
@@ -19,20 +19,19 @@ rm(list=ls())
 setwd("~/Dropbox/BREAST_QATAR")
 
 # Parameters
+DL.Method = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
 Cancerset <- "BRCA"
 Geneset <- "DBGS3"
 Genedatabase <- "Gene_selection_v2.6.txt"
-MA.Data <- "YES"
-#Extra.gene <- "PTX3"
+MA.Data <- "NO"
 
 # Load data
 gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
 gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
-# add a gene
-#gene.list.selected <- c(gene.list.selected,Extra.gene)
+
 # RNAseq
 ## load data
-load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData"))
+load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".NORMALIZED.LOG2.RData"))
 
 
 # check availabilety of the genes in the dataset
@@ -50,8 +49,8 @@ print ("Genes missing for RNASeq :")
 print (unavailable.genes.RNAseq)
 
 # save subsetted data
-dir.create(paste0("./2 DATA/SUBSETS/",Cancerset,"/"), showWarnings = FALSE)
-save (RNASeq.subset,file=paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Geneset,"vs",Extra.gene,".RData"))    #adjust output file names here !!!!!
+dir.create(paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/"), showWarnings = FALSE)
+save (RNASeq.subset,file=paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Geneset,".RData"))    #adjust output file names here !!!!!
 
 # Micro Array
 if (MA.Data == "YES"){
@@ -73,7 +72,7 @@ if (MA.Data == "YES"){
   print (unavailable.genes.MA)
   
   # save subsetted data
-  dir.create(paste0("./2 DATA/SUBSETS/",Cancerset,"/"), showWarnings = FALSE)
-  save (MA.subset,file=paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".MA.subset.",Geneset,"vs",Extra.gene,".RData"))                #adjust output file names here !!!!!
+  dir.create(paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/"), showWarnings = FALSE)
+  save (MA.subset,file=paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/TCGA.",Cancerset,".MA.subset.",Geneset,".RData"))                #adjust output file names here !!!!!
   
 }

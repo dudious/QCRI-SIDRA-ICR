@@ -26,7 +26,7 @@ library("mygene")
 source("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
    
 # Set Parameters
-Cancerset = "THCA"
+Cancerset = "SARC"
 DL.Method = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
 Parent.Cancerset <- substring(Cancerset,1,4)
 Seq.tech = ""
