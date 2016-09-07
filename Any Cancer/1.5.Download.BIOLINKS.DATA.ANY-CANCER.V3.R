@@ -9,8 +9,8 @@
 ### ../2 DATA/TCGA RNAseq/RNASeq_"Cancerset"_BIOLINKS/... (PROCESSED)
 ### ../2 DATA//Clinical Information/",Cancerset,"/BIOLINKS/... (indexed and XML versions)
 ### File to use :
-### ../2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_BIOLINKS/",Cancerset,".RNASeq.TCGA.BIOLINKS.DATA.RDA"
-### Parameters to set : Cancerset, Download-source
+### ../2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_BIOLINKS/Cancerset,".RNASeq.",download.source,".BIOLINKS.",sample.types,".DATA"
+### Parameters to set : Cancerset, Download-source, sample.types
 ###
 #################################################################
 
@@ -34,7 +34,8 @@ library("TCGAbiolinks")
 
 # Set Parameters
 download.source     <- "TCGA"
-Cancerset           <- "LAML"
+Cancerset           <- "UVM"
+sample.types        <- "Selected" #Alternatives TP , TP_TM , Selected
 
 print (paste0("Downloading ",Cancerset," Data from ",download.source," using :"))
 print (paste0("TCGAbiolinks version : ",packageVersion("TCGAbiolinks")))
@@ -42,7 +43,7 @@ print (paste0("SummarizedExperiment : ",packageVersion("SummarizedExperiment")))
 
 # Paths and flies
 Download.path       <- paste0("./2 DATA/",download.source," RNAseq/RNASeq_",Cancerset,"_BIOLINKS/")
-Download.file       <- paste0(Cancerset,".RNASeq.",download.source,".BIOLINKS.DATA")  
+Download.file       <- paste0(Cancerset,".RNASeq.",download.source,".BIOLINKS.",sample.types,".DATA")  
 
 # Download RNASeq data
 start.time <- Sys.time ()
@@ -56,13 +57,32 @@ start.time <- Sys.time ()
 #                  sample.type = "Primary solid Tumor")
 
 ## HARMONIZED
-query <- GDCquery(project = paste0(download.source,"-",Cancerset),
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - Counts",
-                  sample.type = "Primary solid Tumor")
+if (sample.types=="TP"){
+  query <- GDCquery(project = paste0(download.source,"-",Cancerset),
+                   data.category = "Transcriptome Profiling",
+                   data.type = "Gene Expression Quantification", 
+                   workflow.type = "HTSeq - Counts",
+                    sample.type = c("Primary solid Tumor"))
+}
+if (sample.types=="TP_TM"){
+  query <- GDCquery(project = paste0(download.source,"-",Cancerset),
+                    data.category = "Transcriptome Profiling",
+                    data.type = "Gene Expression Quantification", 
+                    workflow.type = "HTSeq - Counts",
+                    sample.type = c("Primary solid Tumor","Metastatic"))
+}
+if (sample.types=="Selected"){
+  query <- GDCquery(project = paste0(download.source,"-",Cancerset),
+                    data.category = "Transcriptome Profiling",
+                    data.type = "Gene Expression Quantification", 
+                    workflow.type = "HTSeq - Counts",
+                    sample.type = c("Primary solid Tumor","Recurrent Solid Tumor","Additional - New Primary",
+                                    "Metastatic","Additional Metastatic","Solid Tissue Normal"))
+}
 
-GDCdownload(query,directory="./2 DATA/GDCdata/")
+GDCdownload(query,
+            directory="./2 DATA/GDCdata/",
+            method = "api")
 end.time <- Sys.time ()
 time <- end.time - start.time 
 print (time)

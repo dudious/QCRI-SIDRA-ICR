@@ -26,8 +26,10 @@ library("mygene")
 source("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
    
 # Set Parameters
-Cancerset = "PRAD"
-DL.Method = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
+Cancerset           = "COAD"
+sample.types        = "TP" #Alternatives TP , TP_TM , Seleceted
+DL.Method           = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
+
 Parent.Cancerset <- substring(Cancerset,1,4)
 Seq.tech = ""
 if (substring(Cancerset,6,nchar(Cancerset))=="hiseq") {Seq.tech = ".hiseq"}
@@ -84,7 +86,7 @@ if (DL.Method=="ASSEMBLER"){
   #load(paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.ASSEMBLER.PRENORM.RData"))                            # Restore prenormalisation Data
 }
 if (DL.Method=="BIOLINKS"){
-  load(paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_BIOLINKS/",Cancerset,".RNASeq.TCGA.",DL.Method,".DATA.RDA"))
+  load(paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_BIOLINKS/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".DATA.RDA"))
   RNASeq.DATA.matrix <- assay(data)
   gene.IDs <- queryMany(rownames(RNASeq.DATA.matrix), scopes="ensembl.gene", fields=c("symbol","entrezgene"), species="human")
   gene.table <- as.data.frame(gene.IDs)
@@ -109,7 +111,7 @@ if (DL.Method=="BIOLINKS"){
   #generate numeric matrix
   RNASeq.DATA <- as.matrix(RNASeq.DATA.table)
   mode(RNASeq.DATA) <- "numeric"
-  save(RNASeq.DATA,file=paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".PRENORM.RData"))             # prenormalized version
+  save(RNASeq.DATA,file=paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".PRENORM.RData"))             # prenormalized version
   #load(paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".PRENORM.RData")) 
 }
   
@@ -133,6 +135,6 @@ RNASeq.NORM <- floor(RNASeq.NORM.quantiles)
 RNASeq.NORM_Log2<-log(RNASeq.NORM+1,2)
 
 # Save Data
-save(RNASeq.NORM,file=paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".NORMALIZED.RData"))             # without log2 transformation
-save(RNASeq.NORM_Log2,file=paste0("././2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".NORMALIZED.LOG2.RData")) # with log2 transformation: the matrix to use
+save(RNASeq.NORM,file=paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".NORMALIZED.RData"))             # without log2 transformation
+save(RNASeq.NORM_Log2,file=paste0("././2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".NORMALIZED.LOG2.RData")) # with log2 transformation: the matrix to use
 
