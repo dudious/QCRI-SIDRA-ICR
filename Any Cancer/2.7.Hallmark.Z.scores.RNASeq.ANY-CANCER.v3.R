@@ -7,7 +7,8 @@
 
 # Setup environment
 rm(list=ls())
-setwd("f:/DropBox Wouter/Dropbox (TBI-Lab)/BREAST_QATAR/")
+#setwd("f:/DropBox Wouter/Dropbox (TBI-Lab)/BREAST_QATAR/")
+setwd("/mnt3/wouter/BREAST-QATAR/")
 #setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 #Dependencies
 required.packages <- c("corrplot")
@@ -16,23 +17,23 @@ if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
 # Set Parameters
-Cancerset <- "LGG"           # do not use -GA or -hiseq (data is merged)
+DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
+sample.types = "Selected" #Alternatives TP , TP_TM , Selected
+Cancersets <- "ALL"           # do not use -GA or -hiseq (data is merged)
 #BRCA.Filter <- "PCF"         # "PCF" or "BSF" Pancer or Breast specific
 Geneset <- "DBGS3"
-Genedatabase <- "Gene_selection_v2.6.txt"
+Genedatabase <- "Gene_selection_v2.7.txt"
 
 # Load immune genes
 gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
 gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
 # load hallmark pathways data
-load("./2 Data/Hallmark Cancer Pathways/cancer.halmark.pathways.R")
+load("./2 DATA/Hallmark Cancer Pathways/cancer.halmark.pathways.R")
 hallmark.selected <- read.csv("./2 DATA/Hallmark Cancer Pathways/cancer.hallmark.pathways.selection.csv",header = FALSE,stringsAsFactors = FALSE)[,c(1,2)]
 colnames(hallmark.selected) <- c("name","selected")
 # selected pathways only
 hallmark.selected.pathways <- hallmark.selected[hallmark.selected$selected == "1","name"]
 hallmark.pathways <- hallmark.pathways[hallmark.selected.pathways]
-# load RNASeq data
-load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData"))
 # add selected IPA pathways
 IPA.pathways <- read.csv("./2 DATA/pathways_from_IPA_selection.csv",header = TRUE,stringsAsFactors = FALSE)
 IPA.pathways.selected <- IPA.pathways[IPA.pathways$Selected=="1",]
@@ -47,6 +48,26 @@ Selected.pathways$BARRIER_GENES <- c("FLG","TACSTD2","DSC3","DST","DSP","PPL","P
 # add MAPK ICR1vs4 luminal mutation signature
 Selected.pathways$MAPK_UP_GENES <- c("TAOK2","TP53","MAPK3","MAP3K1","MAPT","HSPA1A","FLNB","TAOK3","CRK","RPS6KA2","MAP2K4","DUSP5","CACNA1D","MAPK8","RASGRP1","CACNA1G")
 Selected.pathways$MAPK_DOWN_GENES <- c("CACNG6","CACNA1B","CACNA2D3","FASLG","RASGRF1","JUN","JUND","DUSP16","PPM1B","SOS1","FGF12","RASGRP2","PRKCB","MAP4K1","PTPN7","GADD45G","DDIT3","DUSP8","DUSP10","FGFR4","FGF14","FGF13","MAP2K6","DUSP2")
+
+# DO ALL
+TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
+if (Cancersets == "ALL") { 
+  Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
+}
+N.sets = length(Cancersets)
+for (i in 1:N.sets) {
+  Cancerset = Cancersets[i]
+  if (Cancerset %in% c("LAML","FPPP")) {next}
+  Parent.Cancerset <- substring(Cancerset,1,4)
+
+# load RNASeq data
+if (DL.Method == "BIOLINKS") {
+  load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".NORMALIZED.TP_FILTERED_LOG2.RData"))
+  RNASeq.NORM_Log2<-RNASeq.NORM.TP_Log2
+  rm(RNASeq.NORM.TP_Log2)
+  }
+if (DL.Method == "ASSEMBLER") {load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".NORMALIZED_LOG2.RData"))}
+print (paste0(Cancerset," RNASeq data Loaded..."))
 # check availabilety of the Immune genes in the dataset
 available.genes.RNAseq <- gene.list.selected[which(gene.list.selected %in% rownames(RNASeq.NORM_Log2))]
 unavailable.genes.RNAseq <- gene.list.selected[-which(gene.list.selected %in% rownames(RNASeq.NORM_Log2))]
@@ -63,6 +84,7 @@ for(i in 1:length(Selected.pathways)){
   assign(paste(names(Selected.pathways[i]),".Expresion.matrix", sep=""),RNASeq.NORM_Log2[present.genes,])
   Selected.pathways.Zscores[,names(Selected.pathways[i])] <- colMeans(RNASeq.NORM_Log2[present.genes,],na.rm = TRUE)
 }
+print (paste0(Cancerset," Pathways Z-scores calculated..."))
 
 # Correlation plot
 Selected.pathways.spearcor <- cor (Selected.pathways.Zscores,method="spearman")
@@ -86,7 +108,7 @@ cor.mtest <- function(mat, conf.level = 0.95) {
 }
 Selected.pathways.spearcor.sign <- cor.mtest(Selected.pathways.spearcor, 0.95)
 
-png(paste0("./4 FIGURES/CORRELATION/Selected_Pathways/correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
+png(paste0("./4 FIGURES/CORRELATION/Selected_Pathways/",DL.Method,".",sample.types,".correlation.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")  #adjust output file names here !!!!!
 cex.before <- par("cex")
 par(cex = 0.35)
 col1 = colorRampPalette(c("blue", "white", "#009900"))
@@ -118,4 +140,6 @@ colnames(p.value.matrix)=colnames(Selected.pathways.spearcor)
 rownames(p.value.matrix)=rownames(Selected.pathways.spearcor)
 immune.data <- data.frame(correlation = Selected.pathways.spearcor["IMMUNE_GENES_DBGS3",],
                            p.value = p.value.matrix["IMMUNE_GENES_DBGS3",])
-save(immune.data,file=paste0("./3 ANALISYS/Pathway correlation/Immune.correlation.",Cancerset,".",Geneset,".RData"))
+save(immune.data,file=paste0("./3 ANALISYS/Pathway correlation/",DL.Method,".",sample.types,"Immune.correlation.",Cancerset,".",Geneset,".RData"))
+print (paste0(Cancerset," Correlation data saved."))
+}
