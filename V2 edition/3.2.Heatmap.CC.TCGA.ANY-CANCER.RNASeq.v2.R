@@ -16,7 +16,7 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 #Dependencies
 required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -31,7 +31,7 @@ K <- 4                           # SET K here
 
 # Load Data
 Parent.Geneset <- substring(Geneset,1,5)
-load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
+load (paste0("./2 DATA/SUBSETS/ASSEMBLER/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
 RNASeq.subset <- as.matrix(RNASeq.subset)
 if (Cancerset == "BRCA"){
   if (substring(Geneset,7,10)=="FLTR"){
