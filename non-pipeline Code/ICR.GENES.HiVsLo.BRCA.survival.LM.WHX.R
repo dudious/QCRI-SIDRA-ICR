@@ -18,23 +18,29 @@ source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 
 # Set Parameters
-Filtersamples     = "Filtered"    # altervatives : Filtered , UnFiltered
 Surv.cutoff.years = 10            # SET cut-off
-Gene              = "IDO1"
+Gene              = "IS"
 Division          = "Quantile"
 
 # Load data files
-load ("./2 DATA/TCGA RNAseq/RNASeq_BRCA_EDASeq/BRCA.RNASeq.TCGA.ASSEMBLER.NORMALIZED.LOG2.RData")
-imm.score <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.BRCA.DBGS3.csv")
-RNASeq.NORM_Log2.table <- as.data.frame(t(RNASeq.NORM_Log2))
-RNASeq.NORM_Log2.table$ICRscore <- imm.score$unscaled.IS[match(rownames(RNASeq.NORM_Log2.table),imm.score$X)]
-RNASeq.NORM_Log2 <-t(RNASeq.NORM_Log2.table)
-rm(RNASeq.NORM_Log2.table)
-Gene.expression <- (RNASeq.NORM_Log2[Gene,])
-rm(RNASeq.NORM_Log2)
-Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.BSF2.RNASeq_subset_clinicaldata.csv"),header=TRUE)
-rownames(Clinical.data) <- Clinical.data[,1]
-Clinical.data[,1] <-NULL
+load ("./2 DATA/SUBSETS/LM.Dataset/LM.Dataset.MA.subset.DBGS3.RData")
+imm.score <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.LM.Data.csv")
+MA.subset.table <- as.data.frame(t(MA.subset))
+load ("./2 DATA/LM.BRCA/LM.Dataset.split.fixed.Rdata")
+MA.subset <- MA.subset[-1955,]
+MA.subset.table$Gene <- as.character(Gene.Meta.data$Symbol[match(rownames(MA.subset.table),Gene.Meta.data$Affy_Probe_ID)])
+MA.subset.table.bygene <- aggregate(MA.subset.table[],list(MA.subset.table$Gene),FUN=mean)
+rownames(MA.subset.table.bygene) <- MA.subset.table.bygene$Group.1
+MA.subset.table.bygene$Group.1 <- NULL
+MA.subset.table.bygene <- as.data.frame(t(MA.subset.table.bygene))
+MA.subset.table.bygene <- MA.subset.table.bygene[-c(1955,1956),]
+MA.subset.table.bygene$IS <- imm.score$unscaled.IS[match(rownames(MA.subset.table.bygene),imm.score$X)]
+
+#select relevant expression data
+Gene.expression.table <- MA.subset.table.bygene[,Gene,drop = FALSE]
+Gene.expression <- Gene.expression.table[,1]
+names(Gene.expression) <- rownames(Gene.expression.table)
+Clinical.data.subset.TS <- Sample.Meta.data[,c("DMFS_10y_time","DMFS_10y_event")]  # select relevant data
 
 # split into quartiles
 if (Division == "Quantile") {
@@ -46,13 +52,6 @@ if (Division == "Tertile") {
   Gene.HI <- Gene.expression[Gene.expression>quantile(Gene.expression,c(.33333,.66666))["66.666%"]]
 }
 
-# Select relevant clinical data
-if (Filtersamples=="Filtered"){     
-  Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude.post == "No")     # remove excluded patients
-} else if  (Filtersamples=="UnFiltered")
-{Clinical.data.subset <- Clinical.data
-}
-Clinical.data.subset.TS <- Clinical.data.subset[,c("vital_status","death_days_to","last_contact_days_to")]  # select relevant data
 
 # Add quantile to clinical data
 Clinical.data.subset.TS$Quantile <- "Medium"
@@ -65,18 +64,18 @@ cbPalette <- c("#FF0000","#0000FF")
 
 # time / event object creation
 Y <- Surv.cutoff.years * 365
-TS.Alive <- subset(Clinical.data.subset.TS[,c(1,3,4)],Clinical.data.subset.TS$vital_status == "Alive")
+TS.Alive <- subset(Clinical.data.subset.TS[,c(2,1,3)],Clinical.data.subset.TS$DMFS_10y_event == 0)
 colnames(TS.Alive) <- c("Status","Time","Group")
-TS.Alive$Time <- as.numeric(as.character(TS.Alive$Time))
+TS.Alive$Time <- as.numeric(as.character(TS.Alive$Time))*365
 TS.Alive$Time[TS.Alive$Time > Y] <- Y
-TS.Dead <- subset(Clinical.data.subset.TS[,c(1,2,4)],Clinical.data.subset.TS$vital_status == "Dead")
+TS.Dead <- subset(Clinical.data.subset.TS[,c(2,1,3)],Clinical.data.subset.TS$DMFS_10y_event == 1)
 colnames(TS.Dead) <- c("Status","Time","Group")
-TS.Dead$Time <- as.numeric(as.character(TS.Dead$Time))
-TS.Dead$Status[which(TS.Dead$Time> Y)] = "Alive"
+TS.Dead$Time <- as.numeric(as.character(TS.Dead$Time))*365
+TS.Dead$Status[which(TS.Dead$Time> Y)] = 0
 TS.Dead$Time[TS.Dead$Time > Y] <- Y                                                                        
 TS.Surv <- rbind (TS.Dead,TS.Alive)
 TS.Surv$Time <- as.numeric(as.character(TS.Surv$Time))
-TS.Surv$Status <- TS.Surv$Status == "Dead"
+TS.Surv$Status <- TS.Surv$Status == 1
 TS.Surv <- subset(TS.Surv,TS.Surv$Time > 1)             
 
 # survival curve
@@ -84,12 +83,12 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Gene,".HiVsLo.",Division,".TCGA.BRCA.",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Gene,".HiVsLo.",Division,".LM.BRCA.",Surv.cutoff.years,"Y.png"),res=600,height=6,width=6,unit="in")  # set filename
 ggkm(mfit,
      timeby=12,
      ystratalabs=c("High","Low") ,
      ystrataname="Legend",
-     main=paste0("Kaplan-Meier Plot for ",Gene," RNASeq HiVsLo ",Division),
+     main=paste0("KM Plot for ",Gene," RNASeq LM HiVsLo ",Division),
      xlabs = "Time in months",
      cbPalette = cbPalette
 )
@@ -114,3 +113,4 @@ CI   <- round(exp(CI),2)
 print(pvaltxt)
 print(HRtxt)
 print(CI)
+

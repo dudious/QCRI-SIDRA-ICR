@@ -11,7 +11,8 @@
 # Setup environment
 rm(list=ls())
 #setwd("~/Dropbox/BREAST_QATAR")
-setwd("/mnt3/wouter/BREAST-QATAR/")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR")
 ## dependencies
 required.packages <- c("corrplot")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -19,13 +20,14 @@ if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
 
 # Set Parameters
-DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
-sample.types = "Selected" #Alternatives TP , TP_TM , Selected
-Cancersets   = "SKCM"     # Select the Cancer to use
+DL.Method    = "ASSEMBLER" #Choose "ASSEMBLER" or "BIOLINKS"
+sample.types = "TP" #Alternatives TP , TP_TM , Selected
+Cancersets   = "BRCA"     # Select the Cancer to use
 Geneset      = "DBGS3"    # Select the genset to use
 Filter       = "TRUE"     # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
-BRCA.Filter  = "PCF"      # "PCF" or "BSF" Pancer or Breast specific
+BRCA.Filter  = "BSF2"      # "PCF" or "BSF" Pancer or Breast specific
 test         = "pearson"
+colpatern    = colorRampPalette(c("blue", "black", "green"))
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
@@ -71,7 +73,7 @@ png(paste0("./4 FIGURES/CORRELATION/",Geneset,"/",DL.Method,".",sample.types,".R
 #dev.new()
 cex.before <- par("cex")
 par(cex = 0.45)
-col1 = colorRampPalette(c("green", "white", "orange"))
+col1 = colpatern
 lims=c(-1,1)
 if (length(RNASeq.subset.cor[RNASeq.subset.cor<0]) == 0) {lims=c(0,1)} 
 corrplot.mixed (RNASeq.subset.cor,

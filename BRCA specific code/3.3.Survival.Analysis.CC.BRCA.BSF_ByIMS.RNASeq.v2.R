@@ -16,9 +16,9 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 #Dependencies
-required.packages <- c("survival","reshape","ggplot2","plyr","Rcpp","colorspace")
+required.packages <- c("survival","reshape","ggplot2","plyr","Rcpp","colorspace","texreg")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 required.packages.BioC <- c("reshape")
@@ -29,8 +29,9 @@ library(survival)
 library(reshape)
 library(ggplot2)
 library(plyr)
+library(texreg)
 
-source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
+source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
 Cancerset         <- "BRCA.BSF2"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
@@ -59,9 +60,15 @@ if (Filtersamples=="Filtered"){
   {Clinical.data.subset <- Clinical.data
    }
 
+#extra filter for stage
+Clinical.data.subset.F <- Clinical.data.subset[-which(Clinical.data.subset$ajcc_pathologic_tumor_stage=="[Not Available]"),]
+Clinical.data.subset.F <- Clinical.data.subset.F[-which(Clinical.data.subset.F$ajcc_pathologic_tumor_stage=="Stage X"),]
+Clinical.data.subset.F <- Clinical.data.subset.F[-which(Clinical.data.subset.F$ajcc_pathologic_tumor_stage=="Stage IV"),]
+Clinical.data.subset.F <- Clinical.data.subset.F[-which(Clinical.data.subset.F$ajcc_pathologic_tumor_stage=="Stage Tis"),]
+
 #Select data for survival analysis
-Clinical.data.subset.TS <- Clinical.data.subset[,c("vital_status","death_days_to","last_contact_days_to","TCGA.PAM50.RMethod.RNASeq")]  # select relevant data
-Clinical.data.subset.DFS <- Clinical.data.subset[,c("tumor_status","last_contact_days_to")]                 # select relevant data for Desease Free Survival
+Clinical.data.subset.TS <- Clinical.data.subset.F[,c("vital_status","death_days_to","last_contact_days_to","TCGA.PAM50.RMethod.RNASeq")]  # select relevant data
+Clinical.data.subset.DFS <- Clinical.data.subset.F[,c("tumor_status","last_contact_days_to")]                 # select relevant data for Desease Free Survival
 
 # Add Class to clinical data
 Clinical.data.subset.TS <- merge(Clinical.data.subset.TS,Consensus.class["Group"],by="row.names",all.x=TRUE, all.y=FALSE)
@@ -115,7 +122,7 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".TCGA.",Cancerset,"-",Filtersamples,".",IMS.filter,".RNASeq.",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v2.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Km.type,".TCGA.",Cancerset,"-",Filtersamples,".",IMS.filter,".RNASeq.StageFilter",Geneset,".k=",K,".",Surv.cutoff.years,"Y.v2.png"),res=600,height=6,width=6,unit="in")  # set filename
 ggkm(mfit,
      timeby=12,
      ystratalabs=Clusters.names ,

@@ -22,23 +22,47 @@ setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 Filtersamples     = "Filtered" # altervatives : Filtered , UnFiltered
 Surv.cutoff.years = 10       # SET cut-off
 Km.type           = "1vs2vs3vs4"       # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
-Gene              = "MAPKX"
-ICR.filter        = "ALL"
+Gene              = "CXCL9"
+ICR.filter        = "ICR"
+Cancerset         = "BRCA.BSF2"
+IMS.filter        = "ALL"
+Geneset           = "DBGS3.FLTR"
+matrix.type       = "NonSilent"
 
 # Load data files
-load ("./3 ANALISYS/Mutations/BRCA.BSF2/BRCA.BSF2.All.DBGS3.FLTR.Mutation.Matrixes.NonSilent.Rdata")
-MAPKX.MUT <- rownames(genes.mutations.selected[which(genes.mutations.selected[,"MAP3K1"]==1 | genes.mutations.selected[,"MAP2K4"]==1),])
-genes.mutations.selected$MAPKX <- NA
-genes.mutations.selected[MAPKX.MUT,"MAPKX"] <- 1
-patients.MUT <- rownames(genes.mutations.selected[which(genes.mutations.selected[,Gene]==1),])
-patients.WT  <- rownames(genes.mutations.selected[-which(genes.mutations.selected[,Gene]==1),])
-Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.BSF2.RNASeq_subset_clinicaldata.csv"),header=TRUE)
-rownames(Clinical.data) <- Clinical.data[,1]
-Clinical.data[,1] <-NULL
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/BRCA.BSF2/BRCA.BSF2.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000/BRCA.BSF2.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+#combined mutation and CNV datamatix
+load (paste0("./3 ANALISYS/Mutations/",Cancerset,"/",Cancerset,".",IMS.filter,".",Geneset,".Mutation.Matrixes.",matrix.type,".oncoplot.Rdata"))
+#clinical data
+ClinicalData.subset <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_subset_clinicaldata.csv"))                       # Clinical data including IMS
+rownames(ClinicalData.subset) <- ClinicalData.subset$X 
+ClinicalData.subset$X <-NULL
+#clustering Data
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
+
+# select data to plot
+selected.data <- merged.matrix[,"CXCL9"]
+selected.data[selected.data=="MUT"] <- NA
+selected.data <- gsub("MUT;","",as.matrix(selected.data))
+selected.data[selected.data=="HOMDEL"] <- "Deleted"
+selected.data[selected.data=="AMP"] <- "Amplified"
+selected.data <- as.matrix(selected.data)
+selected.data[is.na(selected.data)] <- "Normal"
+
+AMP.patients <- names(selected.data[selected.data[,1]=="Amplified",])
+DEL.patients <- names(selected.data[selected.data[,1]=="Deleted",])
+NOR.patients <- names(selected.data[selected.data[,1]=="Normal",])
+
+
+Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.BRCA.BSF2.RNASeq_subset_clinicaldata.csv"),header=TRUE)
+rownames(Clinical.data) <- Clinical.data[,1]
+Clinical.data[,1] <-NULL
+#Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/BRCA.BSF2/BRCA.BSF2.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000/BRCA.BSF2.TCGA.EDASeq.k7.DBGS3.FLTR.reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+#Consensus.class <- Consensus.class[,-1]
+#colnames (Consensus.class) <- c("Patient_ID","Cluster")
+#rownames(Consensus.class) <- Consensus.class[,1]
 
 # Select relevant clinical data
 if (Filtersamples=="Filtered"){     
@@ -53,22 +77,23 @@ if (ICR.filter != "ALL" ){
 }
 Clinical.data.subset.TS <- Clinical.data.subset[,c("vital_status","death_days_to","last_contact_days_to")]  # select relevant data
 
-# Add MUTSTAT and ICR cluster to clinical data
-Clinical.data.subset.TS$MUTSTAT <- "Unknown"
-Clinical.data.subset.TS$MUTSTAT[rownames(Clinical.data.subset.TS) %in% patients.WT] <- "WT"
-Clinical.data.subset.TS$MUTSTAT[rownames(Clinical.data.subset.TS) %in% patients.MUT] <- "MUT"
+# Add CNA and ICR cluster to clinical data
+Clinical.data.subset.TS$CNA <- "Unknown"
+Clinical.data.subset.TS$CNA[rownames(Clinical.data.subset.TS) %in% AMP.patients] <- "Amplified"
+Clinical.data.subset.TS$CNA[rownames(Clinical.data.subset.TS) %in% DEL.patients] <- "Deleted"
+Clinical.data.subset.TS$CNA[rownames(Clinical.data.subset.TS) %in% NOR.patients] <- "Normal"
 Clinical.data.subset.TS$Cluster <- Consensus.class$Cluster[match(rownames(Clinical.data.subset.TS),rownames(Consensus.class))]
 
-# MUT vs WT
-Clinical.data.subset.TS$Grouping <- Clinical.data.subset.TS$MUTSTAT
-Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Grouping %in% c("MUT","WT"),]
-label = c("Mutated","Wild-Type")
-cbPalette <- c("#0000FF","#FF0000")
+# CNA
+Clinical.data.subset.TS$Grouping <- Clinical.data.subset.TS$CNA
+Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Grouping %in% c("Amplified"),]
+label = c("Amplified")
+cbPalette <- c("red","blue")
 
 if (ICR.filter != "ALL" ){
-  Clinical.data.subset.TS$Grouping <- paste0 (Clinical.data.subset.TS$Cluster,"-",Clinical.data.subset.TS$MUTSTAT)
-  Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Grouping %in% c("ICR1-MUT","ICR1-WT","ICR4-MUT","ICR4-WT"),]
-  label = c("ICR1-Mutated","ICR1-Wild-Type","ICR4-Mutated","ICR4-Wild-Type")
+  Clinical.data.subset.TS$Grouping <- paste0 (Clinical.data.subset.TS$Cluster,"-",Clinical.data.subset.TS$CNA)
+  Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Grouping %in% c("ICR1-Amplified","ICR1-Deleted","ICR4-Amplified","ICR4-Deleted"),]
+  label = c("ICR1-Amplified","ICR1-Deleted","ICR4-Amplified","ICR4-Deleted")
   cbPalette <- c("#0000FF","#FF0000","#8b0000","#00008b")
 }
 
@@ -93,12 +118,12 @@ msurv <- Surv(TS.Surv$Time/30.4, TS.Surv$Status)
 mfit <- survfit(msurv~TS.Surv$Group,conf.type = "log-log")
 
 # plots
-png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Gene,".MUTvsWT.",ICR.filter,".TCGA.BRCA.",Surv.cutoff.years,"Y.v2.png"),res=600,height=6,width=6,unit="in")  # set filename
+png(paste0("./4 FIGURES/KM curves/ggplot.KM.",Gene,".CNA.",ICR.filter,".TCGA.BRCA.",Surv.cutoff.years,".AMP.v2.Y.png"),res=600,height=6,width=6,unit="in")  # set filename
 ggkm(mfit,
      timeby=12,
-     ystratalabs=c("x","y") ,
+     #ystratalabs=label ,
      ystrataname="Legend",
-     main=paste0("Kaplan-Meier Plot for ",Gene," RNASeq MUTvsWT ",ICR.filter),
+     main=paste0("Kaplan-Meier Plot for ",Gene," RNASeq CNA ",ICR.filter),
      xlabs = "Time in months",
      cbPalette = cbPalette
 )
@@ -108,7 +133,7 @@ mdiff <- survdiff(eval(mfit$call$formula), data = eval(mfit$call$data))
 pval <- pchisq(mdiff$chisq,length(mdiff$n) - 1,lower.tail = FALSE)
 pvaltxt <- ifelse(pval < 0.0001,"p < 0.0001",paste("p =", signif(pval, 3)))
 
-TS.Surv$Group <- relevel(as.factor(TS.Surv$Group),"ICR1-WT")
+TS.Surv$Group <- relevel(as.factor(TS.Surv$Group),"Normal")
 mHR <- coxph(formula = msurv ~ Group ,data = TS.Surv)
 mHR.extract <-extract(mHR, include.aic = TRUE,
                       include.rsquared = TRUE, include.maxrs=TRUE,

@@ -16,7 +16,7 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)//BREAST_QATAR/")
 #Dependencies
 required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -25,17 +25,17 @@ library("gplots")
 library("GMD")
 
 # Load Data
-Geneset <- "ISGS" # SET GENESET HERE !!!!!!!!!!!!!!
-K <- 4             # SET K here
+Geneset <- "DBGS1" # SET GENESET HERE !!!!!!!!!!!!!!
+K <- 3             # SET K here
 
-Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.Affy.k7.ISGS.reps5000/GBM.TCGA.MA.Affy.k7.ISGS.reps5000.k=4.consensusClass.csv",header=FALSE) # select source data
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.Affy.k7.ISGS.reps5000/GBM.TCGA.MA.Affy.k7.ISGS.reps5000.k=",K,".consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./2 DATA/SUBSETS/GBM/MA.subset.",Geneset,".RData"))
+load (paste0("./2 DATA/SUBSETS/ASSEMBLER/GBM/TCGA.GBM.MA.subset.",Geneset,".RData"))
 MA.subset <- as.matrix(MA.subset)
 
 ## Code to reorder within cluster, expression data not used
-load ("./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.Affy.k7.ISGS.reps5000/ConsensusClusterObjectAffy.Rdata")
+load ("./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.k7.DBGS1.reps5000/ConsensusClusterObject.Rdata")
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 hhc <- ConsensusClusterObject[[K]]$consensusTree
@@ -60,12 +60,12 @@ MA.subset$PatientID <- NULL
 #Rename ICR clusters
 Cluster.order <- data.frame(Group=MA.subset[,ncol(MA.subset)], avg=rowMeans (MA.subset[,1:(ncol(MA.subset)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
-Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
+Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3"))#,"ICR4"))
 Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character(Cluster.order[1,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,file="./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.Affy.k7.ISGS.reps5000/GBM.TCGA.MA.Affy.k7.ISGS.reps5000.k=4.consensusClass.ICR.csv")       
+write.csv (Consensus.class,file=paste0("./3 ANALISYS/CLUSTERING/MA/GBM/GBM.TCGA.MA.k7.DBGS1.reps5000/GBM.TCGA.MA.k7.DBGS1.reps5000.k=",K,".consensusClass.ICR.csv"))     
 
 #Update Cluster names
 MA.subset$Group <- NULL
@@ -87,15 +87,16 @@ Consensus.class <- Consensus.class[rownames(MA.subset),]
 # Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
 levels (patientcolors$Group) <- c(levels (patientcolors$Group),c("#FF0000","#FFA500","#00FF00","#0000FF"))  #Aply color scheme to patients
-patientcolors$Group[patientcolors$Group=="ICR4"] <- "#FF0000"
-patientcolors$Group[patientcolors$Group=="ICR3"] <- "#FFA500"
+#patientcolors$Group[patientcolors$Group=="ICR4"] <- "#FF0000"
+#patientcolors$Group[patientcolors$Group=="ICR3"] <- "#FFA500"
+patientcolors$Group[patientcolors$Group=="ICR3"] <- "#FF0000"
 patientcolors$Group[patientcolors$Group=="ICR2"] <- "#00FF00"
 patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 #patientcolors$Group <- droplevels(patientcolors$Group)
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png("./4 FIGURES/Heatmaps/Heatmap.MA.TCGA.GBM.ISGS.png",res=600,height=6,width=6,unit="in")     # set filename
+png("./4 FIGURES/Heatmaps/Heatmap.MA.TCGA.GBM.DBGS1.png",res=600,height=6,width=6,unit="in")     # set filename
 heatmap.2(t(MA.subset),
           main = paste0("Heatmap MA - ",Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low
@@ -112,8 +113,10 @@ heatmap.2(t(MA.subset),
           cexRow=1.3,cexCol=0.1,margins=c(2,7),
           Colv=FALSE)                       #warning is normal
 par(lend = 1)
-legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
-       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+#legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
+#       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+legend("topright",legend = c("ICR3","ICR2","ICR1"),
+       col = c("red","green","blue"),lty= 1,lwd = 5,cex = 0.7)
 dev.off()
 ######################
 

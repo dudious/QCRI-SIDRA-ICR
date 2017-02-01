@@ -20,14 +20,14 @@ setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR")
 
 # Parameters
 Cancerset <- "BRCA"
-Geneset <- "CHKPNT_IL"
+Geneset <- "CHKPNT_SLFN"
 Genedatabase <- "Gene_selection_v2.7.txt"
 DL.method <- "ASSEMBLER"
 
 # Load data
 gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
-gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
-
+#gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
+gene.list.selected <- "SLFN11"
 # RNAseq
 ## load data
 load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.method,".NORMALIZED.LOG2.RData"))
@@ -47,6 +47,6 @@ print ("Genes missing for RNASeq :")
 print (unavailable.genes.RNAseq)
 
 # save subsetted data
-dir.create(paste0("./2 DATA/SUBSETS/",Cancerset,"/"), showWarnings = FALSE)
-save (RNASeq.subset,file=paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Geneset,".for_CHKPNT_heatmap.RData"))    #adjust output file names here !!!!!
+dir.create(paste0("./2 DATA/SUBSETS/",DL.method,"/",Cancerset,"/"), showWarnings = FALSE)
+save (RNASeq.subset,file=paste0("./2 DATA/SUBSETS/",DL.method,"/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Geneset,".for_CHKPNT_heatmap.RData"))    #adjust output file names here !!!!!
 

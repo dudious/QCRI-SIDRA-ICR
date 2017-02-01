@@ -1,10 +1,12 @@
+# Setup environment
+rm(list=ls())
 required.packages <- c("forestplot")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library(forestplot)
 
-  HR.table <- read.csv (file="./6 Project details/Paper/OncoImmunology submission/Revised/new images/Forrest.MUTvsWT.plot.csv")
-
+  HR.table <- read.csv (file="./3 ANALISYS/stats.KLRK1.Tertile.csv")
+  HR.table <- HR.table[-which(is.na(HR.table$p.value)),]
 # Cochrane data from the 'rmeta'-package
 cochrane_from_rmeta <- 
   structure(list(

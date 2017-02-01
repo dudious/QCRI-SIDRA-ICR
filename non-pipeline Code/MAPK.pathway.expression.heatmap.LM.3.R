@@ -1,6 +1,6 @@
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 ## dependencies
 required.packages <- c("plotrix","data.table")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -8,10 +8,10 @@ if(length(missing.packages)) install.packages(missing.packages)
 library(plotrix)
 library (data.table)
 
-source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
+source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/heatmap.3.R")
 
 #parameters
-filter.samples = "Basal-Like" #"Luminal" OR "Basal-Like" OR "HER2-enriched"
+filter.samples = "All" #"Luminal" OR "Basal-Like" OR "HER2-enriched"
 genes.probes = "genes"
 
 #load MAPK pathway and MAPKDEG data
@@ -77,7 +77,7 @@ heatmap.table$cluster <- Consensus.class$Group[match(rownames(heatmap.table),row
 heatmap.table <- heatmap.table[complete.cases(heatmap.table),]
 #drop normal-like & Claudine low
 heatmap.table<-heatmap.table[-which(heatmap.table$subtype=="Normal"),]
-heatmap.table<-heatmap.table[-which(heatmap.table$subtype=="ClaudinLow"),]
+#heatmap.table<-heatmap.table[-which(heatmap.table$subtype=="ClaudinLow"),]
 table(heatmap.table$subtype)
 #subtype filter
 filter.label <- ""
@@ -92,6 +92,10 @@ if (filter.samples == "Basal-Like") {
 if (filter.samples == "HER2-enriched") {
   heatmap.table <- heatmap.table[heatmap.table$subtype == "Her2",]
   filter.label <- "HER2."
+}
+if (filter.samples == "ClaudinLow") {
+  heatmap.table <- heatmap.table[heatmap.table$subtype == "ClaudinLow",]
+  filter.label <- "CLDNL"
 }
 #heatmap.table <- heatmap.table[heatmap.table$subtype == "LumB",]
 heatmap.table <- heatmap.table[heatmap.table$cluster == "ICR1" | heatmap.table$cluster == "ICR4",]
@@ -176,8 +180,8 @@ heatmap.3((t(heatmap.matrix.UP)),
 par(lend = 1)
 #legend("left",legend = c("ICR4","ICR3","ICR2","ICR1"),
 #       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 1.3)
-legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR1"),
-       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","blue"),lty= 1,lwd = 5,cex = 0.6)
+legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","Claudin-Low","","ICR4","ICR1"),
+       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","#000000","white","red","blue"),lty= 1,lwd = 5,cex = 0.6)
 dev.off()
 
 
@@ -198,8 +202,8 @@ heatmap.3((t(heatmap.matrix.DOWN)),
           Colv = FALSE,Rowv = FALSE,
           cexRow=1,cexCol=0.1
 )
-legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","","ICR4","ICR1"),
-       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","white","red","blue"),lty= 1,lwd = 5,cex = 0.6)
+legend("topright",legend = c("Luminal A","Luminal B","Basal-like","HER2-enriched","Normal-like","Claudin-Low","","ICR4","ICR1"),
+       col = c("#eaff00","#00c0ff","#da70d6","#daa520","#d3d3d3","#000000","white","red","blue"),lty= 1,lwd = 5,cex = 0.6)
 dev.off()
 
 

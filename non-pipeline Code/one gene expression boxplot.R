@@ -1,11 +1,11 @@
 # Setup environment
-setwd("~/Dropbox/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
 rm(list=ls())
 ## dependencies
 library (ggplot2)
 
 #parameters
-exp.gene = "CSPG4"
+exp.gene = "SLFN11"
 mut.gene = "TP53"
 Cancerset = "BRCA.PCF"
 Parent.Cancerset = Cancerset
