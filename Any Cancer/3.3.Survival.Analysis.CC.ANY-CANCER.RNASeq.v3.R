@@ -16,8 +16,8 @@
 
 # Setup environment
 rm(list=ls())
-#setwd("~/Dropbox/BREAST_QATAR/")
-setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
 #Dependencies
 required.packages <- c("survival","reshape","ggplot2","plyr","Rcpp","colorspace","texreg")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -29,23 +29,38 @@ if(length(missing.packages)) biocLite(missing.packages)
 library(reshape)
 library(ggplot2)
 library(plyr)
+<<<<<<< HEAD
 library(texreg)
 library(survival)
+=======
+library(survival)
+library(texreg)
+>>>>>>> 5a74652a1b18b5d5e16e21f7fddb7033a8e8d4b5
 
-source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/ggkm.R")
+source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
+#source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
 DL.Method         = "BIOLINKS"     #Choose "ASSEMBLER" or "BIOLINKS"
 sample.types      = "Selected"     #Alternatives TP , TP_TM , Selected
-Cancerset         = "BLCA"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
+Cancersets        = "BRCA"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
 Filtersamples     = "Filtered" # altervatives : Filtered , UnFiltered
 Geneset           = "DBGS3"     # SET GENESET and pruclustering filter 
 K                 = 4                      # SET K
 Surv.cutoff.years = 10     # SET cut-off
 Km.type           = "1vs4"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
 
+# DO ALL
+TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
+if (Cancersets == "ALL") { 
+  Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
+}
+N.sets = length(Cancersets)
+for (i in 1:N.sets) {
+  Cancerset = Cancersets[i]
+  if (Cancerset %in% c("LAML","FPPP")) {next}
+
 # Load data
-Parent.Geneset <- substring(Geneset,1,5)
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/",
                                    Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
@@ -62,6 +77,7 @@ if (DL.Method =="BIOLINKS") {
   Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_",DL.Method,"_subset_clinicaldata.csv")) 
 }
 
+if (length(which(is.na(Clinical.data[,1])))>0){Clinical.data <- Clinical.data[-which(is.na(Clinical.data[,1])),]}
 rownames(Clinical.data) <- Clinical.data[,1]
 Clinical.data[,1] <-NULL
 
@@ -124,12 +140,12 @@ ggkm(mfit,
      timeby=12,
      ystratalabs=Clusters.names ,
      ystrataname="Legend",
-     main=paste0("Kaplan-Meier Plot for ",Parent.Geneset," RNASeq selection"),
+     main=paste0("KM curve for ",Cancerset," - ",Geneset,"."),
      xlabs = "Time in months",
      cbPalette = cbPalette
      )
 dev.off()
-
+print (Cancerset)
 
 mdiff <- survdiff(eval(mfit$call$formula), data = eval(mfit$call$data))
 pval <- pchisq(mdiff$chisq,length(mdiff$n) - 1,lower.tail = FALSE)
@@ -150,4 +166,4 @@ CI   <- round(exp(CI),2)
 print(pvaltxt)
 print(HRtxt)
 print(CI)
-
+}

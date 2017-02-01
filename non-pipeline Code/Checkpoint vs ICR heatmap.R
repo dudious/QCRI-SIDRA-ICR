@@ -25,14 +25,18 @@ library("gplots")
 
 # Set Parameters
 Cancerset <- "BRCA"              # SET Cancertype
-BRCA.Filter <- "BSF2"             # "PCF" or "BSF" Pancer or Breast specific
-Geneset <- "DBGS3.FLTR"          # SET GENESET and pruclustering filter 
+BRCA.Filter <- "PCF"             # "PCF" or "BSF" Pancer or Breast specific
+Geneset <- "DBGS3.FLTR"              # SET GENESET and pruclustering filter 
+ALT.Geneset <- "CHKPNT_IL"
 K <- 4                           # SET K here
 
 # Load Data
 Parent.Geneset <- substring(Geneset,1,5)
-load (paste0("./2 DATA/SUBSETS/ASSEMBLER/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".RData"))
-RNASeq.subset <- as.matrix(RNASeq.subset)
+load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",Parent.Geneset,".for_CHKPNT_heatmap.RData"))
+RNASeq.subset.ICR <- as.matrix(RNASeq.subset)
+load (paste0("./2 DATA/SUBSETS/",Cancerset,"/TCGA.",Cancerset,".RNASeq.subset.",ALT.Geneset,".for_CHKPNT_heatmap.RData"))
+RNASeq.subset.ALT <- as.matrix(RNASeq.subset)
+
 if (Cancerset == "BRCA"){
   if (substring(Geneset,7,10)=="FLTR"){
     Cancerset <- paste0(Cancerset,".",BRCA.Filter)
@@ -43,46 +47,35 @@ colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
 load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
 
-
-## Code to reorder within cluster, expression data not used
-consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
-names(consensusClusters) <- attr(ddist, "Labels")
-hhc <- ConsensusClusterObject[[K]]$consensusTree
-sampleOrder <- consensusClusters[hhc$order]                                            ## get the order of cluser assignments based on the consensus tree
-ConsensusClusterObject.oGE <- t(RNASeq.subset[names(sampleOrder),])
-
 #Add cluster assignment to data
-RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
-row.names(RNASeq.subset) <- RNASeq.subset$Row.names
-RNASeq.subset$Row.names <- NULL
-RNASeq.subset$PatientID <- NULL
+RNASeq.subset.ICR <- merge (RNASeq.subset.ICR,Consensus.class,by="row.names")
+row.names(RNASeq.subset.ICR) <- RNASeq.subset.ICR$Row.names
+RNASeq.subset.ICR$Row.names <- NULL
+RNASeq.subset.ICR$PatientID <- NULL
 
 #Rename ICR clusters
-Cluster.order <- data.frame(Group=RNASeq.subset[,ncol(RNASeq.subset)], avg=rowMeans (RNASeq.subset[,1:(ncol(RNASeq.subset)-1)]))
+Cluster.order <- data.frame(Group=RNASeq.subset.ICR[,ncol(RNASeq.subset.ICR)], avg=rowMeans (RNASeq.subset.ICR[,1:(ncol(RNASeq.subset.ICR)-1)]))
 Cluster.order <- aggregate(Cluster.order,by=list(Cluster.order$Group),FUN=mean)
 Cluster.order <- cbind(Cluster.order[order(Cluster.order$avg),c(2,3)],ICR.name=c("ICR1","ICR2","ICR3","ICR4"))
 Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character(Cluster.order[1,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"))       
 
 #Update Cluster names
-RNASeq.subset$Group <- NULL
-RNASeq.subset <- merge (RNASeq.subset,Consensus.class,by="row.names")
-row.names(RNASeq.subset) <- RNASeq.subset$Row.names
-RNASeq.subset$Row.names <- NULL
-RNASeq.subset$PatientID <- NULL
-
-#ordeing within clusters (comment out if no reordering within cluster is required)
-# RNASeq.subset   <- RNASeq.subset[colnames(ConsensusClusterObject.oGE),]
+RNASeq.subset.ICR$Group <- NULL
+RNASeq.subset.ICR <- merge (RNASeq.subset.ICR,Consensus.class,by="row.names")
+row.names(RNASeq.subset.ICR) <- RNASeq.subset.ICR$Row.names
+RNASeq.subset.ICR$Row.names <- NULL
+RNASeq.subset.ICR$PatientID <- NULL
 
 #ordering of the clusters
-RNASeq.subset <- RNASeq.subset[order(factor(RNASeq.subset$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
-RNASeq.subset$Group <- NULL
+RNASeq.subset.ICR <- RNASeq.subset.ICR[order(factor(RNASeq.subset.ICR$Group,levels = c("ICR4","ICR3","ICR2","ICR1"))),]     
+RNASeq.subset.ICR$Group <- NULL
+RNASeq.subset.ALT <- RNASeq.subset.ALT[rownames(RNASeq.subset.ICR),]
 
 #re-order the labels
-Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
+Consensus.class <- Consensus.class[rownames(RNASeq.subset.ICR),]
 
 # Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
@@ -95,8 +88,29 @@ patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
 my.colors = unique(c(seq(-4,-0.5,length=100),seq(-0.5,1,length=100),seq(1,4,length=100)))
-png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.",Cancerset,".",Geneset,".png"),res=600,height=6,width=6,unit="in")     # set filename
-heatmap.2(t(RNASeq.subset),
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.",Cancerset,".",Geneset,".CHKPNT_heatmap_ICR.png"),res=600,height=6,width=6,unit="in")     # set filename
+heatmap.2(t(RNASeq.subset.ICR),
+          main = paste0("Heatmap RNASeq - ",Parent.Geneset," sel., K=",K),
+          col=my.palette,                   #set color sheme RED High, GREEN low
+          breaks=my.colors,                                 
+          ColSideColors=patientcolors,      #set goup colors                 
+          key=TRUE,
+          symm=FALSE,
+          symkey=FALSE,
+          symbreaks=TRUE,             
+          scale="row",
+          density.info="none",
+          trace="none",
+          labCol=FALSE,
+          cexRow=1.3,cexCol=0.1,margins=c(2,7),
+          Colv=FALSE)
+par(lend = 1)
+legend("topright",legend = c("ICR4","ICR3","ICR2","ICR1"),
+       col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+dev.off()
+
+png(paste0("./4 FIGURES/Heatmaps/Heatmap.RNASeq.TCGA.",Cancerset,".",Geneset,".",ALT.Geneset,"_heatmap_ALT.png"),res=600,height=6,width=6,unit="in")     # set filename
+heatmap.2(t(RNASeq.subset.ALT),
           main = paste0("Heatmap RNASeq - ",Parent.Geneset," sel., K=",K),
           col=my.palette,                   #set color sheme RED High, GREEN low
           breaks=my.colors,                                 

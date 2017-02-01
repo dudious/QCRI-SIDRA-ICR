@@ -22,10 +22,10 @@ setwd("/mnt3/wouter/BREAST-QATAR/")
 # Parameters
 DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
 sample.types = "Selected" #Alternatives TP , TP_TM , Selected
-Cancersets   = "ALL"
+Cancersets   = "GBM"
 Geneset      = "DBGS3"
 Genedatabase = "Gene_selection_v2.6.txt"
-MA.Data      = "NO"
+MA.Data      = "YES"
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")

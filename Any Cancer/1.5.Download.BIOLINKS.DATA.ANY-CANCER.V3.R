@@ -34,7 +34,8 @@ library("TCGAbiolinks")
 
 # Set Parameters
 download.source     <- "TCGA"
-Cancerset           <- "UVM"
+Cancerset           <- "GBM"
+Profiling.method    <- "RNASeq"       #MA or RNASeq
 sample.types        <- "Selected" #Alternatives TP , TP_TM , Selected
 
 print (paste0("Downloading ",Cancerset," Data from ",download.source," using :"))

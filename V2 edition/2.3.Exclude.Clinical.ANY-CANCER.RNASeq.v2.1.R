@@ -22,7 +22,7 @@
 
 # Parameters
   Cancerset    = "BLCA"
-  DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
+  DL.Method    = "ASSEMBLER" #Choose "ASSEMBLER" or "BIOLINKS"
   sample.types = "Selected" #Alternatives TP , TP_TM , Selected
   Parent.Cancerset <- substring(Cancerset,1,4) 
   
