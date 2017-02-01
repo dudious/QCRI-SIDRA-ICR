@@ -29,8 +29,13 @@ if(length(missing.packages)) biocLite(missing.packages)
 library(reshape)
 library(ggplot2)
 library(plyr)
+<<<<<<< HEAD
+library(texreg)
+library(survival)
+=======
 library(survival)
 library(texreg)
+>>>>>>> 5a74652a1b18b5d5e16e21f7fddb7033a8e8d4b5
 
 source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 #source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/ggkm.R")
