@@ -16,8 +16,8 @@
 
 # Setup environment
 rm(list=ls())
-#setwd("~/Dropbox/BREAST_QATAR")
-setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
 
 # Parameters
 DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
