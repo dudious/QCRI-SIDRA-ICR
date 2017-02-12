@@ -16,19 +16,23 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR")
 #setwd("/mnt3/wouter/BREAST-QATAR/")
 
 # Parameters
-DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
-sample.types = "Selected" #Alternatives TP , TP_TM , Selected
-Cancersets   = "GBM"
+DL.Method    = "PANCANCER" #Choose "ASSEMBLER" or "BIOLINKS" or "PANCANCER"
+sample.types = "Split" #Alternatives TP , TP_TM , Selected or "Split" for PANCANCER
+Cancersets   = "ALL"
 Geneset      = "DBGS3"
 Genedatabase = "Gene_selection_v2.6.txt"
-MA.Data      = "YES"
+MA.Data      = "NO"
+
+# Load data
+gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
+gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
+TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 
 # DO ALL
-TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 if (Cancersets == "ALL") { 
   Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
   }
@@ -36,9 +40,6 @@ N.sets = length(Cancersets)
 for (i in 1:N.sets) {
   Cancerset = Cancersets[i]
   if (Cancerset %in% c("LAML","FPPP")) {next}
-# Load data
-gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
-gene.list.selected <- as.character(gene.list[which(gene.list[,Geneset]==1),1])
 
 # RNAseq
 ## load data
@@ -50,7 +51,10 @@ if (sample.types == "Selected") {
   RNASeq.NORM_Log2 <- RNASeq.NORM.TP_Log2
   RNASeq.NORM.TP_Log2 <- NULL
 }
-
+if (DL.Method == "PANCANCER") {
+  load (paste0("./2 DATA/TCGA RNAseq/RNASeq_PANCANCER/",Cancerset,".RNASeq.TCGA.",DL.Method,".SPLIT.DATA.RData"))
+  RNASeq.NORM_Log2 <- t(RNAseq.matrix)
+}
 
 # check availabilety of the genes in the dataset
 available.genes.RNAseq <- gene.list.selected[which(gene.list.selected %in% rownames(RNASeq.NORM_Log2))]
@@ -68,6 +72,7 @@ print ("Genes missing for RNASeq :")
 print (unavailable.genes.RNAseq)
 
 # save subsetted data
+dir.create(paste0("./2 DATA/SUBSETS/",DL.Method), showWarnings = FALSE)
 dir.create(paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/"), showWarnings = FALSE)
 save (RNASeq.subset,file=paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/TCGA.",Cancerset,".RNASeq.",sample.types,".subset.",Geneset,".RData"))    #adjust output file names here !!!!!
 

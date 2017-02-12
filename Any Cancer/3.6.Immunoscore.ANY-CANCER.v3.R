@@ -8,8 +8,8 @@
 
 ## Setup environment
 rm(list=ls())
-#setwd("~/Dropbox/BREAST_QATAR/")
-setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
 #Dependencies
  required.packages <- c("plyr")
  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -23,15 +23,18 @@ missing.packages <- required.packages[!(required.packages %in% installed.package
 library("plyr")
 #library("estimate")
 #source ("~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/read.gct.R")
-source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/read.gct.R")
+#source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/read.gct.R")
 
 dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/",showWarnings=FALSE)
 
 # Set Parameters
 Cancersets        = "ALL"
 Geneset           = "DBGS3"   
-DL.Method         = "BIOLINKS"     #Choose "ASSEMBLER" or "BIOLINKS"
-sample.types      = "Selected"     #Alternatives TP , TP_TM , Selected
+DL.Method         = "PANCANCER.CLEAN"     #Choose "ASSEMBLER" or "BIOLINKS" or "PANCANCER"
+sample.types      = "Split"     #Alternatives TP , TP_TM , Selected or "Split" for Pancancer
+
+#test
+Cancerset = "BLCA"
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
@@ -62,10 +65,10 @@ RNASeq.subset <- as.matrix(RNASeq.subset)
 
 # Calculate Immunoscore
 RNASeq.subset.scaled <- scale (RNASeq.subset,scale=FALSE)
-RNASeq.subset.scaled <- cbind(RNASeq.subset.scaled,rowMeans(RNASeq.subset.scaled[,-ncol(RNASeq.subset.scaled)]))
+RNASeq.subset.scaled <- cbind(RNASeq.subset.scaled,rowMeans(RNASeq.subset.scaled))
 colnames(RNASeq.subset.scaled)[ncol(RNASeq.subset.scaled)] <- c("scaled.IS")
 immunoscore <- RNASeq.subset.scaled[,c("scaled.IS"),drop=FALSE]
-immunoscore <- cbind(immunoscore,rowMeans(RNASeq.subset[,-ncol(RNASeq.subset)]))
+immunoscore <- cbind(immunoscore,rowMeans(RNASeq.subset))
 colnames(immunoscore) <- c("scaled.IS","unscaled.IS")
 
 #estimate.gct<-t(estimate.gct[,-1])

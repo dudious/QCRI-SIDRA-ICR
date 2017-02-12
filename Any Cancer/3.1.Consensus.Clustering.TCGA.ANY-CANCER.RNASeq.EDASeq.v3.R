@@ -11,12 +11,12 @@
 
 # Setup environment
 rm(list=ls())
-setwd("/mnt3/wouter/BREAST-QATAR/")
-#setwd("~/Dropbox/BREAST_QATAR/") #using symbolic link on R-server, no actual dropbox (ln -s /cancer_data/Cancer\ Immunesignature\ QCRI-SIDRA/ /home/whendrickx/Dropbox/BREAST_QATAR)
+#setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/") #using symbolic link on R-server, no actual dropbox (ln -s /cancer_data/Cancer\ Immunesignature\ QCRI-SIDRA/ /home/whendrickx/Dropbox/BREAST_QATAR)
 #Dependencies
   required.packages <- c("clue")
   missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if(length(missing.packages)) install.packages( "~/Dropbox/R-projects/QCRI-SIDRA-ICR/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary") #windows
+  if(length(missing.packages)) install.packages( "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/clue_0.3-49.zip", repos=NULL,type= "win.binary") #windows
   if (Sys.info()['sysname']=="Linux"){if(length(missing.packages)) install.packages(missing.packages)} #Linux
   required.packages.BioC <- c("ConsensusClusterPlus")
   missing.packages <- required.packages.BioC[!(required.packages.BioC %in% installed.packages()[,"Package"])]
@@ -25,26 +25,34 @@ setwd("/mnt3/wouter/BREAST-QATAR/")
 
 library(ConsensusClusterPlus)
 library(clue)
-source("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
+#source("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
+source("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
+  
 # Set Parameters
-DL.Method    = "BIOLINKS"     #Choose "ASSEMBLER" or "BIOLINKS"
-sample.types = "Selected"     #Alternatives TP , TP_TM , Selected
+DL.Method    = "PANCANCER.CLEAN"     #Choose "ASSEMBLER" or "BIOLINKS"
+sample.types = "Split"     #Alternatives TP , TP_TM , Selected "Split" for PANCANER
 Cancersets   = "ALL"          # Select the Cancer to use
 Geneset      = "DBGS3"        # Select the genset to use
 Filter       = "TRUE"         # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 BRCA.Filter  = "BSF2"         # "PCF" or "BSF2" Pancancer or Breast specific
+
+#test
+Cancerset = "BLCA"
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 if (Cancersets == "ALL") { 
   Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
 }
+if (DL.Method =="PANCANCER.CLEAN") {
+  Clinical.data <- read.csv ("./2 DATA/Clinical Information/PANCANCER/clinical_PANCAN_patient_with_followup.tsv",sep = "\t") 
+}
 N.sets = length(Cancersets)
 for (i in 1:N.sets) {
   Cancerset = Cancersets[i]
   Geneset   = "DBGS3"
-  if (Cancerset %in% c("LAML","FPPP","BRCA","ACC")) {next}
+  if (Cancerset %in% c("LAML","FPPP")) {next}
 
 # Load data
 load (paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/TCGA.",Cancerset,".RNASeq.",sample.types,".subset.",Geneset,".RData"))                  # load subset data to cluster
@@ -66,8 +74,9 @@ if (DL.Method =="BIOLINKS") {
 Selected.samples <- Clinical.data[Clinical.data$exclude.pre=="No",1]
 if (Filter == "TRUE"){
   Geneset <- paste0(Geneset,".FLTR")
-  RNASeq.subset <- RNASeq.subset[rownames(RNASeq.subset) %in% Selected.samples,]
-}
+  if (DL.Method !="PANCANCER.CLEAN"){
+    RNASeq.subset <- RNASeq.subset[rownames(RNASeq.subset) %in% Selected.samples,]
+}}
 
 # Hierarchical Clustering 
 sHc <- hclust(ddist <- dist(RNASeq.subset), method = "ward.D2")                                                     # hierachical clustering
