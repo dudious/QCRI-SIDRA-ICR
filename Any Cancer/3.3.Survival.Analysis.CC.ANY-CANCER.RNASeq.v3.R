@@ -16,7 +16,7 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/")
 #setwd("/mnt3/wouter/BREAST-QATAR/")
 #Dependencies
 required.packages <- c("survival","reshape","ggplot2","plyr","Rcpp","colorspace","texreg")
@@ -29,26 +29,22 @@ if(length(missing.packages)) biocLite(missing.packages)
 library(reshape)
 library(ggplot2)
 library(plyr)
-<<<<<<< HEAD
 library(texreg)
 library(survival)
-=======
-library(survival)
-library(texreg)
->>>>>>> 5a74652a1b18b5d5e16e21f7fddb7033a8e8d4b5
+
 
 source ("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/ggkm.R")
 #source ("/mnt3/wouter/QCRI-SIDRA-ICR/R tools/ggkm.R")
 
 # Set Parameters
-DL.Method         = "BIOLINKS"     #Choose "ASSEMBLER" or "BIOLINKS"
+DL.Method         = "PANCANCER.CLEAN"     #Choose "ASSEMBLER" or "BIOLINKS"
 sample.types      = "Selected"     #Alternatives TP , TP_TM , Selected
-Cancersets        = "BRCA"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
-Filtersamples     = "Filtered" # altervatives : Filtered , UnFiltered
+Cancersets        = "SKCM"     # SET Cancertype (include Filter type for BRCA.BSF of BRCA.PCF)
+Filtersamples     = "UnFiltered" # altervatives : Filtered , UnFiltered
 Geneset           = "DBGS3"     # SET GENESET and pruclustering filter 
 K                 = 4                      # SET K
 Surv.cutoff.years = 10     # SET cut-off
-Km.type           = "1vs4"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4
+Km.type           = "1vs4"           # SET curve type  - altervatives :1vs2vs3vs4 4vs123 OR 1vs4 OR 1vs3
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
@@ -62,7 +58,7 @@ for (i in 1:N.sets) {
 
 # Load data
 Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/",
-                                   Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+                                   Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=",K,".consensusClass.ICR.csv"),header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
 rownames(Consensus.class) <- Consensus.class$PatientID
 if (DL.Method == "ASSEMBLER") {
@@ -76,7 +72,14 @@ if (DL.Method == "ASSEMBLER") {
 if (DL.Method =="BIOLINKS") {
   Clinical.data <- read.csv (paste0("./3 ANALISYS/CLINICAL DATA/TCGA.",Cancerset,".RNASeq_",DL.Method,"_subset_clinicaldata.csv")) 
 }
-
+if (DL.Method =="PANCANCER.CLEAN") {
+  Clinical.data <- read.csv (paste0("./2 DATA/Clinical Information/PANCANCER/clinical_PANCAN_patient_with_followup.tsv"),sep = "\t")
+  Clinical.data <- Clinical.data[Clinical.data$acronym==Cancerset,c(2,5,7,8)]
+  colnames(Clinical.data) <-  c("PatientID","vital_status","days_to_death","days_to_last_follow_up")
+  colnames(Consensus.class) <- c("SampleID","Group")
+  Consensus.class$PatientID <- substring(Consensus.class$SampleID,1,12)
+  rownames(Consensus.class) <- Consensus.class$PatientID
+}
 if (length(which(is.na(Clinical.data[,1])))>0){Clinical.data <- Clinical.data[-which(is.na(Clinical.data[,1])),]}
 rownames(Clinical.data) <- Clinical.data[,1]
 Clinical.data[,1] <-NULL
@@ -84,8 +87,8 @@ Clinical.data[,1] <-NULL
 # Post-Clustering Filter Data
 if (Filtersamples=="Filtered"){     
   Clinical.data.subset <- subset (Clinical.data,Clinical.data$exclude.post == "No")     # remove excluded patients
-} else if  (Filtersamples=="UnFiltered")
-  {Clinical.data.subset <- Clinical.data
+} else if  (Filtersamples=="UnFiltered"){
+  Clinical.data.subset <- Clinical.data
 }
 
 #Select data for survival analysis
@@ -109,24 +112,28 @@ if (Km.type =='4vs123') {
     # ICR4 vs ICR1
     Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Group %in% c("ICR1","ICR4"),]
     cbPalette <- c("#0000FF","#FF0000")
-  }
+  } else if (Km.type =='1vs3') {
+  # ICR3 vs ICR1
+  Clinical.data.subset.TS <- Clinical.data.subset.TS[Clinical.data.subset.TS$Group %in% c("ICR1","ICR3"),]
+  cbPalette <- c("#0000FF","#FF0000")
+}
 Clinical.data.subset.TS$Group <- droplevels(Clinical.data.subset.TS$Group) 
 Clusters.names <- levels(Clinical.data.subset.TS$Group)
 
 # time / event object creation
 Y <- Surv.cutoff.years * 365
-TS.Alive <- subset(Clinical.data.subset.TS[,c(1,3,4)],Clinical.data.subset.TS$vital_status == "alive")
+TS.Alive <- subset(Clinical.data.subset.TS[,c(1,3,4)],Clinical.data.subset.TS$vital_status == "Alive")
 colnames(TS.Alive) <- c("Status","Time","Group")
 TS.Alive$Time <- as.numeric(as.character(TS.Alive$Time))
 TS.Alive$Time[TS.Alive$Time > Y] <- Y
-TS.Dead <- subset(Clinical.data.subset.TS[,c(1,2,4)],Clinical.data.subset.TS$vital_status == "dead")
+TS.Dead <- subset(Clinical.data.subset.TS[,c(1,2,4)],Clinical.data.subset.TS$vital_status == "Dead")
 colnames(TS.Dead) <- c("Status","Time","Group")
 TS.Dead$Time <- as.numeric(as.character(TS.Dead$Time))
-TS.Dead$Status[which(TS.Dead$Time> Y)] = "alive"
+TS.Dead$Status[which(TS.Dead$Time> Y)] = "Alive"
 TS.Dead$Time[TS.Dead$Time > Y] <- Y                                                                        
 TS.Surv <- rbind (TS.Dead,TS.Alive)
 TS.Surv$Time <- as.numeric(as.character(TS.Surv$Time))
-TS.Surv$Status <- TS.Surv$Status == "dead"
+TS.Surv$Status <- TS.Surv$Status == "Dead"
 TS.Surv <- subset(TS.Surv,TS.Surv$Time > 1)                                                                # remove patients with less then 1 day follow up time
 
 # survival curve

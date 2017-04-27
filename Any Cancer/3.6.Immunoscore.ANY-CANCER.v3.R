@@ -30,18 +30,27 @@ dir.create("./3 ANALISYS/IMMUNOSCORE/ESTIMATE/",showWarnings=FALSE)
 # Set Parameters
 Cancersets        = "ALL"
 Geneset           = "DBGS3"   
-DL.Method         = "PANCANCER.CLEAN"     #Choose "ASSEMBLER" or "BIOLINKS" or "PANCANCER"
+DL.Method         = "PANCANCER.CLEAN.v2"     #Choose "ASSEMBLER" or "BIOLINKS" or "PANCANCER"
 sample.types      = "Split"     #Alternatives TP , TP_TM , Selected or "Split" for Pancancer
+Genedatabase      = "Gene_selection_v2.6.txt"
 
-#test
-Cancerset = "BLCA"
-
-# DO ALL
+#Load data
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 if (Cancersets == "ALL") { 
   Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
 }
 N.sets = length(Cancersets)
+gene.list <- read.csv (paste0("./2 DATA/SUBSETS/",Genedatabase))                                 # Select subset here !!!!! and change filename below !!!!
+gene.list.ALL <- as.character(gene.list[which(gene.list[,"DBGS3"]==1),1])
+gene.list.INH <- as.character(gene.list[which(gene.list[,"ImSuGS"]==1),1])
+a<-which(gene.list[,"DBGS3"]==1)
+b<-which(gene.list[,"ImSuGS"]==1)
+gene.list.ACT <- as.character(gene.list[a[-which(a%in%b)],1])
+
+#test
+#Cancerset = "BLCA"
+
+# DO ALL
 for (i in 1:N.sets) {
   Cancerset = Cancersets[i]
   if (Cancerset %in% c("LAML","FPPP")) {next}
@@ -68,9 +77,14 @@ RNASeq.subset.scaled <- scale (RNASeq.subset,scale=FALSE)
 RNASeq.subset.scaled <- cbind(RNASeq.subset.scaled,rowMeans(RNASeq.subset.scaled))
 colnames(RNASeq.subset.scaled)[ncol(RNASeq.subset.scaled)] <- c("scaled.IS")
 immunoscore <- RNASeq.subset.scaled[,c("scaled.IS"),drop=FALSE]
-immunoscore <- cbind(immunoscore,rowMeans(RNASeq.subset))
-colnames(immunoscore) <- c("scaled.IS","unscaled.IS")
 
+# Culculate subscore ACT/INH
+#Subset the Pancancer Matrix
+
+RNAseq.INH.scaled <- scale(RNASeq.subset[,gene.list.INH],scale=FALSE)
+RNAseq.ACT.scaled <- scale(RNASeq.subset[,gene.list.ACT],scale=FALSE)
+immunoscore <- cbind(immunoscore,rowMeans(RNASeq.subset),rowMeans(RNAseq.ACT.scaled),rowMeans(RNAseq.INH.scaled))
+colnames(immunoscore) <- c("scaled.IS","unscaled.IS","scaled.IS.ACT","scaled.IS.INH")
 #estimate.gct<-t(estimate.gct[,-1])
 #colnames(estimate.gct) <- estimate.gct[1,]
 #estimate.gct<-estimate.gct[-1,]

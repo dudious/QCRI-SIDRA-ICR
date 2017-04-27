@@ -30,22 +30,26 @@ library(clue)
 source("~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/R tools/stefanofunctions.R")
 
 # Set Parameters
-DL.Method    = "PANCANCER.CLEAN"     #Choose "ASSEMBLER" or "BIOLINKS"
+DL.Method    = "PANCANCER.CLEAN.v2"     #Choose "ASSEMBLER" or "BIOLINKS"
 sample.types = "Split"     #Alternatives TP , TP_TM , Selected "Split" for PANCANER
 Cancersets   = "ALL"          # Select the Cancer to use
 Geneset      = "DBGS3"        # Select the genset to use
-Filter       = "TRUE"         # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
+Filter       = "FALSE"         # Use Pre-Clustering Filter "TRUE" OR "FALSE"  (setup filter in "2.3.Exclude.Clinical" script)
 BRCA.Filter  = "BSF2"         # "PCF" or "BSF2" Pancancer or Breast specific
 
 #test
 #Cancerset = "BLCA"
 
 # DO ALL
+dir.create(paste0("./3 ANALISYS/Calinsky/TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/"))
+fileConn<-file(paste0("./3 ANALISYS/Calinsky/TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/R_script_output.v2.txt"))
+writeLines(paste0("Calinsky maxima for : TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000"), fileConn)
+close(fileConn)
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 if (Cancersets == "ALL") { 
   Cancersets = gsub("\\]","",gsub(".*\\[","",TCGA.cancersets$Cancername))
 }
-if (DL.Method =="PANCANCER.CLEAN") {
+if (DL.Method =="PANCANCER.CLEAN.v2") {
   Clinical.data <- read.csv ("./2 DATA/Clinical Information/PANCANCER/clinical_PANCAN_patient_with_followup.tsv",sep = "\t") 
 }
 N.sets = length(Cancersets)
@@ -112,7 +116,7 @@ for (i in 1:N.sets) {
   print (time)
   print (paste0(Cancerset," Done. With Optimal Calinsky at K:",which(aCalinsky == max(aCalinsky[3:5]))))
   dir.create(paste0("./3 ANALISYS/Calinsky/TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/"))
-  fileConn<-file(paste0("./3 ANALISYS/Calinsky/TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/R_script_output.txt"))
+  fileConn<-file(paste0("./3 ANALISYS/Calinsky/TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/R_script_output.v2.txt"),"a")
   writeLines(paste0(Cancerset," Done. With Optimal Calinsky at K:",which(aCalinsky == max(aCalinsky[3:5]))), fileConn)
   close(fileConn)
   save (ConsensusClusterObject,ddist,file=paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))

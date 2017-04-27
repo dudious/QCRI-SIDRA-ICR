@@ -19,9 +19,9 @@ setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/")
 # Set Parameters
 Filtersamples     = "Filtered"    # altervatives : Filtered , UnFiltered
 Surv.cutoff.years = 10            # SET cut-off
-Gene              = "BRGS"
-GeneIsSignature   = "TRUE"
-GeneSignature     = c("TACSTD2","DSP","JUP","DST","FLG","PPL","PKP3")
+Gene              = "GAPDH"
+GeneIsSignature   = "FALSE"
+#GeneSignature     = c("TACSTD2","DSP","JUP","DST","FLG","PPL","PKP3")
 Division          = "Tertile"
 Cancersets        = "ALL"
 

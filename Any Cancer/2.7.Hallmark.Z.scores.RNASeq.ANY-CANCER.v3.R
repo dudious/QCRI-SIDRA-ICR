@@ -8,13 +8,14 @@
 # Setup environment
 rm(list=ls())
 #setwd("f:/DropBox Wouter/Dropbox (TBI-Lab)/BREAST_QATAR/")
-setwd("/mnt3/wouter/BREAST-QATAR/")
-#setwd("~/Dropbox (TBI-Lab)/BREAST_QATAR/")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/")
 #Dependencies
 required.packages <- c("corrplot")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(missing.packages)) install.packages(missing.packages)
 library (corrplot)
+library (plyr)
 
 # Set Parameters
 DL.Method    = "BIOLINKS" #Choose "ASSEMBLER" or "BIOLINKS"
@@ -48,6 +49,15 @@ Selected.pathways$BARRIER_GENES <- c("FLG","TACSTD2","DSC3","DST","DSP","PPL","P
 # add MAPK ICR1vs4 luminal mutation signature
 Selected.pathways$MAPK_UP_GENES <- c("TAOK2","TP53","MAPK3","MAP3K1","MAPT","HSPA1A","FLNB","TAOK3","CRK","RPS6KA2","MAP2K4","DUSP5","CACNA1D","MAPK8","RASGRP1","CACNA1G")
 Selected.pathways$MAPK_DOWN_GENES <- c("CACNG6","CACNA1B","CACNA2D3","FASLG","RASGRF1","JUN","JUND","DUSP16","PPM1B","SOS1","FGF12","RASGRP2","PRKCB","MAP4K1","PTPN7","GADD45G","DDIT3","DUSP8","DUSP10","FGFR4","FGF14","FGF13","MAP2K6","DUSP2")
+
+#Save pathway file
+save(Selected.pathways,file = "./PANCANCER/Selected.pathways.RData")
+Selected.pathways.df <- data.frame(Name = names(Selected.pathways),
+                                   Number = sapply(Selected.pathways, length),
+                                   Genes = sapply(names(Selected.pathways),function(x) paste(Selected.pathways[[x]],collapse=" ")),
+                                   row.names = NULL)
+write.csv(Selected.pathways.df,"./PANCANCER/Selected.pathways.txt",row.names = F)
+
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")

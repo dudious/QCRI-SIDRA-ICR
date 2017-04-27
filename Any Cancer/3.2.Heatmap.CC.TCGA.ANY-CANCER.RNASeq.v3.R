@@ -16,8 +16,8 @@
 
 # Setup environment
 rm(list=ls())
-#setwd("~/Dropbox/BREAST_QATAR/")
-setwd("/mnt3/wouter/BREAST-QATAR/")
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/BREAST_QATAR/")
+#setwd("/mnt3/wouter/BREAST-QATAR/")
 #Dependencies
 required.packages <- c("gplots","GMD")
 missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
@@ -25,12 +25,12 @@ if(length(missing.packages)) install.packages(missing.packages)
 library("gplots")
 
 # Set Parameters
-DL.Method    = "BIOLINKS"     # Choose "ASSEMBLER" or "BIOLINKS"
-sample.types = "Selected"     # Alternatives TP , TP_TM , Selected
-Cancersets    = c("GBM","LGG")         # SET Cancertype
+DL.Method    = "PANCANCER.CLEAN.v2"     # Choose "ASSEMBLER" or "BIOLINKS"
+sample.types = "Split"               # Alternatives TP , TP_TM , Selected Split for PANCANCER
+Cancersets   = "ALL"                 # SET Cancertype
 BRCA.Filter  = "PCF"          # "PCF" or "BSF" Pancer or Breast specific
 Geneset      = "DBGS3"        # SET GENESET and proclustering filter 
-K <- 3                        # SET K here
+K <- 4                        # SET K here
 
 # DO ALL
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
@@ -45,10 +45,10 @@ for (i in 1:N.sets) {
 # Load Data
 load (paste0("./2 DATA/SUBSETS/",DL.Method,"/",Cancerset,"/TCGA.",Cancerset,".RNASeq.",sample.types,".subset.",Geneset,".RData"))  
 RNASeq.subset <- as.matrix(RNASeq.subset)
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=",K,".consensusClass.csv"),header=FALSE) # select source data
+Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000.k=",K,".consensusClass.csv"),header=FALSE) # select source data
 colnames (Consensus.class) <- c("PatientID","Group")
 rownames(Consensus.class) <- Consensus.class[,1]
-load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/ConsensusClusterObject.Rdata"))
+load (paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/ConsensusClusterObject.Rdata"))
 
 ## Code to reorder within cluster, expression data not used
 consensusClusters <- as.factor(ConsensusClusterObject[[K]]$clrs[[1]])
@@ -71,7 +71,7 @@ Consensus.class$Group[Consensus.class$Group==Cluster.order[1,1]] <- as.character
 Consensus.class$Group[Consensus.class$Group==Cluster.order[2,1]] <- as.character(Cluster.order[2,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[3,1]] <- as.character(Cluster.order[3,3])
 Consensus.class$Group[Consensus.class$Group==Cluster.order[4,1]] <- as.character(Cluster.order[4,3])
-write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=",K,".consensusClass.ICR.csv"))       
+write.csv (Consensus.class,paste0(file="./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.",DL.Method,".EDASeq.k7.",Geneset,".FLTR.reps5000.k=",K,".consensusClass.ICR.csv"))       
 
 #Update Cluster names
 RNASeq.subset$Group <- NULL
@@ -93,10 +93,17 @@ Consensus.class <- Consensus.class[rownames(RNASeq.subset),]
 # Heatmap 2 (simple no extra annotations)
 patientcolors <- Consensus.class
 levels (patientcolors$Group) <- c(levels (patientcolors$Group),c("#FF0000","#FFA500","#00FF00","#0000FF"))  #Aply color scheme to patients
+if (K == 4) {
 patientcolors$Group[patientcolors$Group=="ICR4"] <- "#FF0000"
 patientcolors$Group[patientcolors$Group=="ICR3"] <- "#FFA500"
 patientcolors$Group[patientcolors$Group=="ICR2"] <- "#00FF00"
 patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
+}
+if (K == 3) {
+  patientcolors$Group[patientcolors$Group=="ICR3"] <- "#FF0000"
+  patientcolors$Group[patientcolors$Group=="ICR2"] <- "#00FF00"
+  patientcolors$Group[patientcolors$Group=="ICR1"] <- "#0000FF"
+}
 #patientcolors$Group <- droplevels(patientcolors$Group)
 patientcolors <- patientcolors$Group
 my.palette <- colorRampPalette(c("blue", "yellow", "red"))(n = 297)
@@ -119,8 +126,14 @@ heatmap.2(t(RNASeq.subset),
           margins=c(2,7),
           Colv=FALSE)
 par(lend = 1)
+if (K == 4) {
 legend("topright",legend = paste0("ICR",rev(c(1:K))),
        col = c("red","orange","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+}
+if (K == 3) {
+  legend("topright",legend = paste0("ICR",rev(c(1:K))),
+         col = c("red","green","blue"),lty= 1,lwd = 5,cex = 0.7)
+}
 dev.off()
 print(paste0("Clusterassigment and heatmap for ",Cancerset," done."))
 }

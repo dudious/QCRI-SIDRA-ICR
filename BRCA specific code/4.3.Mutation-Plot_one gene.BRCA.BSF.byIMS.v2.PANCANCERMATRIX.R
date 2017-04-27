@@ -40,8 +40,9 @@ Mutation.selected.data <- Mutation.selected.data [-which(is.na(Mutation.selected
 Count.IMS.samples<-count(unique(Mutation.selected.data[,c("Patient_ID","Subtype")]),vars=c("Subtype"))
 
 #cluster assignment
-Consensus.class <- read.csv(paste0("./3 ANALISYS/CLUSTERING/RNAseq/",Cancerset,"/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000/",Cancerset,".TCGA.EDASeq.k7.",Geneset,".reps5000.k=4.consensusClass.ICR.csv"),header=TRUE) # select source data
+Consensus.class <- read.csv("./3 ANALISYS/CLUSTERING/RNAseq/BRCA/BRCA.TCGA.PANCANCER.CLEAN.EDASeq.k7.DBGS3.FLTR.reps5000/BRCA.TCGA.PANCANCER.CLEAN.EDASeq.k7.DBGS3.FLTR.reps5000.k=4.consensusClass.ICR.csv",header=TRUE) # select source data
 Consensus.class <- Consensus.class[,-1]
+Consensus.class$PatientID <- substring(Consensus.class$PatientID,1,12)
 colnames (Consensus.class) <- c("Patient_ID","Cluster")
 rownames(Consensus.class) <- Consensus.class[,1]
 # Add Class to mutation data
@@ -111,8 +112,8 @@ if (GOF != "MAP2K4") {
 }
 
 
-write.csv (count.NonSilent,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"count.NonSilent.By.IMS.and.Cluster",".csv", sep=""))
-write.csv (count.NonSilent.byIMS.only,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"count.NonSilent.By.IMS.",".csv", sep=""))
+write.csv (count.NonSilent,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"count.NonSilent.By.IMS.and.Cluster.PC.",".csv", sep=""))
+write.csv (count.NonSilent.byIMS.only,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"count.NonSilent.By.IMS.PC.",".csv", sep=""))
 
 #count.All.Missense <- count.All[count.All$Variant_Classification=="Missense_Mutation",] 
 blot.df <- rbind(count.Separate,count.NonSilent)
@@ -166,7 +167,7 @@ if (GOF == "FCGBP") {
 
 blot.df$Mutation_Type <- gsub("_"," ",blot.df$Mutation_Type)
 dir.create(paste0("./4 FIGURES/Mutation Plots/",GOF,"/"), showWarnings = FALSE)
-write.csv (blot.df,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".By.IMS.Cluster.and.Mutationtype",".csv", sep=""))
+write.csv (blot.df,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".By.IMS.Cluster.and.Mutationtype.PC",".csv", sep=""))
 
 #remove silent/nonsilent/normal-like
 blot.df.stack <- blot.df[blot.df$Mutation_Type!="NonSilent",]
@@ -268,7 +269,7 @@ stats.p.values <- data.frame(Molecular_Subtype = subtype,
                                                              signif(fisher.AB$p.value,digits=3))),
                              Mutation_Type="NonSilent")
 
-write.csv (stats.p.values,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stats.NonSilent",".csv", sep=""))
+write.csv (stats.p.values,file=paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stats.NonSilent.PC",".csv", sep=""))
 stats.p.values$Mutation_Type = NA
 
 y.value = 30 #TP53 110 , MAP3K1 35, MAP2K4 7, MAPx 00, CTCF 6.5,FCGBP 18, COMBO 42
@@ -278,7 +279,7 @@ if (GOF == "MAP2K4") {y.value = 15}
 
 #create grid plot of all mutation types en molecular subtypes (stacked bar chart)
 
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor",".png", sep=""), height = 500, width= 2000)
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor.PC",".png", sep=""), height = 500, width= 2000)
  gg = ggplot(blot.df.stack, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
               geom_bar(stat="identity",size=0,width=0.8) + #position="dodge",drop=FALSE,ylim=c(0,100)
               facet_grid(.~Molecular_Subtype, space="free") +
@@ -300,7 +301,7 @@ dev.off()
 blot.df.stack.IMSonly <- blot.df.stack[blot.df.stack$Molecular_Subtype!="All Subtypes",]
 stats.p.values <- stats.p.values[stats.p.values$Molecular_Subtype!="All Subtypes",]
 
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor.noAllIMS",".png", sep=""), height = 500, width= 2000)
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.noIMScolor.noAllIMS.PC",".png", sep=""), height = 500, width= 2000)
 gg = ggplot(blot.df.stack.IMSonly, aes(x = Cluster_Assignment, y = Mutation_Frequency , fill = Mutation_Type )) + #, colour = Molecular_Subtype
   geom_bar(stat="identity",size=0,width=0.8) + #position="dodge" drop=FALSE,ylim=c(0,100)
   facet_grid(.~Molecular_Subtype, space="free") +
@@ -326,7 +327,7 @@ Labels <- Labels[order(match(Labels$Molecular_Subtype,subtype)),]
 Labels$Mutation_Type <- NA
 Labels$Molecular_Subtype <- factor(Labels$Molecular_Subtype,levels=subtype)
 
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.scaled.noIMScolor.noAllIMS",".png", sep=""), height = 500, width= 2000)
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,"By.IMS.stacked.scaled.noIMScolor.noAllIMS.PC",".png", sep=""), height = 500, width= 2000)
 gg = ggplot(blot.df.stack.IMSonly, aes(x = Cluster_Assignment, y = scaled.freq , fill = Mutation_Type )) + #, colour = Molecular_Subtype
   geom_bar(stat="identity",size=0,width=0.8) + #position="dodge"
   facet_grid(.~Molecular_Subtype, space="free") +
@@ -361,7 +362,7 @@ blot.df <- blot.df[blot.df$Mutation_Type=="NonSilent",]
 blot.df <- blot.df[blot.df$Molecular_Subtype=="All Subtypes",]
 test.trend <- prop.trend.test(blot.df$Mutation_Count,blot.df$Group_Count)
 
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stacked.scaled.png", sep=""), height = 500, width= 700)
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".stacked.scaled.PC.png", sep=""), height = 500, width= 700)
 gg = ggplot(blot.df.stack.noIMS, aes(x = Cluster_Assignment, y = scaled.freq , fill = Mutation_Type )) + #, colour = Molecular_Subtype
   geom_bar(stat="identity",size=0,width=0.8) + #position="dodge",drop=FALSE,ylim=c(0,100)
   xlab("ICR Cluster Assignment") + ylab("Mutation Frequency (%)") + theme_bw() +
@@ -380,7 +381,7 @@ dev.off()
 
 
 
-png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".Overall.png", sep=""))
+png(paste0("./4 FIGURES/Mutation Plots/",GOF,"/",GOF,".",Cancerset,".",Geneset,".Overall.PC.png", sep=""))
 #cluster.order = rev(clusters)
 gg = ggplot(blot.df, aes(x = Cluster_Assignment, y = Mutation_Frequency))  +
   geom_bar(stat = "identity", width = 0.8, position="dodge", fill = c("blue", "green", "orange", "red")) +
