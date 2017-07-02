@@ -24,6 +24,7 @@ Geneset           = "DBGS3"
 DL.Method         = "BIOLINKS"     #Choose "ASSEMBLER" or "BIOLINKS" or "PANCANCER"
 sample.types      = "Selected"     #Alternatives TP , TP_TM , Selected or "Split" for Pancancer
 K                 = 4
+ICR.Filter        = "ICR1vs4"
 
 TCGA.cancersets <- read.csv ("./2 DATA/TCGA.datasets.csv")
 if (Cancersets == "ALL") { 
@@ -32,7 +33,7 @@ if (Cancersets == "ALL") {
 N.sets = length(Cancersets)
 
 #test
-Cancerset = "BRCA"
+Cancerset = "BLCA"
 
 #load data
 load (paste0("./2 DATA/TCGA RNAseq/RNASeq_",Cancerset,"_EDASeq/",Cancerset,".RNASeq.TCGA.",DL.Method,".",sample.types,".NORMALIZED.TP_FILTERED_LOG2.RData"))
@@ -49,9 +50,16 @@ DatiCli <- Consensus.class
 
 #upload the variability in the attachment
 
+#Filtering of ICR clusters
+if (ICR.Filter == "ICR1vs4"){
+  DatiCli <- DatiCli[DatiCli$Group %in% c("ICR1","ICR4"),]
+  normCounts <- normCounts[,rownames(DatiCli)]
+}
+
 #mettere nello stesso ordine matrice e dati clinici
 DatiCli <- DatiCli[colnames(normCounts),]
 
+# GSEA
 ES <- gsva(normCounts,marker_list,method="ssgsea")
 dim(ES)#
 ESz <- ES #come se rinormalizzasse per tutti i campioni
@@ -59,6 +67,8 @@ for(i in 1: nrow(ES))
 {
   ESz[i,]<- (ES[i,]-mean(ES[i,]))/sd(ES[i,])
 }
+
+#plotting
 
 sHc <- hclust(ddist <- dist(t(ESz)), method = "ward.D2")
 plot(sHc,labels=FALSE)
@@ -81,19 +91,19 @@ annot<-as.vector(ICR.col)
 for(cc in unique(ICR.col)) rug(which(ICR.col[sHc$order] == cc), col = cc, lwd = 3, ticksize=-.06)
 
 #log o nolog= stessi risultati
-pdf("./3 ANALISYS/IMMUNOSCORE/BINDEA/HM_ssGSEA_bindea_TCGA_ICR4-1-noLOG.pdf",width = 16,height = 8 )
+pdf(paste0("./3 ANALISYS/IMMUNOSCORE/BINDEA/",Cancerset,".HM_ssGSEA_bindea_TCGA_",ICR.Filter,".pdf"),width = 16,height = 8 )
 
 sHc2<-reorder(as.dendrogram(sHc),c(length(sHc$labels):1))
 plot(sHc2)
 dev.off()
-pdf("./3 ANALISYS/IMMUNOSCORE/BINDEA/bindea.pdf",width = 16,height = 8 )
+pdf(paste0("./3 ANALISYS/IMMUNOSCORE/BINDEA/",Cancerset,".bindea.",ICR.Filter,".pdf"),width = 16,height = 8 )
 heatmap3((as.matrix(ESz)),
          main="ssGSEA/bindea signatures",
          ColSideColors=annot,
          Colv= as.dendrogram(sHc),col=bluered(75) , labCol=NA,
          scale='col',margins = c(12, 7))
 dev.off()
-pdf("./3 ANALISYS/IMMUNOSCORE/BINDEA/bindea_reverse.pdf",width = 16,height = 8 )
+pdf(paste0("./3 ANALISYS/IMMUNOSCORE/BINDEA/",Cancerset,".bindea_reverse.",ICR.Filter,".pdf"),width = 16,height = 8 )
 heatmap3((as.matrix(ESz)),
          main="ssGSEA/bindea signatures",
          ColSideColors=annot,
