@@ -12,7 +12,6 @@
 
 ## Create Heatmap of TCGA RNASeq ICR genes
 
-# Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
 
