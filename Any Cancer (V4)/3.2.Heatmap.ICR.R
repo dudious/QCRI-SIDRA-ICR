@@ -1,11 +1,5 @@
 #################################################################
 ###
-<<<<<<< HEAD
-### Create ICR RNASEQ based expression Heatmap....
-###
-#################################################################
-
-=======
 ### This script creates heatmaps for ICR genes using EDASeq 
 ### normalized RNASeq data from the TCGA. This script includes a 
 ### log transformation of the data. Samples are ordered by ICR 
@@ -18,8 +12,6 @@
 
 ## Create Heatmap of TCGA RNASeq ICR genes
 
-# Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
->>>>>>> 1172c97ced4e87aeaf07a1c6fc003ad99a2350b9
 # Setup environment
 rm(list=ls())
 setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
@@ -46,7 +38,6 @@ TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)     
 
 source(paste0(Path.R.Tools, "ipak.function.R"))
 source(paste0(Path.Pipeline.Scripts, "0.1.Specification_ICR_genes_for_pipeline.R"))
-
 
 #Install and load required packages
 ipak(required.packages)
