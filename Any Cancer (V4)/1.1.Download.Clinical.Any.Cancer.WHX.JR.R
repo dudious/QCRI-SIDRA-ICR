@@ -1,0 +1,71 @@
+#################################################################
+###
+### This script downloads the Clinical Data and
+### Biospecimen Data from the TCGA database.
+### 
+### Data is saved :
+### .../2_Data/",download.method,"/",Cancer,"/BiospecimenClinicalData/
+###
+#################################################################
+
+# Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
+# Setup environment
+rm(list=ls())
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
+required.packages <- c("xlsx","RCurl","httr", "rjson", "stringr", "HGNChelper")
+
+                                                                                                                      # Create function that installs and loads the required packages as 
+                                                                                                                      # specified in character vector (required.packages)
+ipak <- function(required.packages){    
+  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
+  if(length(missing.packages)) install.packages(missing.packages, dependencies = TRUE)
+  invisible(sapply(required.packages, library, character.only = TRUE))
+}
+
+ipak(required.packages)                                                                                               # Install and load required packages     
+
+# Set Parameters
+download.method = "TCGA_Assembler"                                                                                    # Specify download method (this information to be used when saving the file)
+CancerTYPES     = "ALL"
+Cancer_skip     = c("")
+Path.TCGA.Assembler = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                      # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
+
+source(paste0(Path.TCGA.Assembler, "/TCGA-Assembler_v2.0.3/Module_A.R"))
+
+# Load data
+TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)
+
+# Download clinical and Biospecimen information in the Biotab format
+if (CancerTYPES == "ALL") { 
+      CancerTYPES <- TCGA.cancersets$cancerType
+}
+
+N.sets <- length(CancerTYPES)
+#i=1 #Remove the # if any one cancertype is downloaded
+for (i in 1:N.sets) {
+  Cancer = CancerTYPES[i]
+  if (Cancer %in% Cancer_skip) {next}
+  Cancer_path = paste0 ("./2_Data/",download.method,"/",Cancer,"/BiospecimenClinicalData/")
+  DownloadBiospecimenClinicalData(cancerType = CancerTYPES[i],
+                                  saveFolderName = Cancer_path,
+                                  outputFileName = "")
+  print (paste0("Clinical and Biospecimen data downloaded to ",Cancer_path))
+  # Extract and merge relevant data
+  ## rename files
+  file.list.old  <- list.files(Cancer_path,full.names = TRUE)
+  file.list.new <- gsub ("nationwidechildrens.org_clinical_","",file.list.old)
+  file.list.new <- gsub (paste0("_",tolower(Cancer)),"",file.list.new)
+  file.rename (file.list.old,file.list.new)
+  print ("Files renamed ...")
+  
+#j=1 #Remove the # if any one cancertype is downloaded
+for (j in 1:length(file.list.new)){
+  file = file.list.new[j]
+  name = gsub(paste0("./2_Data/TCGA_Assembler/", Cancer, "BiospecimenClinicalData/"),"",file)
+  name = paste0(gsub(".txt","",name),".table")
+  table = read.csv(file,header = TRUE, sep="\t", as.is=TRUE,skip=2)
+  assign(name,table)
+  rm(table)
+}
+}
+
