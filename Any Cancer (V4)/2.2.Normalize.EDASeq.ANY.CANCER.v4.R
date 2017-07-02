@@ -8,7 +8,7 @@
 ###
 #################################################################
 
-##Download the RNASeq data using TCGA Assembler
+## Normalize RNASeq data using TCGA EDASeq
 
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
@@ -28,7 +28,7 @@ assay.platform = "gene_RNAseq"
 # Specify download method (this information to be used when saving the file)
 Path.R.Tools = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                               # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
 #Path.R.Tools = "D:/Jessica/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"
-Log_file = paste0("./1_Log_Files/2.2_RNASeq_Normalization/RNASeq_Normalization_Log_File_",                                # Specify complete name of the logfile that will be saved during this script
+Log_file = paste0("./1_Log_Files/2.2_RNASeq_Normalization/RNASeq_Normalization_Log_File_",                              # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
 # Load data
@@ -97,11 +97,13 @@ for (i in 1:N.sets) {
   Des = as.data.frame(Des, stringsAsfactors = FALSE)
   Des$hgnc_symbol = geneInfo$hgnc_symbol[match(Des$EntrezID, geneInfo$EntrezID)]
   
-  Raw.data = Data[, -(grep(".*\\.1$",colnames(Data)))]                                                                        # Drop columns with colname ending with .1 in data-file (these are scaled values) and save in Raw.data
+  Raw.data = Data[, -(grep(".*\\.1$",colnames(Data)))]                                                                      # Drop columns with colname ending with .1 in data-file (these are scaled values) and save in Raw.data
   
-  cat(paste0("Number of samples in Data is ", ncol(Raw.data), ".\n", "number of genes in Data is ", nrow(Raw.data), ".", "\n",
-             "Number of patients is ", length(unique(substring(colnames(Raw.data),1,12))), "."),file=Log_file, sep = "\n", append = TRUE)
-  tissue.type = c("TP", "TR", "TAP", "TM", "TAM", "NT")
+  cat(paste0("Number of samples in Data is ", ncol(Raw.data), ".\n", "number of genes in Data is ", 
+             nrow(Raw.data), ".", "\n", "Number of patients is ", 
+             length(unique(substring(colnames(Raw.data),1,12))), "."), 
+      file=Log_file, sep = "\n", append = TRUE)
+  tissue.type = c("TP", "TR", "TAP", "TM", "TAM", "NT") 
   
   sink(Log_file, append=TRUE, split=TRUE)
   

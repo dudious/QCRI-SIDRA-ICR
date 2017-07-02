@@ -1,8 +1,11 @@
 #################################################################
-###
+### 
 ### This script downloads ANY-CANCER Somatic Mutation Data 
-### from the TCGA database
-### It will download and process the data. 
+### from the TCGA database.
+### (Script 2.4 creates an overview of this downloaded data
+### which can be used to decide which MAF files to process using
+### script 1.7)
+###
 ### Downloaded raw data is saved in:
 ### "./2_Data/",download.method,"/",Cancer,"/SomaticMutationData/"
 ###

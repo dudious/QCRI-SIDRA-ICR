@@ -2,8 +2,11 @@
 ###
 ### This script generates an overview of the available MAFs 
 ### for somatic mutation data. Based on this information, a 
-### selection of MAFs to analyse can be chosen.
+### selection of MAFs to analyze can be made.
+### (Performed between script 1.6 and 1.7)
 ###
+### Output file:
+### "./1_Log_Files/2.4_MAF.selection/2.4.MAF.file.Analysis.", gsub(":",".",gsub(" ","_",date())), ".csv"
 #################################################################
 
 ##Download the SomaticMutationData data using TCGA Assembler
@@ -18,7 +21,7 @@ setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
 required.packages = c("RCurl","httr", "rjson", "stringr", "HGNChelper", "Hmisc")
 
 # Set Parameters
-CancerTYPES = "ALL"                                                                                                  # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                     # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 
