@@ -15,17 +15,15 @@
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-setwd("D:/Jessica/Dropbox (TBI-Lab)/TCGA Analysis pipeline/") 
+
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+
 required.packages <- c("RCurl","httr", "rjson", "stringr", "HGNChelper")
 
                                                                                                                         # Create function that installs and loads the required packages 
                                                                                                                         # as specified in character vector (required.packages)                                                                                                                      
-ipak <- function(required.packages){
-  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if(length(missing.packages)) install.packages(missing.packages, dependencies = TRUE)
-  invisible(sapply(required.packages, library, character.only = TRUE))
-}
+source(paste0(code_path, "R tools/ipak.function.R")) 
 
 ipak(required.packages)                                                                                                 #Install and load required packages
 
@@ -41,7 +39,7 @@ Log_file = paste0("./1_Log_Files/1.4_CNA_Processing/CNA-Process_Log_File_",
 # Load data
 GenomeFileHg18 = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/Hg18GenePosition.txt")                     # Load RefGenomeFiles from Assembler_v2.0.3
 GenomeFileHg19 = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/Hg19GenePosition.txt")                     # Load RefGenomeFiles from Assembler_v2.0.3
-TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)                                             # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
                                                                                                                         # in the Manual of Assembler v2.0.3 and was saved as csv file.
 source(paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/Module_A.R"))
 source(paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/Module_B.R"))

@@ -9,31 +9,28 @@
 #################################################################
 
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
+# and indicate the location.
+
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
 required.packages <- c("xlsx","RCurl","httr", "rjson", "stringr", "HGNChelper")
 
-                                                                                                                      # Create function that installs and loads the required packages as 
-                                                                                                                      # specified in character vector (required.packages)
-ipak <- function(required.packages){    
-  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if(length(missing.packages)) install.packages(missing.packages, dependencies = TRUE)
-  invisible(sapply(required.packages, library, character.only = TRUE))
-}
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+
+source(paste0(code_path, "R tools/ipak.function.R")) 
+source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_A.R"))
 
 ipak(required.packages)                                                                                               # Install and load required packages     
+
 
 # Set Parameters
 download.method = "TCGA_Assembler"                                                                                    # Specify download method (this information to be used when saving the file)
 CancerTYPES     = "ALL"
 Cancer_skip     = c("")
-Path.TCGA.Assembler = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                      # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
-
-source(paste0(Path.TCGA.Assembler, "/TCGA-Assembler_v2.0.3/Module_A.R"))
 
 # Load data
-TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 
 # Download clinical and Biospecimen information in the Biotab format
 if (CancerTYPES == "ALL") { 

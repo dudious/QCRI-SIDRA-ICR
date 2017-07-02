@@ -16,8 +16,9 @@
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-#setwd("D:/Jessica/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+
 required.packages = c("base64enc", "HGNChelper","RCurl","httr","stringr","digest","bitops",
                       "rjson")
 
@@ -35,7 +36,7 @@ Log_file = paste0("./1_Log_Files/2.3_RNASeq_Filtering/RNASeq_Filtering_Log_File_
 
 # Load data
 TCGASampleTypeFile = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/TCGASampleType.txt")
-TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)                                             # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 
 
 # in the Manual of Assembler v2.0.3 and was saved as csv file.

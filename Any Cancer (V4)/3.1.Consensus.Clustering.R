@@ -1,20 +1,25 @@
-#################################################################
+####################################################################
 ###
-### This Script clusters the ",Cancerset," RNASeq date retrieved with 
-### TCGA assembler v2.0.3., normalized using EDASeq and filtered 
-### for specific tissue type and 1 sample per patient. ??What about transformation??
+### This Script clusters the RNASeq date from TCGA that have been
+### normalized using EDASeq and filtered for specific tissue type
+### and 1 sample per patient. This script includes a 
+### log transformation of the data. Additionally, optimal kalinsky
+### is calculated.
+### 
 ### Input data:
 ### ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData/")
-###
-#################################################################
-
-##Download the SomaticMutationData data using TCGA Assembler
+### Output data are saved as Rdata file:
+### ./, Cancer, ".", download.method, ".EDASeq.ICR.reps5000/" , Cancer, "_ICR_cluster_assignment_k2-6.Rdata"
+### which includes: (1) table_cluster_assignment and (2) optimal.calinsky.
+#####################################################################
 
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-#setwd("D:/Jessica/Dropbox (TBI-Lab)/TCGA Analysis pipeline/") 
+
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+
 required.packages = c("RCurl","httr", "rjson", "stringr", "HGNChelper")
 required.bioconductor.packages = "ConsensusClusterPlus"
 
@@ -22,6 +27,8 @@ required.bioconductor.packages = "ConsensusClusterPlus"
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
+assay.platform = "gene_RNAseq" 
+
 
 Path.R.Tools = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                               # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
 #Path.R.Tools = "D:/Jessica/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"
@@ -33,12 +40,12 @@ Log_file = paste0("./1_Log_Files/3.1_Consensus_Clustering/3.1_Consensus_Clusteri
 
 
 # Load data
-TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)                                             # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-# in the Manual of Assembler v2.0.3 and was saved as csv file.
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
+                                                                                                                        # in the Manual of Assembler v2.0.3 and was saved as csv file.
 
 source(paste0(Path.R.Tools, "ipak.function.R"))
 source(paste0(Path.Pipeline.Scripts, "0.1.Specification_ICR_genes_for_pipeline.R"))
-source("~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/stefanofunctions.R")                                     # Used for calinsky function and plot
+source("~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/stefanofunctions.R")                    # Used for calinsky function and plot
 
 #Install and load required packages
 ipak(required.packages)
@@ -86,9 +93,16 @@ for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
   cat (paste0 ("Clustering ",Cancer,"."))
+  if(!file.exists(paste0("./3_DataProcessing/TCGA_Assembler/", Cancer, "/RNASeqData/",Cancer, "_", 
+                         assay.platform, "_", "normalized.Rdata"))) 
+  {cat(paste0("For ", Cancer, ", a normalization file does not exist, file is skipped.", 
+              "\n",
+              "-----------------------------------------------------------------------------------------------------------",
+              "\n"), file = Log_file, sep = "\n", append = TRUE)
+    next}
   if(Cancer == "SKCM"){
     Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
-    load(paste0(Cancer_path, Cancer, "_gene_RNAseq_normalized_TPandTM_filtered.Rdata"))
+    load(paste0(Cancer_path, "/", Cancer, "_gene_RNAseq_normalized_TPandTM_filtered.Rdata"))
   } else{
     Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
     load(paste0(Cancer_path, "/", Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))

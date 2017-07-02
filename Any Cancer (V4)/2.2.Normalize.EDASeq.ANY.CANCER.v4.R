@@ -13,8 +13,10 @@
 # Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-#setwd("D:/Jessica/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
+
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+
 required.bioconductor.packages = c("EDASeq", "preprocessCore")
 required.packages = c("base64enc", "HGNChelper","RCurl","httr","stringr","digest","bitops",
                       "rjson")
@@ -34,7 +36,7 @@ Log_file = paste0("./1_Log_Files/2.2_RNASeq_Normalization/RNASeq_Normalization_L
 # Load data
 TCGASampleTypeFile = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/TCGASampleType.txt")
 load(paste0(Path.R.Tools, "/geneInfo.August2016.RData"))
-TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)                                             # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 
 colnames(geneInfo)[which(names(geneInfo) == "entrezgene")] <- "EntrezID"
 

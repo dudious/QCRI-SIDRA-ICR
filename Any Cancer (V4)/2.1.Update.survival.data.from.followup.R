@@ -11,7 +11,10 @@
 
 # Setup environment
 rm(list=ls())
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
+
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+
 required.packages <- c("RCurl","httr", "rjson", "stringr", "HGNChelper")
 
 ipak <- function(required.packages){
@@ -28,7 +31,7 @@ CancerTYPES     = "ALL"
 Cancer_skip     = c("")
 
 # Load data
-TCGA.cancersets <- read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 
 if (CancerTYPES == "ALL") { 
   CancerTYPES <- TCGA.cancersets$cancerType
