@@ -41,7 +41,7 @@ if (CancerTYPES == "ALL") {
 }
 
 N.sets <- length(CancerTYPES)
-#i=1 #Remove the # if any one cancertype is downloaded
+
 for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -58,7 +58,7 @@ for (i in 1:N.sets) {
   file.rename (file.list.old,file.list.new)
   print ("Files renamed ...")
   
-#j=1 #Remove the # if any one cancertype is downloaded
+
 for (j in 1:length(file.list.new)){
   file = file.list.new[j]
   name = gsub(paste0("./2_Data/TCGA_Assembler/", Cancer, "BiospecimenClinicalData/"),"",file)

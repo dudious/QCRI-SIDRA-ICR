@@ -39,7 +39,7 @@ N.sets <- length(CancerTYPES)
 #Update the patient.txt files with follow-up data. When a patient appears twice in a follow-up table, the most recent observation is always the lowest row in the table with this
 #patient barcode (see variable form completion date).
 
-#k=3
+
 for(k in 1:N.sets){
   Cancer = CancerTYPES[k]
   if(Cancer %in% Cancer_skip){next}
@@ -59,7 +59,7 @@ for(k in 1:N.sets){
   survival.table <- patient.table[, c("bcr_patient_barcode", "vital_status","days_to_last_followup","days_to_death")]
   N.files <- length(file.list.followup)
   
-#l=1
+
   for(l in 1:N.files){
     followup.file = file.list.followup[l]
     followup.table = read.csv(followup.file,header = FALSE, sep="\t", as.is=TRUE, skip = 3,stringsAsFactors = FALSE)
