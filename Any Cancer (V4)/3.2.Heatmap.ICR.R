@@ -1,12 +1,9 @@
 #################################################################
 ###
-### Create Heatmap....
+### Create ICR RNASEQ based expression Heatmap....
 ###
 #################################################################
 
-##Download the SomaticMutationData data using TCGA Assembler
-
-# Before running this script, first download TCGA assembler 2.0.3 scripts http://www.compgenome.org/TCGA-Assembler/
 # Setup environment
 rm(list=ls())
 setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
@@ -27,7 +24,7 @@ Path.Pipeline.Scripts = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR
 Log_file = paste0("./1_Log_Files/3.2_Heatmap_ICR/3.2_Heatmap_ICR_Log_File_",                                            # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
-# Load data
+# Load data and R scripts
 TCGA.cancersets = read.csv ("./TCGA.datasets.csv",stringsAsFactors = FALSE)                                             # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 # in the Manual of Assembler v2.0.3 and was saved as csv file.
 
@@ -39,7 +36,7 @@ source(paste0(Path.Pipeline.Scripts, "0.1.Specification_ICR_genes_for_pipeline.R
 ipak(required.packages)
 ibiopak(required.bioconductor.packages)
 
-# Create folders
+# Create folders and log file
 dir.create("./4_Analysis/",showWarnings = FALSE)                                                                        # Create folder to save processed data (by Assembler module B)
 dir.create(paste0("./4_Analysis/",download.method),showWarnings = FALSE)
 dir.create(paste0("./1_Log_Files/"), showWarnings = FALSE)                                                              # Create folder to save logfile
@@ -68,22 +65,20 @@ cat("This is a log file for creating heatmaps of RNASeq data based on ICR genes"
 if (CancerTYPES == "ALL") { 
   CancerTYPES <- TCGA.cancersets$cancerType
 }
-
 N.sets = length(CancerTYPES)
 
-## Create heatmaps
+# Create heatmaps
 start.time.process.all = Sys.time()
 msg = paste0("Create heatmaps", "\n")
 cat(msg)
 
-i=2
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
   cat (paste0 ("Creating heatmap ",Cancer,"."))
   
-  ##load RNASeq data
+  ## load RNASeq data
   if(Cancer == "SKCM"){
     Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
     load(paste0(Cancer_path, Cancer, "_gene_RNAseq_normalized_TPandTM_filtered.Rdata"))
@@ -91,7 +86,7 @@ for (i in 1:N.sets) {
     Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
     load(paste0(Cancer_path, "/", Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))
   }
-  ##load cluster data
+  ## load cluster data
   Cluster_file = paste0("./4_Analysis/", download.method, "/", Cancer, "/clustering/", Cancer, ".", download.method, ".EDASeq.ICR.reps5000/",
                         Cancer, "_ICR_cluster_assignment_k2-6.Rdata")
   load(Cluster_file)
@@ -104,7 +99,7 @@ for (i in 1:N.sets) {
   dir.create(paste0("./5_Figures/Heatmaps/ICR_Heatmaps"),showWarnings = FALSE)
   dir.create(paste0("./5_Figures/Heatmaps/ICR_Heatmaps/",download.method),showWarnings = FALSE)
   
-  ##plot heatmap
+  ## plot annotation
   table_cluster_assignment = table_cluster_assignment[order(table_cluster_assignment$ICRscore),]
   annotation = table_cluster_assignment[,c(1,5,7,9)]
   
@@ -122,8 +117,8 @@ for (i in 1:N.sets) {
   my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 300)
   expression.matrix = t(ICR_subset_RNAseq_log2)[,rownames(annotation.blot)]
   
-  
-  dev.new()
+  ## plot heatmap
+  #dev.new()
   png(paste0("./5_Figures/Heatmaps/ICR_Heatmaps/", download.method, "/ICR_Heatmap_RNASeq_",Cancer,".png"),res=600,height=7,width=10,unit="in")
   heatmap3 (expression.matrix,
             col=my.palette,
