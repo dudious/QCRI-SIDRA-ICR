@@ -15,14 +15,9 @@ rm(list=ls())
 setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
 code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
 
+source(paste0(code_path, "R tools/ipak.function.R"))
+
 required.packages <- c("RCurl","httr", "rjson", "stringr", "HGNChelper")
-
-ipak <- function(required.packages){
-  missing.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
-  if(length(missing.packages)) install.packages(missing.packages, dependencies = TRUE)
-  invisible(sapply(required.packages, library, character.only = TRUE))
-}
-
 ipak(required.packages)
 
 # Set Parameters

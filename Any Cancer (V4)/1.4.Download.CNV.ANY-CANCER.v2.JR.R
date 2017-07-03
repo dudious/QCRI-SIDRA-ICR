@@ -16,34 +16,28 @@
 # Setup environment
 rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                     # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                           # Set code path to the location were the R code is located
+
+source(paste0(code_path, "R tools/ipak.function.R")) 
+source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_A.R"))
+source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_B.R"))
 
 required.packages <- c("RCurl","httr", "rjson", "stringr", "HGNChelper")
-
-                                                                                                                        # Create function that installs and loads the required packages 
-                                                                                                                        # as specified in character vector (required.packages)                                                                                                                      
-source(paste0(code_path, "R tools/ipak.function.R")) 
-
-ipak(required.packages)                                                                                                 #Install and load required packages
+ipak(required.packages)                                                                                                  # Install and load required packages
 
 # Set Parameters
-CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
-Cancer_skip = c("")                                                                                                     # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
-download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
-#Path.R.Tools = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                              # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
-Path.R.Tools = "D:/Jessica/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"
+CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
+download.method = "TCGA_Assembler"                                                                                       # Specify download method (this information to be used when saving the file)
 Log_file = paste0("./1_Log_Files/1.4_CNA_Processing/CNA-Process_Log_File_",
                   gsub(":",".",gsub(" ","_",date())),".txt")
+GenomeFileHg18 = paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/SupportingFiles/Hg18GenePosition.txt")                 # Load RefGenomeFiles from Assembler_v2.0.3
+GenomeFileHg19 = paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/SupportingFiles/Hg19GenePosition.txt")                 # Load RefGenomeFiles from Assembler_v2.0.3
 
 # Load data
-GenomeFileHg18 = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/Hg18GenePosition.txt")                     # Load RefGenomeFiles from Assembler_v2.0.3
-GenomeFileHg19 = paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/SupportingFiles/Hg19GenePosition.txt")                     # Load RefGenomeFiles from Assembler_v2.0.3
-TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-                                                                                                                        # in the Manual of Assembler v2.0.3 and was saved as csv file.
-source(paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/Module_A.R"))
-source(paste0(Path.R.Tools, "TCGA-Assembler_v2.0.3/Module_B.R"))
-
+TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                    # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
+                                                                                                                         # in the Manual of Assembler v2.0.3 and was saved as csv file.
 # Define parameters (based on loaded data)
 if (CancerTYPES == "ALL") { 
   CancerTYPES <- TCGA.cancersets$cancerType
@@ -61,7 +55,7 @@ cat("This is a log file for Processing CNV Data",
     capture.output(sessionInfo()),
     "",
     "Parameters Used :",
-    paste0("CancerTYPES = ", CancerTYPES),                                                                                                    # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+    paste0("CancerTYPES = ", CancerTYPES),
     paste0("Cancer_skip = ", Cancer_skip),
     paste0("download.method = ", download.method),
     "",

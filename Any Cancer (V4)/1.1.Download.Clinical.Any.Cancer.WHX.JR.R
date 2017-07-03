@@ -13,14 +13,14 @@
 
 # Setup environment
 rm(list=ls())
-required.packages <- c("xlsx","RCurl","httr", "rjson", "stringr", "HGNChelper")
 
 setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located.
 
 source(paste0(code_path, "R tools/ipak.function.R")) 
 source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_A.R"))
 
+required.packages <- c("xlsx","RCurl","httr", "rjson", "stringr", "HGNChelper")
 ipak(required.packages)                                                                                               # Install and load required packages     
 
 
@@ -43,7 +43,7 @@ for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
   Cancer_path = paste0 ("./2_Data/",download.method,"/",Cancer,"/BiospecimenClinicalData/")
-  DownloadBiospecimenClinicalData(cancerType = CancerTYPES[i],
+  DownloadBiospecimenClinicalData(cancerType = Cancer,
                                   saveFolderName = Cancer_path,
                                   outputFileName = "")
   print (paste0("Clinical and Biospecimen data downloaded to ",Cancer_path))

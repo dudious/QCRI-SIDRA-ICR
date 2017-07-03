@@ -17,11 +17,16 @@
 # Setup environment
 rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                  # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                        # Set code path to the location were the R code is located
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+
+source(paste0(code_path, "R tools/ipak.function.R"))
+source(paste(code_path, "/R tools/stefanofunctions.R"))                                                                 # Used for calinsky function and plot
 
 required.packages = c("RCurl","httr", "rjson", "stringr", "HGNChelper")
 required.bioconductor.packages = "ConsensusClusterPlus"
+ipak(required.packages)
+ibiopak(required.bioconductor.packages)
 
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
@@ -29,27 +34,12 @@ Cancer_skip = ""                                                                
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq" 
 
-
-Path.R.Tools = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"                               # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
-#Path.R.Tools = "D:/Jessica/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/"
-Path.Pipeline.Scripts = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/Any Cancer (V4)/"
-#Path.Pipeline.Scripts = "D:/Jessica/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/Any Cancer (V4)/"
-
 Log_file = paste0("./1_Log_Files/3.1_Consensus_Clustering/3.1_Consensus_Clustering_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
-
 # Load data
+load(code_path, "Datalists/ICR_genes.RData") 
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-                                                                                                                        # in the Manual of Assembler v2.0.3 and was saved as csv file.
-
-source(paste0(Path.R.Tools, "ipak.function.R"))
-source(paste0(Path.Pipeline.Scripts, "0.1.Specification_ICR_genes_for_pipeline.R"))
-source("~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/R tools/stefanofunctions.R")                    # Used for calinsky function and plot
-
-#Install and load required packages
-ipak(required.packages)
-ibiopak(required.bioconductor.packages)
 
 # Create folders
 dir.create("./4_Analysis/",showWarnings = FALSE)                                                                        # Create folder to save processed data (by Assembler module B)
@@ -169,7 +159,6 @@ for (i in 1:N.sets) {
   
   #log calinsky
   setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-  #setwd("D:/Jessica/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
   cat(paste0("Optimal calinsky for ", Cancer, " is: ", optimal.calinsky, "."), file = Log_file, append = TRUE, sep = "\n")
   
   end.time.process.cancer <- Sys.time ()
