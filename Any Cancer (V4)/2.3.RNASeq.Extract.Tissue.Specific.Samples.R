@@ -28,7 +28,7 @@ required.packages = c("base64enc", "HGNChelper","RCurl","httr","stringr","digest
 ipak(required.packages)
 
 # Set Parameters
-CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = c("TGCT")                                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                     # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"
 assay.platform = "gene_RNAseq"                                                                                            

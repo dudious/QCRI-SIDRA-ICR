@@ -21,7 +21,7 @@ setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                            
 code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 
 source(paste0(code_path, "R tools/ipak.function.R"))
-source(paste(code_path, "/R tools/stefanofunctions.R"))                                                                 # Used for calinsky function and plot
+source(paste0(code_path, "R tools/stefanofunctions.R"))                                                                 # Used for calinsky function and plot
 
 required.packages = c("RCurl","httr", "rjson", "stringr", "HGNChelper")
 required.bioconductor.packages = "ConsensusClusterPlus"
@@ -29,16 +29,15 @@ ipak(required.packages)
 ibiopak(required.bioconductor.packages)
 
 # Set Parameters
-CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = c("TGCT", "THCA", "THYM", "UCEC", "UCS")                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq" 
-
 Log_file = paste0("./1_Log_Files/3.1_Consensus_Clustering/3.1_Consensus_Clustering_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
 # Load data
-load(code_path, "Datalists/ICR_genes.RData") 
+load(paste0(code_path, "Datalists/ICR_genes.RData")) 
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 
 # Create folders
