@@ -30,7 +30,7 @@ CancerTYPES = "ALL"                                                             
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"
-Log_file = paste0("./1_Log_Files/3.2_Heatmap_ICR/3.2_Heatmap_ICR_Log_File_",                                            # Specify complete name of the logfile that will be saved during this script
+Log_file = paste0("./1_Log_Files/3.4_Heatmap_ICR/3.4_Heatmap_ICR_Log_File_",                                            # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
 # Load data and R scripts
@@ -41,7 +41,7 @@ TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stri
 dir.create("./4_Analysis/",showWarnings = FALSE)                                                                        # Create folder to save processed data (by Assembler module B)
 dir.create(paste0("./4_Analysis/",download.method),showWarnings = FALSE)
 dir.create(paste0("./1_Log_Files/"), showWarnings = FALSE)                                                              # Create folder to save logfile
-dir.create(paste0("./1_Log_Files/3.2_Heatmap_ICR"), showWarnings = FALSE)
+dir.create(paste0("./1_Log_Files/3.4_Heatmap_ICR"), showWarnings = FALSE)
 cat("This is a log file for creating heatmaps of RNASeq data based on ICR genes",                                       # Set-up logfile
     "__________________________________________",
     "",
@@ -127,10 +127,11 @@ for (i in 1:N.sets) {
   
   ## plot heatmap
   #dev.new()
-  png(paste0("./5_Figures/Heatmaps/ICR_Heatmaps/", download.method, "/ICR_Heatmap_RNASeq_",Cancer,".png"),res=600,height=7,width=10,unit="in")
+  png(paste0("./5_Figures/Heatmaps/ICR_Heatmaps/", download.method, "/ICR_Heatmap_RNASeq_",Cancer,".png"),res=600,height=7,width=10.5,unit="in")
   heatmap3 (expression.matrix,
             col=my.palette,
             Colv=NA,
+            scale = "row",
             ColSideColors= annotation.blot,
             ColSideLabs = c(paste0("k3 ICR clusters: ", gsub(","," /",toString(count(annotation, "ICR_cluster_k3")$freq))),
                             paste0("k4 ICR clusters: ", gsub(","," /",toString(count(annotation, "ICR_cluster_k4")$freq))),

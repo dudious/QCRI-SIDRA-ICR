@@ -120,11 +120,11 @@ for (i in 1:N.sets) {
   Bindea.enrichment.z.core <- Bindea.enrichment.score 
   for(j in 1: nrow(Bindea.enrichment.score))
   {
-    Bindea.enrichment.z.core[j,]<- (Bindea.enrichment.score[j,]-mean(Bindea.enrichment.score[j,]))/sd(Bindea.enrichment.score[j,]) # z-score the inrichment matrix
+    Bindea.enrichment.z.score[j,]<- (Bindea.enrichment.score[j,]-mean(Bindea.enrichment.score[j,]))/sd(Bindea.enrichment.score[j,]) # z-score the inrichment matrix
   }
   ### Bindea plotting
   dev.new()
-  Bindea.enrichment.z.core <- Bindea.enrichment.z.core[,rownames(annotation.blot)]
+  Bindea.enrichment.z.score <- Bindea.enrichment.z.score[,rownames(annotation.blot)]
   heatmap3((as.matrix(Bindea.enrichment.z.core)),
            main="ssGSEA/bindea signatures",
            ColSideColors=annotation.blot,
