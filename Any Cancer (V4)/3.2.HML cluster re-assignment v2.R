@@ -5,7 +5,10 @@
 ### for all cancer types.
 ###
 ### Outputfile:
-### "./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/Cluster_assignment_analysis.csv"
+### "./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/Cluster_assignment_analysis
+### gsub(":",".",gsub(" ","_",date()))," .csv"
+### This file can be manually corrected before HML-classification in
+### script 3.3.
 #################################################################
 
 # Setup environment
@@ -17,9 +20,8 @@ code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"  
 source(paste0(code_path, "R tools/ipak.function.R"))
 
 required.packages = c("plyr")
-required.bioconductor.packages = c()
 ipak(required.packages)
-ibiopak(required.bioconductor.packages)
+
 
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
@@ -68,8 +70,8 @@ cat(msg)
 
 cluster_assignment_analysis = data.frame(Cancertype = CancerTYPES, Optimal.K = NA, mean.ICR.scores = NA, 
                                          mean.scaled.ICR.scores = NA, patient.numbers = NA, patient.percentages = NA, auto.action = NA, chosen.K = NA, 
-                                         manual.correction = "no", manual.action = NA)
-i=3
+                                         manual.correction = "no", reason.manual.correction = NA, manual.action = NA)
+
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
@@ -117,4 +119,5 @@ dir.create(paste0("./4_Analysis/"), showWarnings = FALSE)
 dir.create(paste0("./4_Analysis/TCGA_Assembler/"), showWarnings = FALSE)
 dir.create(paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/"), showWarnings = FALSE)
 dir.create(paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering"), showWarnings = FALSE)
-write.csv(cluster_assignment_analysis ,file = "./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/Cluster_assignment_analysis.csv")
+write.csv(cluster_assignment_analysis ,file = paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/Cluster_assignment_analysis",
+                                                     gsub(":",".",gsub(" ","_",date())), ".csv"))

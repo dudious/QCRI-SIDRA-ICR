@@ -21,9 +21,9 @@ source(paste0(code_path, "R tools/ipak.function.R"))
 source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_A.R"))
 source(paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/Module_B.R"))
 
-required.bioconductor.packages = c("EDASeq", "preprocessCore")
+required.bioconductor.packages = c("SummarizedExperiment","EDASeq", "preprocessCore")
 required.packages = c("base64enc", "HGNChelper","RCurl","httr","stringr","digest","bitops",
-                      "rjson")
+                      "rjson","Matrix","latticeExtra","matrixStats")
 ipak(required.packages)
 ibiopak(required.bioconductor.packages)
 
@@ -37,10 +37,15 @@ Log_file = paste0("./1_Log_Files/2.2_RNASeq_Normalization/RNASeq_Normalization_L
 TCGASampleTypeFile = paste0(code_path, "R tools/TCGA-Assembler_v2.0.3/SupportingFiles/TCGASampleType.txt")
 
 # Load data
-load(paste0(code_path, "R tools/geneInfo.August2016.RData"))
+load(paste0(code_path, "R tools/geneInfo.July2017.RData"))
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 
-colnames(geneInfo)[which(names(geneInfo) == "entrezgene")] <- "EntrezID"
+#update geneinfo file
+#colnames(geneInfo)[which(colnames(geneInfo) == "entrezgene")] <- "EntrezID"
+#gene.query <- queryMany(geneInfo$hgnc_symbol, scopes="symbol", fields=c("entrezgene", "go"), species="human")
+#gene.table <- as.data.frame(gene.query)
+#geneInfo$new_EntrezID = gene.table$entrezgene[match(geneInfo$hgnc_symbol,gene.table$query)]
+#save(geneInfo,gene.table,file = paste0(code_path,"R tools/geneInfo.July2017.RData"))
 
 # Create folders
 dir.create("./3_DataProcessing/",showWarnings = FALSE)                                                                  # Create folder to save processed data (by Assembler module B)
@@ -74,7 +79,6 @@ if (CancerTYPES == "ALL") {
 N.sets = length(CancerTYPES)
 
 start.time.all <- Sys.time()
-
 # Normalization
 for (i in 1:N.sets) {
   start.time.cancer = Sys.time()
@@ -86,10 +90,12 @@ for (i in 1:N.sets) {
   load(paste0("./3_DataProcessing/TCGA_Assembler/", Cancer, "/RNASeqData/",Cancer, "_", 
               assay.platform, "_", "Processed.Rdata"))
   
-  
-  
-  Des = as.data.frame(Des, stringsAsfactors = FALSE)
-  Des$hgnc_symbol = geneInfo$hgnc_symbol[match(Des$EntrezID, geneInfo$EntrezID)]
+  Des = as.data.frame(Des, StringsAsfactors = FALSE)
+  Des$hgnc_symbol = geneInfo$hgnc_symbol[match(Des$EntrezID, geneInfo$new_EntrezID)]
+  #lost.genes <- as.character(Des[which(is.na(Des$hgnc_symbol)),"GeneSymbol"])
+  #lost.genes <- lost.genes[-which(lost.genes %in% Des$hgnc_symbol)]
+  #which(duplicated(lost.genes))
+  Des$hgnc_symbol[Des$hgnc_symbol=="?"] <- NA
   
   Raw.data = Data[, -(grep(".*\\.1$",colnames(Data)))]                                                                      # Drop columns with colname ending with .1 in data-file (these are scaled values) and save in Raw.data
   

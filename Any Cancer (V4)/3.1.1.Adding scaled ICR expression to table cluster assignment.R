@@ -17,9 +17,7 @@ code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"  
 source(paste0(code_path, "R tools/ipak.function.R"))
 
 required.packages = c("plyr")
-required.bioconductor.packages = c()
 ipak(required.packages)
-ibiopak(required.bioconductor.packages)
 
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
@@ -78,6 +76,7 @@ Cluster_file = paste0("./4_Analysis/", download.method, "/", Cancer, "/clusterin
 load(Cluster_file)
 
 table_cluster_assignment$Scaled_ICRscore = round((100-1)/(max(table_cluster_assignment$ICRscore)-min(table_cluster_assignment$ICRscore))*(table_cluster_assignment$ICRscore-max(table_cluster_assignment$ICRscore))+100,1)
-table_cluster_assignment = table_cluster_assignment[,c(1, 12, 2:11)]
+#table_cluster_assignment = table_cluster_assignment[,c(1, 12, 2:11)] ## Only re-order after initial run of the 3.1.1 script directly after clustering
+                                                                      ## Formula for scaling can be adapted to revise scaling, but no extra columns should be added and columns should maintain their order to keep full pipeline functional.
 save(table_cluster_assignment,optimal.calinsky, file = Cluster_file)
 }

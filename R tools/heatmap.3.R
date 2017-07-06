@@ -54,6 +54,9 @@ heatmap.3 <- function(x,
                       margins = c(5,5),
                       ColSideColors,
                       RowSideColors,
+                      ColSideLabs = colnames(ColSideColors),
+                      RowSideLabs = colnames(RowSideColors),
+                      font_size_col_Labs = 1,
                       side.height.fraction=0.3,
                       cexRow = 0.2 + 1/log10(nr),
                       cexCol = 0.2 + 1/log10(nc),
@@ -304,8 +307,8 @@ heatmap.3 <- function(x,
       }
       rsc = matrix(as.numeric(rsc), nrow = dim(rsc)[1])
       image(t(rsc), col = as.vector(rsc.colors), axes = FALSE)
-      if (length(colnames(RowSideColors)) > 0) {
-        axis(1, 0:(dim(rsc)[2] - 1)/(dim(rsc)[2] - 1), colnames(RowSideColors), las = 2, tick = FALSE)
+      if (length(RowSideLabs) > 0) {
+        axis(1, 0:(dim(rsc)[2] - 1)/(dim(rsc)[2] - 1), RowSideLabs, las = 2, tick = FALSE)
       }
     }
   }
@@ -330,9 +333,9 @@ heatmap.3 <- function(x,
       }
       csc = matrix(as.numeric(csc), nrow = dim(csc)[1])
       image(csc, col = as.vector(csc.colors), axes = FALSE)
-      if (length(colnames(ColSideColors)) > 0) {
-        axis(2, 0:(dim(csc)[2] - 1)/max(1,(dim(csc)[2] - 1)), cex.axis=0.7, 
-             colnames(ColSideColors), las = 2, tick = FALSE)
+      if (length(ColSideLabs) > 0) {
+        axis(2, 0:(dim(csc)[2] - 1)/max(1,(dim(csc)[2] - 1)), cex.axis= font_size_col_Labs, 
+             ColSideLabs, las = 2, tick = FALSE)
       }
     }
   }
