@@ -28,7 +28,7 @@ ipak(required.packages)
 
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
-Cancer_skip = "LAML"                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
+Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.4_Heatmap_ICR/3.4_Heatmap_ICR_Log_File_",                                            # Specify complete name of the logfile that will be saved during this script
@@ -80,7 +80,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Create heatmaps", "\n")
 cat(msg)
 
-i=1
+
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
@@ -143,7 +143,7 @@ for (i in 1:N.sets) {
                        cluster_assignment_analysis$mean.scaled.ICR.scores.HML[cluster_assignment_analysis$Cancertype == Cancer],
                        " for Low / Medium / High resp.")
   
-  Delta = cluster_assignment_analysis$delta.HL.in.HML.classification[cluster_assignment_analysis$Cancertype == Cancer]
+  Delta = cluster_assignment_analysis[which(cluster_assignment_analysis$Cancertype == Cancer), "delta.scaled.HL.in.HML.classification"]
   
   ## plot heatmap
   png(paste0("./5_Figures/Heatmaps/ICR_Heatmaps/", download.method, "/ICR_Heatmap3_RNASeq_",Cancer,".png"),res=600,height=8,width=11,unit="in")

@@ -74,7 +74,6 @@ start.time <- Sys.time ()
 
 mean_correlation_table = data.frame(Cancertype = CancerTYPES, Mean.correlation = 0)
 
-i=1
 for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -95,7 +94,7 @@ for (i in 1:N.sets) {
   }
   
   # Subset RNAseq data to genes to correlate
-  #unavailable.genes <- genes_to_correlate[-which(genes_to_correlate %in% rownames(filtered.norm.RNAseqData))]
+  unavailable.genes <- genes_to_correlate[-which(genes_to_correlate %in% rownames(filtered.norm.RNAseqData))]
   subset_RNAseq = t(filtered.norm.RNAseqData[row.names(filtered.norm.RNAseqData) %in% genes_to_correlate, ])
   subset_RNAseq_log2 = log(subset_RNAseq +1, 2)
   
