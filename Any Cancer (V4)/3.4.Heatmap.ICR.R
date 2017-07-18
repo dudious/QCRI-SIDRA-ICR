@@ -12,7 +12,6 @@
 #################################################################
 
 ## Create Heatmap of TCGA RNASeq ICR genes
-
 # Setup environment
 rm(list=ls())
 
@@ -80,7 +79,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Create heatmaps", "\n")
 cat(msg)
 
-
+i=26
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
@@ -131,13 +130,12 @@ for (i in 1:N.sets) {
   annotation.blot[annotation.blot=="ICR High"]="red"
   annotation.blot[annotation.blot=="ICR Medium"]="green"
   
-  
   my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 297)
   expression.matrix = t(ICR_subset_RNAseq_log2)[,rownames(annotation.blot)]
   
   HML_actions = paste0("Optimal k for clustering was ", optimal.calinsky, ". \nSelected number of clusters for HML classification was: ",
                        cluster_assignment_analysis$chosen.K[cluster_assignment_analysis$Cancertype == Cancer],
-                       ". The combination action performed to reduce to 3 clusters is: ",
+                       ".\nThe combination action performed to reduce to 3 clusters is: \n",
                        cluster_assignment_analysis$manual.action[cluster_assignment_analysis$Cancertype == Cancer],
                        " \nResulting in a mean scaled ICR scores of ",
                        cluster_assignment_analysis$mean.scaled.ICR.scores.HML[cluster_assignment_analysis$Cancertype == Cancer],
@@ -166,7 +164,7 @@ for (i in 1:N.sets) {
   title(main = list(paste0(Cancer, ": RNASeq", "\n N patients = ", nrow(table_cluster_assignment), "\n Delta = ", Delta),cex = 1.5),
         outer = FALSE, line = -2, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was obtained from TCGA, \n using ", download.method, " v2.0.3. ",
-                          "Samples are ordered by ICR score.\n", HML_actions), cex = 0.8), outer = FALSE, line = 4)
+                          "Samples are ordered by ICR score.\n", HML_actions), cex = 0.85), outer = FALSE, line = -0.75)
   legend(x = 0 , y= 0.9, legend = c("ICR High", "ICR Medium3", "ICR Medium2", "ICR Medium1", "ICR Low"),
          col = c("red","orange","yellow", "green","blue"), lty= 0.5,lwd = 0.5, cex = 0.9, pch= 15, pt.cex = 1.2)
   dev.off()
@@ -191,7 +189,7 @@ for (i in 1:N.sets) {
   title(main = list(paste0(Cancer, ": RNASeq", "\n N patients = ", nrow(table_cluster_assignment), "\n Delta = ", Delta),cex = 1.5),
         outer = FALSE, line = -4 , adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was obtained from TCGA, \n using ", download.method, " v2.0.3. ",
-                          "Samples are ordered by ICR score. ", HML_actions), cex = 1), outer = FALSE, line = -1, adj = 0.55)
+                          "Samples are ordered by ICR score. ", HML_actions), cex = 0.80), outer = FALSE, line = -0.82, adj = 0.55)
   legend("topright", legend = c("ICR High", "ICR Medium3", "ICR Medium2", "ICR Medium1", "ICR Low"),
          col = c("red","orange","yellow", "green","blue"), lty= 0.5,lwd = 0.5, cex = 0.9, pch= 15, pt.cex = 1.2)
   dev.off()
