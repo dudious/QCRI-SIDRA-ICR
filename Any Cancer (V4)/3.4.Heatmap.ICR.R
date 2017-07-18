@@ -79,7 +79,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Create heatmaps", "\n")
 cat(msg)
 
-i=26
+i=1
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]

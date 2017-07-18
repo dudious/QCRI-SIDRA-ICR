@@ -24,7 +24,7 @@ if(!("xCell" %in% installed.packages()[,"Package"])){
   required.packages = c("devtools")
   ipak(required.packages)
 }
-required.bioconductor.packages = c("GSVA","heatmap3")                                                                   
+required.bioconductor.packages = c("GSVA","heatmap3", "gclus")                                                                   
 ibiopak(required.bioconductor.packages)
 devtools::install_github('dviraran/xCell')
 library ("xCell")
@@ -131,8 +131,15 @@ for (i in 1:N.sets) {
   for(j in 1: nrow(Bindea.enrichment.z.score))  {
     Bindea.enrichment.z.score[j,] = (Bindea.enrichment.score[j,]-mean(Bindea.enrichment.score[j,]))/sd(Bindea.enrichment.score[j,]) # z-score the enrichment matrix
   }
+  #Bindea.enrichment.ordered = Bindea.enrichment.z.score
+  #Bindea.enrichment.ordered = rbind(Bindea.enrichment.ordered, colMeans(Bindea.enrichment.ordered))
+  #rownames(Bindea.enrichment.ordered)[25] = "Bindea_enrichment_score"
+  #Bindea.enrichment.ordered = Bindea.enrichment.ordered[, order(Bindea.enrichment.ordered[which(rownames(Bindea.enrichment.ordered) == "Bindea_enrichment_score"),])]
+  #Bindea.enrichment.z.score = Bindea.enrichment.z.score[,colnames(Bindea.enrichment.ordered)]
+  
   ## Bindea cluster (hierarchical)
-  sHc <- hclust(ddist <- dist(t(Bindea.enrichment.z.score)), method = "ward.D2")
+  sHc = hclust(ddist <- dist(t(Bindea.enrichment.z.score)), method = "ward.D2")
+  
   plot(sHc,labels=FALSE)
   
   ## Annotation for plotting
