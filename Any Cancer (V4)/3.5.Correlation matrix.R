@@ -99,7 +99,7 @@ for (i in 1:N.sets) {
   subset_RNAseq_log2 = log(subset_RNAseq +1, 2)
   
   # Correlation matrix
-  RNASeq_subset_cor <- cor (subset_RNAseq_log2,method=test)
+  ICR_cor <- cor (subset_RNAseq_log2,method=test)
   
   # Correlation significance
   cor.mtest <- function(mat, conf.level = 0.95) {
@@ -118,7 +118,7 @@ for (i in 1:N.sets) {
     }
     return(list(p.mat, lowCI.mat, uppCI.mat))
   }
-  RNASeq_subset_cor_sign <- cor.mtest(RNASeq_subset_cor, 0.95)
+  ICR_cor_sign <- cor.mtest(ICR_cor, 0.95)
   
   # Correlation plot
   png(paste0("./5_Figures/Correlation_plots/", selected_genes, "_Correlation_plots/",
@@ -128,15 +128,15 @@ for (i in 1:N.sets) {
   cex.before <- par("cex")
   par(cex = 0.45)
   lims=c(-1,1)
-  if (length(RNASeq_subset_cor[RNASeq_subset_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(RNASeq_subset_cor),color = c(rep("#CC0506",20)),stringsAsFactors = FALSE)
+  if (length(ICR_cor[ICR_cor<0]) == 0) {lims=c(0,1)}
+  annotation = data.frame (gene = rownames(ICR_cor),color = c(rep("#CC0506",20)),stringsAsFactors = FALSE)
   annotation$color[annotation$gene %in% c("IDO1","CD274","CTLA4","FOXP3","PDCD1")] = "#41719C"
-  annotation = annotation[corrMatOrder(RNASeq_subset_cor,order="FPC"),]
+  annotation = annotation[corrMatOrder(ICR_cor,order="FPC"),]
   
-  mean_correlation = round(mean(RNASeq_subset_cor),2)
-  corrplot.mixed (RNASeq_subset_cor,
+  mean_correlation = round(mean(ICR_cor),2)
+  corrplot.mixed (ICR_cor,
                   #type="lower",
-                  #p.mat = RNASeq_subset_cor_sign[[1]],                                                                      # add significance to correlations
+                  #p.mat = ICR_cor_sign[[1]],                                                                      # add significance to correlations
                   col = colpattern,
                   lower = "square",
                   upper ="number",
@@ -160,6 +160,10 @@ for (i in 1:N.sets) {
   
   cat(paste0("For ", Cancer, " mean correlation is ", mean_correlation), file = Log_file, append = TRUE, sep = "\n")
   mean_correlation_table$Mean.correlation[mean_correlation_table$Cancertype == Cancer] = mean_correlation
+  
+  dir.create(paste0("./4_Analysis/", download.method, "/", Cancer, "/Correlation"), showWarnings = FALSE)
+  save(ICR_cor, ICR_cor_sign, file = paste0("./4_Analysis/", download.method, "/", Cancer, "/Correlation/",
+                                                                                                 "Correlation_matrix_ICR_", test, "_", Cancer, ".Rdata"))
 }
 
 dir.create("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation", showWarnings = FALSE)
