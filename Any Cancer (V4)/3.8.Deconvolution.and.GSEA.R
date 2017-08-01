@@ -89,7 +89,6 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-i=1
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
@@ -258,7 +257,7 @@ for (i in 1:N.sets) {
          col = Legend_colors,lty= 0.5,lwd = 0.5, cex = 0.7, pch= 15, pt.cex = 1.2)
   dev.off()
   
-  ## Hallmark row means
+  ## Hallmark col means
   
   #z-score matrix
   Hallmark.col.means <- data.frame(matrix(nrow=length(Gene_Lists), ncol=ncol(Expression.data)))
