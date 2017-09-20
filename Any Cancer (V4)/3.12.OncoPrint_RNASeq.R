@@ -18,10 +18,11 @@ code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"  
 
 source(paste0(code_path, "R tools/ipak.function.R"))
 
-required.bioconductor.packages = c("ComplexHeatmap")
+required.bioconductor.packages = c("ComplexHeatmap", "circlize", "gridExtra")
 ibiopak(required.bioconductor.packages)
 
 source(paste0(code_path, "R tools/oncoPrint.R"))                                                                        # source adapted version of oncoPrint version (Other functions of ComplexHeatmap packages are still required still required)
+source(paste0(code_path, "R tools/heatmap.3.R"))
 
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
@@ -39,6 +40,7 @@ z_score_upregulation = 1.5
 z_score_downregulation = -1.5
 subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG"
 cor_cutoff = 0
+ICR_medium_excluded = "all_included"                                                                                     # Options: "ICR_medium_excluded" or "all_included"
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
@@ -98,54 +100,52 @@ for (i in 1:N.sets){
     pathway_order = c("ICR cluster", cor_pathways)
   }
   
-  
   if(expression_units == "z_score"){
     ## Translate z_score to upregulation or downregulation
     # First set all to new numeric value (100, -100 or 0)
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score > z_score_upregulation] = 100
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score < z_score_downregulation] = -100
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score >= z_score_downregulation & Hallmark.enrichment.z.score <= z_score_upregulation] = 0
+    oncoprint_matrix = Hallmark.enrichment.z.score
+    oncoprint_matrix[oncoprint_matrix > z_score_upregulation] = 100
+    oncoprint_matrix[oncoprint_matrix < z_score_downregulation] = -100
+    oncoprint_matrix[oncoprint_matrix >= z_score_downregulation & oncoprint_matrix <= z_score_upregulation] = 0
     
     # Convert individual values to new character value
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score == 100] = "UP"
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score == -100] = NA
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score == 0] = NA
+    oncoprint_matrix[oncoprint_matrix == 100] = "UP"
+    oncoprint_matrix[oncoprint_matrix == -100] = NA
+    oncoprint_matrix[oncoprint_matrix == 0] = NA
     
     # Filter to only plot the selected cor_pathways
-    Hallmark.enrichment.z.score = Hallmark.enrichment.z.score[which(rownames(Hallmark.enrichment.z.score) %in% cor_pathways),]
+    oncoprint_matrix = oncoprint_matrix[which(rownames(oncoprint_matrix) %in% cor_pathways),]
     
-    Hallmark.enrichment.z.score = rbind(Hallmark.enrichment.z.score, table_cluster_assignment$HML_cluster[match(colnames(Hallmark.enrichment.z.score), row.names(table_cluster_assignment))])
-    rownames(Hallmark.enrichment.z.score)[nrow(Hallmark.enrichment.z.score)] = "ICR cluster"
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score == "ICR Low" | Hallmark.enrichment.z.score == "ICR Medium"] = NA
-    Hallmark.enrichment.z.score[Hallmark.enrichment.z.score == "ICR High"] = "UP"
+    oncoprint_matrix = rbind(oncoprint_matrix, table_cluster_assignment$HML_cluster[match(colnames(oncoprint_matrix), row.names(table_cluster_assignment))])
+    rownames(oncoprint_matrix)[nrow(oncoprint_matrix)] = "ICR cluster"
+    oncoprint_matrix[oncoprint_matrix == "ICR Low" | oncoprint_matrix == "ICR Medium"] = NA
+    oncoprint_matrix[oncoprint_matrix == "ICR High"] = "UP"
     
-    Hallmark.enrichment.z.score[is.na(Hallmark.enrichment.z.score)] = ""
-    
-    matrix = Hallmark.enrichment.z.score
+    oncoprint_matrix[is.na(oncoprint_matrix)] = ""
+    complete_matrix = oncoprint_matrix
   }
   
-  if(expression_units == "quantiles"){
-    quantfun = function(x) as.integer(cut(x, breaks = quantile(x, probs = 0:4/4), include.lowest=TRUE))
-    Hallmark.expression.quantiles =  apply(Hallmark.enrichment.score, MARGIN = 1, FUN = quantfun)
-    Hallmark.expression.quantiles = t(Hallmark.expression.quantiles)
-    colnames(Hallmark.expression.quantiles) = colnames(Hallmark.enrichment.score)
-    
-    Hallmark.expression.quantiles[Hallmark.expression.quantiles != 4] = NA
-    Hallmark.expression.quantiles[Hallmark.expression.quantiles == 4] = "UP"
-    
-    # Filter to only plot the selected cor_pathways
-    Hallmark.expression.quantiles = Hallmark.expression.quantiles[which(rownames(Hallmark.expression.quantiles) %in% cor_pathways),]
-   
-    Hallmark.expression.quantiles = rbind(Hallmark.expression.quantiles, table_cluster_assignment$HML_cluster[match(colnames(Hallmark.expression.quantiles), row.names(table_cluster_assignment))])
-    rownames(Hallmark.expression.quantiles)[nrow(Hallmark.expression.quantiles)] = "ICR cluster"
-    Hallmark.expression.quantiles[Hallmark.expression.quantiles == "ICR Low" | Hallmark.expression.quantiles == "ICR Medium"] = NA
-    Hallmark.expression.quantiles[Hallmark.expression.quantiles == "ICR High"] = "UP"
-    
-    Hallmark.expression.quantiles[is.na(Hallmark.expression.quantiles)] = ""
-    
-    matrix = Hallmark.expression.quantiles
-  }
+  #if(expression_units == "quantiles"){
+  #quantfun = function(x) as.integer(cut(x, breaks = quantile(x, probs = 0:4/4), include.lowest=TRUE))
+  #Hallmark.expression.quantiles =  apply(Hallmark.enrichment.score, MARGIN = 1, FUN = quantfun)
+  #Hallmark.expression.quantiles = t(Hallmark.expression.quantiles)
+  #colnames(Hallmark.expression.quantiles) = colnames(Hallmark.enrichment.score)
   
+  #Hallmark.expression.quantiles[Hallmark.expression.quantiles != 4] = NA
+  #Hallmark.expression.quantiles[Hallmark.expression.quantiles == 4] = "UP"
+  
+  # Filter to only plot the selected cor_pathways
+  #Hallmark.expression.quantiles = Hallmark.expression.quantiles[which(rownames(Hallmark.expression.quantiles) %in% cor_pathways),]
+  
+  #Hallmark.expression.quantiles = rbind(Hallmark.expression.quantiles, table_cluster_assignment$HML_cluster[match(colnames(Hallmark.expression.quantiles), row.names(table_cluster_assignment))])
+  #rownames(Hallmark.expression.quantiles)[nrow(Hallmark.expression.quantiles)] = "ICR cluster"
+  #Hallmark.expression.quantiles[Hallmark.expression.quantiles == "ICR Low" | Hallmark.expression.quantiles == "ICR Medium"] = NA
+  #Hallmark.expression.quantiles[Hallmark.expression.quantiles == "ICR High"] = "UP"
+  
+  #Hallmark.expression.quantiles[is.na(Hallmark.expression.quantiles)] = ""
+  
+  #matrix = Hallmark.expression.quantiles
+  #}
   
   dir.create(paste0("./5_Figures/OncoPrints/"), showWarnings = FALSE)
   dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/"), showWarnings = FALSE)
@@ -153,57 +153,123 @@ for (i in 1:N.sets){
   dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method), showWarnings = FALSE)
   dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
   
-  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
-             "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", Cancer, ".png"),res=600,height= 7,width= 18,unit="in")
   alter_fun = list(
     background = function(x, y, w, h) grid.rect(x, y, w*0.8, h*0.9, gp = gpar(fill = "grey", col = NA)),
     UP = function(x, y, w, h) grid.rect(x, y, w*0.8, h*0.9, gp = gpar(fill = col["UP"], col = NA)))
   
   col = c(UP = "red", DOWN = "blue")
-    
-  plot = oncoPrint(matrix,
-                   alter_fun = alter_fun,
-                   col = col,
-                   heatmap_legend_param = list(title= "", at = c("UP"),
-                                        labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
-                   column_title = paste0("OncoPrint: ", Cancer, " RNASeq expression", "\n N patients = ", nrow(table_cluster_assignment)),
-                   row_order = pathway_order,
-                   show_row_barplot = FALSE,
-                   row_barplot_width = unit(7, "in"),
-                   top_annotation = NULL,
-                   width = unit(8, "in"),
-                   row_title = "Hallmark pathways",
-                   column_title_gp = gpar(fontface = 2, fontsize = 16))
-
-  draw(plot, heatmap_legend_side = "bottom", row_sub_title_side = "left")
+  
+  if(ICR_medium_excluded == "all_included"){
+    number_of_patients = nrow(table_cluster_assignment)
+  }
+  if(ICR_medium_excluded == "ICR_medium_excluded"){
+    number_of_patients = nrow(table_cluster_assignment[table_cluster_assignment$HML_cluster != "ICR Medium",])
+  }
+  
+  # Run oncoPrint function first (without saving in png) to get the column_order_oncoprint, which is needed for the heatmap next to the oncoprint
+  # Very important to use the complete cohort (without filtering out ICR Medium Tumors), because column_order_oncoprint is an integer vector generated in oncoPrint function.
+  # First use this to order the heatmap matrix, to subsequently filter out medium tumors (if needed).
+  First_oncoprint = oncoPrint(complete_matrix,
+                              alter_fun = alter_fun,
+                              col = col,
+                              heatmap_legend_param = list(title= "", at = c("UP"),
+                                                          labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
+                              column_title = paste0("OncoPrint: ", Cancer, " RNASeq expression", "\n N patients = ", number_of_patients),
+                              row_order = pathway_order,
+                              show_row_barplot = FALSE,
+                              row_barplot_width = unit(7, "in"),
+                              top_annotation = NULL,
+                              width = unit(8, "in"),
+                              row_title = "Hallmark pathways",
+                              column_title_gp = gpar(fontface = 2, fontsize = 16))
+  
+  # Generate matrix for heatmap from Hallmark enrichment z scores
+  pathway_order_heatmap = pathway_order
+  pathway_order_heatmap[1] = "ICR_genes"
+  matrix_heatmap_oncoprint = Hallmark.enrichment.z.score[match(pathway_order_heatmap, rownames(Hallmark.enrichment.z.score)), column_order_oncoprint]
+  rownames(matrix_heatmap_oncoprint)[1] = "ICR cluster"
+  
+  # Filter out Medium Tumors if needed (specify in parameters in top of this script)
+  if(ICR_medium_excluded == "ICR_medium_excluded"){
+    excluded_patients = rownames(table_cluster_assignment)[table_cluster_assignment$HML_cluster == "ICR Medium"]
+    matrix_heatmap_oncoprint = matrix_heatmap_oncoprint[,-which(colnames(matrix_heatmap_oncoprint) %in% excluded_patients)]
+  }
+  
+  complete_matrix = complete_matrix[rownames(matrix_heatmap_oncoprint),column_order_oncoprint]
+  
+  if(ICR_medium_excluded == "all_included"){
+    oncoprint_matrix = complete_matrix
+  }
+  
+  if(ICR_medium_excluded == "ICR_medium_excluded"){
+    oncoprint_matrix = complete_matrix[, -which(colnames(complete_matrix) %in% excluded_patients)]
+  }
+  
+  # Run oncoPrint function for a second time to generate the figure, no algorithm used in this function: 
+  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+             "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_", Cancer, ".png"),res=600,height= 9,width= 18,unit="in")
+  
+  #col_fun_oncoprint = colorRamp2(c("UP", ""), c("red", "grey"))
+  col_fun_heatmap = colorRamp2(c(-2, 0, 2), c("blue", "white", "red"))
+  
+  plot1 = oncoPrint(oncoprint_matrix,
+                    alter_fun = alter_fun,
+                    col = col,
+                    column_order = NULL,
+                    #heatmap_legend_param = list(title= "", at = c("UP"),
+                    #labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
+                    show_row_barplot = FALSE,
+                    show_heatmap_legend = FALSE,
+                    top_annotation = NULL,
+                    width = unit(8, "in"),
+                    show_pct = FALSE,
+                    row_order = 1:nrow(oncoprint_matrix),
+                    #row_title = "Hallmark pathways",
+                    column_title_gp = gpar(fontface = 2, fontsize = 16))
+  
+  plot2 = Heatmap(matrix_heatmap_oncoprint, name = "expression", 
+                  cluster_rows = FALSE, cluster_columns = FALSE, 
+                  show_row_dend = FALSE,  show_column_dend = FALSE,
+                  column_order = 1:ncol(matrix_heatmap_oncoprint), row_order = 1:nrow(matrix_heatmap_oncoprint),
+                  col = col_fun_heatmap,
+                  #row_title = "Hallmark pathways",
+                  show_heatmap_legend = FALSE,
+                  show_column_names = FALSE,
+                  width = unit(8, "in"),
+                  column_title_gp = gpar(fontface = 2, fontsize = 16))
+  
+  #lgd_oncoprint = Legend(c("UP"), col = "red", labels = c("Upregulation", "No Upregulation"), nrow = 1, title_position = "leftcenter")
+  lgd_heatmap = Legend(at = c(-2, -1, 0, 1, 2), col_fun = col_fun_heatmap, title = "heatmap legend", title_position = "topleft")
+  
+  pushViewport(viewport(layout = grid.layout(ncol = 2, nrow = 3, widths = unit(c(8, 7.5), c("in", "in")),
+                                             heights = unit(c(0.5,3.5, 3.5), c("in", "in", "in")))))
+  
+  pushViewport(viewport(layout.pos.row = 2, layout.pos.col = 1))
+  draw(plot1, newpage = FALSE)
+  upViewport()
+  
+  pushViewport(viewport(layout.pos.row = 3, layout.pos.col = 1))
+  draw(plot2, newpage = FALSE)
+  upViewport()
+  
+  pushViewport(viewport(layout.pos.row = 3, layout.pos.col = 2))
+  grid.draw(lgd_heatmap)
+  upViewport()
+  
+  pushViewport(viewport(layout.pos.row = 1, layout.pos.col = 1))
+  grid.text(paste0(Cancer, " RNASeq expression (OncoPrint)", "\n N patients = ", number_of_patients, "\n",
+                   ICR_medium_excluded), x = unit(3, "in"), gp = gpar(fontface = "bold"))
+  upViewport()
+  
   dev.off()
   
-  oncoPrintMatrix = matrix[match(pathway_order, rownames(matrix)),column_order_oncoprint]
-  oncoPrintMatrix = rbind(oncoPrintMatrix, table_cluster_assignment$HML_cluster[match(colnames(oncoPrintMatrix), row.names(table_cluster_assignment))])
-  assign(paste0(Cancer, "_OncoPrintMatrix"), oncoPrintMatrix)
+  ## save OncoPrint
+  assign(paste0(Cancer, "_oncoprint_matrix"), oncoprint_matrix)
+  assign(paste0(Cancer, "_matrix_heatmap_oncoprint"), matrix_heatmap_oncoprint)
 }
 
-rm(list = "oncoPrintMatrix")
-AlloncoPrintMatrixes = grep("OncoPrintMatrix", ls(), value = TRUE)
-save(list = AlloncoPrintMatrixes , file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
-                                                 "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, ".Rdata"))
+StringsToSelect = "_oncoprint_matrix|_matrix_heatmap_oncoprint"
+AlloncoPrintMatrixes = grep(pattern = StringsToSelect, ls(), value = TRUE)
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"
-
-TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
-
-CancerTYPES = "ALL"
-
-if (CancerTYPES == "ALL") { 
-  CancerTYPES <- TCGA.cancersets$cancerType
-}
-
-N.sets = length(CancerTYPES)
-
-for(i in 1:N.sets){
-  Cancer = CancerTYPES[i]
-  AlloncoPrintMatrixes = grep("OncoPrintMatrix", ls(), value = TRUE)
-  OncoPrintMatrix = get(AlloncoPrintMatrixes[i])
-  write.csv(OncoPrintMatrix, file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/TCGA_Assembler/z_score_1.5_COR_COEF_0/", Cancer,"_OncoPrintMatrix.csv"))
-}
+save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+                                                 "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))

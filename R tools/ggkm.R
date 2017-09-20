@@ -140,8 +140,14 @@ ggkm <- function(sfit,
   ###################################
   # specifying plot parameteres etc #
   ###################################
+  # 21 colors
+  cbPalette <- c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
+                 "#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
+                 "#FDCDAC", "#FFFD99", "#FC9998", "#B2DE68", "#A6CEE3",
+                 "#F12B7E", "#4DAE4B", "#D96002", "#FB7F72", "#E4211E",
+                 "#FC8D62")
   # 5 colors c(blue,green,orange,red,purple)
-  cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000", "#800080")
+  #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000", "#800080")
   # 4 colors (blue,green,orange,red)
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000")
   # 2 colors (red,black)

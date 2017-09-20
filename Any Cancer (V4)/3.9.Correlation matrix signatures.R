@@ -119,7 +119,7 @@ for (i in 1:N.sets) {
     diag(lowCI.mat) <- diag(uppCI.mat) <- 1
     for (i in 1:(n - 1)) {
       for (j in (i + 1):n) {
-        tmp <- cor.test(mat[, i], mat[, j], conf.level = conf.level)
+        tmp <- cor.test(mat[, i], mat[, j], method = test, conf.level = conf.level)
         p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
         lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
         uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
@@ -127,7 +127,7 @@ for (i in 1:N.sets) {
     }
     return(list(p.mat, lowCI.mat, uppCI.mat))
   }
-  Bindea_cor_sign = cor.mtest(Bindea_cor, 0.95)
+  Bindea_cor_sign = cor.mtest(Bindea.enrichment.z.score.df, 0.95)
   
   print(paste0("Generating Bindea z score correlation plot for ", Cancer))
   
@@ -181,7 +181,7 @@ for (i in 1:N.sets) {
   
   # Correlation significance
  
-  xCell_cor_sign = cor.mtest(xCell_cor, 0.95)
+  xCell_cor_sign = cor.mtest(xCell.df, 0.95)
   
   print(paste0("Generating xCell correlation plot for ", Cancer))
   # Correlation plot
@@ -234,7 +234,7 @@ for (i in 1:N.sets) {
   Hallmark_GSEA_cor <- cor (Hallmark.enrichment.z.score.df,method=test)
   
   # Correlation significance
-  Hallmark_GSEA_cor_sign = cor.mtest(Hallmark_GSEA_cor, 0.95)
+  Hallmark_GSEA_cor_sign = cor.mtest(Hallmark.enrichment.z.score.df, 0.95)
   
   # Correlation plot
   print(paste0("Generating Hallmark_GSEA z score correlation plot for ", Cancer))
@@ -287,7 +287,7 @@ for (i in 1:N.sets) {
   Hallmark_CM_cor <- cor (Hallmark.col.means.df, method=test)
   
   # Correlation significance
-  Hallmark_CM_cor_sign = cor.mtest(Hallmark_CM_cor, 0.95)
+  Hallmark_CM_cor_sign = cor.mtest(Hallmark.col.means.df, 0.95)
   
   # Correlation plot
   print(paste0("Generating Hallmark column means correlation plot for ", Cancer))
@@ -340,7 +340,7 @@ for (i in 1:N.sets) {
   all_GSEA_cor <- cor (all_GSEA.df, method=test)
   
   # Correlation significance
-  all_GSEA_cor_sign = cor.mtest(all_GSEA_cor, 0.95)
+  all_GSEA_cor_sign = cor.mtest(all_GSEA.df, 0.95)
   
   # Correlation plot
   png(paste0("./5_Figures/Correlation_plots/Combined_Signature_Correlation_plots/", download.method,

@@ -30,7 +30,7 @@ Log_file = paste0("./1_Log_Files/5.1_Pancancer_Correlation_matrix_Signatures/5.1
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
 test = "pearson"
-display_correlations = "only_significant"                                                                                # Can either be "only_significant" or "irrespective_of_significance"         
+display_correlations = "irrespective_of_significance"                                                                   # Can either be "only_significant" or "irrespective_of_significance"         
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                    # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
@@ -165,7 +165,6 @@ pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_tabl
 pancancer_all_correlation_table = pancancer_all_correlation_table[,-c(14)]
 
 ## Bindea correlation heatmap
-dev.new()
 #png(paste0("./5_Figures/Pancancer_plots/Bindea_ICR_correlation_", display_correlations, ".png"),res=600,height= 10,width=10,unit="in")
 heatmap.3 (pancancer_Bindea_correlation_table,
           col= my.palette,

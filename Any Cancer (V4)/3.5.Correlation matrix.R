@@ -110,7 +110,7 @@ for (i in 1:N.sets) {
     diag(lowCI.mat) <- diag(uppCI.mat) <- 1
     for (i in 1:(n - 1)) {
       for (j in (i + 1):n) {
-        tmp <- cor.test(mat[, i], mat[, j], conf.level = conf.level)
+        tmp <- cor.test(mat[, i], mat[, j], method = test, conf.level = conf.level)
         p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
         lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
         uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
@@ -118,7 +118,7 @@ for (i in 1:N.sets) {
     }
     return(list(p.mat, lowCI.mat, uppCI.mat))
   }
-  ICR_cor_sign <- cor.mtest(ICR_cor, 0.95)
+  ICR_cor_sign <- cor.mtest(subset_RNAseq_log2, 0.95)
   
   # Correlation plot
   png(paste0("./5_Figures/Correlation_plots/", selected_genes, "_Correlation_plots/",
