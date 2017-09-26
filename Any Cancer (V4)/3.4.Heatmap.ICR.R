@@ -32,7 +32,7 @@ download.method = "TCGA_Assembler"                                              
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.4_Heatmap_ICR/3.4_Heatmap_ICR_Log_File_",                                            # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
-version = "v3"                                                                                                          # Specify version of manual correction to perform in this script
+version = "v4"                                                                                                          # Specify version of manual correction to perform in this script
 
 # Load data
 load (paste0(code_path, "Datalists/ICR_genes.RData"))
@@ -79,7 +79,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Create heatmaps", "\n")
 cat(msg)
 
-i=1
+i=3
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]

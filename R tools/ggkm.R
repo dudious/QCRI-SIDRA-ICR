@@ -141,15 +141,17 @@ ggkm <- function(sfit,
   # specifying plot parameteres etc #
   ###################################
   # 21 colors
-  cbPalette <- c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
-                 "#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
-                 "#FDCDAC", "#FFFD99", "#FC9998", "#B2DE68", "#A6CEE3",
-                 "#F12B7E", "#4DAE4B", "#D96002", "#FB7F72", "#E4211E",
-                 "#FC8D62")
+  #cbPalette <- c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
+                 #"#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
+                 #"#FDCDAC", "#FFFD99", "#FC9998", "#B2DE68", "#A6CEE3",
+                 #"#F12B7E", "#4DAE4B", "#D96002", "#FB7F72", "#E4211E",
+                 #"#FC8D62")
   # 5 colors c(blue,green,orange,red,purple)
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000", "#800080")
   # 4 colors (blue,green,orange,red)
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000")
+  # 5 colors (red, blue, green, orange, purple)
+  cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080")
   # 2 colors (red,black)
   #cbPalette <- c("#FF0000","#000000")
   p <- ggplot( .df, aes(time, surv)) +
@@ -161,7 +163,7 @@ ggkm <- function(sfit,
     scale_y_continuous(ylabs, limits = ylims) +
     theme(panel.grid.minor = element_blank()) +
     # MOVE LEGEND HERE BELOW [first is x dim, second is y dim]
-    theme(legend.position = c(ifelse(m < 8, .15, .25),ifelse(d < 4, .75, .25))) +
+    theme(legend.position = c(ifelse(m < 8, .10, .15),ifelse(d < 4, .15, .15))) +
     theme(legend.key = element_rect(colour = NA)) +
     labs(linetype = ystrataname) +
     theme(plot.margin = unit(c(0, 1, .5,ifelse(m < 10, 1.5, 2.5)),"lines")) +
@@ -179,16 +181,32 @@ ggkm <- function(sfit,
   # p-value placement #
   #####################a
   
-  if(length(levels(summary(sfit)$strata)) == 0) pval <- FALSE
+  #if(length(levels(summary(sfit)$strata)) == 0) pval <- FALSE
+  
+  
+  ## ICR High Low specific part
+  #if(pval){
+   # p <- annotate("text",x = 0.6, y = 0.1, label = paste0("It works! p = ", p[1]))
+ # }
   
   if(pval) {
-    sdiff <- survdiff(eval(sfit$call$formula), data = eval(sfit$call$data))
-    pval <- pchisq(sdiff$chisq,length(sdiff$n) - 1,lower.tail = FALSE)
-    pvaltxt <- ifelse(pval < 0.0001,"p < 0.0001",paste("p =", signif(pval, 3)))
+    #sdiff <- survdiff(eval(sfit$call$formula), data = eval(sfit$call$data))
+    #pval <- pchisq(sdiff$chisq,length(sdiff$n) - 1,lower.tail = FALSE)
+    pvaltxt <- paste("HR = ", PLOT_HR ,"p =", PLOT_P, "\n CI = ", PLOT_CI1, "-", PLOT_CI2)
     # MOVE P-VALUE LEGEND HERE BELOW [set x and y]
     #p <- p + annotate("text",x = 150, y = 0.1,label = pvaltxt)
-	p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.1,label = pvaltxt)
+    p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt)
   }
+  
+  
+  #if(pval) {
+    #sdiff <- survdiff(eval(sfit$call$formula), data = eval(sfit$call$data))
+    #pval <- pchisq(sdiff$chisq,length(sdiff$n) - 1,lower.tail = FALSE)
+    #pvaltxt <- ifelse(pval < 0.0001,"p < 0.0001",paste("p =", signif(pval, 3)))
+    # MOVE P-VALUE LEGEND HERE BELOW [set x and y]
+  #p <- p + annotate("text",x = 150, y = 0.1,label = pvaltxt)
+	#p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.1,label = pvaltxt)
+  #}
   
   ###################################################
   # Create table graphic to include at-risk numbers #
@@ -206,7 +224,7 @@ ggkm <- function(sfit,
       time = summary(sfit,times = times,extend = TRUE)$time[subs3],
       n.risk = summary(sfit,times = times,extend = TRUE)$n.risk[subs3]
     )
-    risk.data$n.risk[seq(1,length(risk.data$n.risk),by=11)] <- sfit$n #fix bug in summary
+    #risk.data$n.risk[seq(1,length(risk.data$n.risk),by=11)] <- sfit$n #fix bug in summary
     risk.data$strata <- factor(risk.data$strata, levels=rev(levels(risk.data$strata)))
     
     data.table <- ggplot(risk.data,aes(x = time, y = strata, label = format(n.risk, nsmall = 0))) +

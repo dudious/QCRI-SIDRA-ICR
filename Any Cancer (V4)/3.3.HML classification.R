@@ -27,7 +27,7 @@ download.method = "TCGA_Assembler"                                              
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.3_HMLclustering/3.3_HMLclustering_",                                                 # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
-version = "v3"                                                                                                          # Specify version of manual correction to perform in this script
+version = "v4"                                                                                                          # Specify version of manual correction to perform in this script
 
 # Load data and R scripts
 cluster_assignment_analysis = read.csv(paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/Cluster_assignment_analysis",
@@ -96,7 +96,15 @@ if(!"patient.percentages.HML" %in% colnames(cluster_assignment_analysis)){
 if(!"delta.scaled.HL.in.HML.classification" %in% colnames(cluster_assignment_analysis)){
   cluster_assignment_analysis$delta.scaled.HL.in.HML.classification = NA
 }
-
+if(!"ratio.scaled.HL.in.HML.classification" %in% colnames(cluster_assignment_analysis)){
+  cluster_assignment_analysis$ratio.scaled.HL.in.HML.classification = NA
+}
+if(!"delta.HL.in.HML.classification" %in% colnames(cluster_assignment_analysis)){
+  cluster_assignment_analysis$delta.HL.in.HML.classification = NA
+}
+if(!"ratio.HL.in.HML.classification" %in% colnames(cluster_assignment_analysis)){
+  cluster_assignment_analysis$ratio.HL.in.HML.classification = NA
+}
 
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
@@ -190,6 +198,10 @@ for (i in 1:N.sets) {
   cluster_assignment_analysis$patient.percentages.HML[cluster_assignment_analysis$Cancertype == Cancer] = gsub(",", " / ", toString(patient_table$pct[c(2,3,1)]))
   
   cluster_assignment_analysis$delta.scaled.HL.in.HML.classification[cluster_assignment_analysis$Cancertype == Cancer] = scaled_ICR_scores[3] - scaled_ICR_scores[1]
+  cluster_assignment_analysis$delta.HL.in.HML.classification[cluster_assignment_analysis$Cancertype == Cancer] = ICR_scores[3] - ICR_scores[1]
+  
+  cluster_assignment_analysis$ratio.scaled.HL.in.HML.classification[cluster_assignment_analysis$Cancertype == Cancer] = scaled_ICR_scores[3] / scaled_ICR_scores[1]
+  cluster_assignment_analysis$ratio.HL.in.HML.classification[cluster_assignment_analysis$Cancertype == Cancer] = ICR_scores[3] / ICR_scores[1]
   
   save(table_cluster_assignment,optimal.calinsky, file = Cluster_file)
 }

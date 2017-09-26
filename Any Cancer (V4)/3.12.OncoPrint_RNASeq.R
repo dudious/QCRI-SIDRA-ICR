@@ -38,7 +38,7 @@ assay.platform = "gene_RNAseq"
 expression_units = "z_score"                                                                                             # ("z_score" or "quantiles". Define the matrix to use for generation of OncoPrint (z-score matrix or quantile expression values)
 z_score_upregulation = 1.5
 z_score_downregulation = -1.5
-subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG"
+subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
 cor_cutoff = 0
 ICR_medium_excluded = "all_included"                                                                                     # Options: "ICR_medium_excluded" or "all_included"
 
@@ -57,7 +57,7 @@ if (CancerTYPES == "ALL") {
 }
 N.sets = length(CancerTYPES)
 
-i=1
+i=13
 for (i in 1:N.sets){
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -122,6 +122,7 @@ for (i in 1:N.sets){
     oncoprint_matrix[oncoprint_matrix == "ICR High"] = "UP"
     
     oncoprint_matrix[is.na(oncoprint_matrix)] = ""
+    
     complete_matrix = oncoprint_matrix
   }
   

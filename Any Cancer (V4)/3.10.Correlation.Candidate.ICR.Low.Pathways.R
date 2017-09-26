@@ -24,7 +24,7 @@ required.packages <- c("corrplot", "stringr", "GSVA")
 ipak(required.packages)                                                                                                  # Install and load required packages
 
 # Set Parameters
-CancerTYPES = "BRCA"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
 download.method = "TCGA_Assembler"                                                                                       # Specify download method (this information to be used when saving the file)
 colpattern = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 297)                                                                                                 # Specify which genes will be correlated

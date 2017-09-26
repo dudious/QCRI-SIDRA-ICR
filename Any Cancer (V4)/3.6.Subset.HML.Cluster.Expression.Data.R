@@ -23,7 +23,7 @@ download.method = "TCGA_Assembler"                                              
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.6_Subset.HML.Expression.Data/3.6_Subset_Expressiondata_Log_File_",                   # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")                                                            # Specify version of manual correction to perform in this script
-version = "v3"
+version = "v4"
 
 # Load data
 load (paste0(code_path, "Datalists/ICR_genes.RData"))

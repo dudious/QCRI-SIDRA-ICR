@@ -25,13 +25,6 @@ ipak(required.packages)                                                         
 CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
 download.method = "TCGA_Assembler"                                                                                       # Specify download method (this information to be used when saving the file)
-my.palette = colorRampPalette(c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
-                                "#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
-                                "#FDCDAC", "#FFFD99", "#FC9998", "#B2DE68", "#A6CEE3",
-                                "#F12B7E", "#4DAE4B", "#D96002", "#FB7F72", "#E4211E",
-                                "#FC8D62", "#DECAE4", "#F1E1CC", "#D9D9D9", "#E6AB03",
-                                "#FFFECC", "#7FB1D3", "#FFED6F", "#E5C494", "#A5761D",
-                                "#34A02C", "#8DD3C7"))
                                                                                         
 Log_file = paste0("./1_Log_Files/5.2_Pancancer_ICR_Correlation_boxplot/5.2_Pancancer_ICR_Correlation_boxplot", 
                   "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
@@ -90,16 +83,31 @@ for (i in 1:N.sets) {
   Cancertype = rep(Cancer, length(correlation_triangle))
   ICR_correlation_table = rbind(ICR_correlation_table, data.frame(Correlation_values = correlation_triangle, Cancertype = Cancertype))
 }
+load(paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
+ICR_cluster_assignment_ICR_High = ICR_cluster_assignment_allcancers[ICR_cluster_assignment_allcancers$HML_cluster == "ICR High",]
+mean_ICR_perCancer = aggregate(ICR_cluster_assignment_ICR_High$ICRscore, list(ICR_cluster_assignment_ICR_High$Cancer), mean)
+mean_ICR_perCancer = mean_ICR_perCancer[order(mean_ICR_perCancer$x, decreasing = FALSE),]
+Cancer_order = mean_ICR_perCancer$Group.1
 
 ICR_correlation_table = ICR_correlation_table[-c(1),]
+
+ICR_correlation_table = ICR_correlation_table[order(match(ICR_correlation_table$Cancertype,Cancer_order)),]
+ICR_correlation_table$Cancertype = factor(ICR_correlation_table$Cancertype,levels = Cancer_order)
 
 png(paste0("./5_Figures/Correlation_plots/ICR_Correlation_plots/",
            download.method, "/ICR_", test, "_Correlation_boxplot_pancancer.png"), res=600,height=6,width=14,unit="in")
 
-boxplot_correlation = ggplot(data = ICR_correlation_table, aes(x= Cancertype, y= Correlation_values, fill = Cancertype)) + scale_fill_manual(values = my.palette(n=32)) + geom_boxplot(outlier.colour = NA) + labs(fill = "Cancer type")
-boxplot_correlation = boxplot_correlation + scale_x_discrete("Cancertype") + scale_y_continuous("Mean correlation") + ggtitle("Pearson correlation between expression of ICR genes across cancers") + theme(plot.title = element_text(size=14, face = "bold"))
-boxplot_correlation = boxplot_correlation + guides(fill=FALSE) + theme(axis.title = element_text(size = 13)) + theme(panel.background = element_rect(fill = "white"), panel.grid.major = element_line(colour = "grey", size = 0.2), panel.grid.minor.y = element_line(colour = "grey", size = 0.2))
-boxplot_correlation = boxplot_correlation + theme(axis.line = element_line(color= "black", size = 0.4))
-boxplot_correlation
+boxplot_correlation = ggplot(data = ICR_correlation_table, aes(x= Cancertype, y= Correlation_values, fill = Cancertype)) + 
+  geom_boxplot(outlier.colour = NA) +
+  labs(fill = "Cancer type") +
+  scale_y_continuous("Mean correlation") +
+  scale_fill_manual(values = mean_ICR_perCancer$color) + 
+  ggtitle("Pearson correlation between expression of ICR genes across cancers") + 
+  theme(plot.title = element_text(size=14, face = "bold")) +
+  guides(fill=FALSE) + 
+  theme(axis.title = element_text(size = 13)) + 
+  theme(panel.background = element_rect(fill = "white"), panel.grid.major = element_line(colour = "grey", size = 0.2), panel.grid.minor.y = element_line(colour = "grey", size = 0.2)) +
+  theme(axis.line = element_line(color= "black", size = 0.4))
+print(boxplot_correlation)
 dev.off()
 

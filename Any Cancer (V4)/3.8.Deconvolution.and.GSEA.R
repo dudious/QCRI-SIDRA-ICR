@@ -89,8 +89,8 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-i=22
-for (i in 22:N.sets) {
+
+for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
