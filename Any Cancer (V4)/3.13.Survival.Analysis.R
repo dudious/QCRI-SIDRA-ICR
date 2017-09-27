@@ -32,7 +32,7 @@ assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.13_Survival_Analysis/3.13_Survival_Analysis_Log_File_",                              # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 ICR_k = "HML_classification"                                                                                            # "HML_classification" or "k3" or "k4" or "k5"
-Surv_cutoff_years = 100
+Surv_cutoff_years = 10
 
 # Load data
 #load(paste0(code_path, "Datalists/ICR_genes.RData")) 

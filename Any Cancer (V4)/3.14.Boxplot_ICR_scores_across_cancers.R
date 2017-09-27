@@ -106,7 +106,7 @@ for (i in 1:N.sets) {
   ICR_cluster_assignment_allcancers = rbind(get(paste0(Cancer, "_table_cluster_assignment")), ICR_cluster_assignment_allcancers )
 }
 
-#load(paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
+load(paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
 #ICR_cluster_assignment_allcancers = ICR_cluster_assignment_allcancers[ICR_cluster_assignment_allcancers$HML_cluster == subset,]
 
 dir.create("./5_Figures", showWarnings = FALSE)
@@ -132,18 +132,19 @@ if(basis_ordering == "Mean ICR High"){
   Cancer_order = mean_ICR_perCancer$Group.1
 }
 
-load(file = paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
+#ICR_cluster_assignment_allcancers = ICR_cluster_assignment_allcancers[order(match(ICR_cluster_assignment_allcancers$Cancer, Cancer_order)),]
+ICR_cluster_assignment_allcancers$Cancer = factor(ICR_cluster_assignment_allcancers$Cancer,levels = Cancer_order)
 
-mean_ICR_perCancer = mean_ICR_perCancer[order(match(mean_ICR_perCancer$Group.1, Cancer_order)),]
+Cancer_color_table = Cancer_color_table[order(match(Cancer_color_table$Group.1, Cancer_order)),]
 
 png(paste0("./5_Figures/ICR_distribution_plots/ICR_boxplot_across_cancers/", 
-           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering,"_across_cancers.png"), res=600,height=6,width=15,unit="in")
-boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= Cancer, y= ICRscore, fill = Cancer)) +
+           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering, "_", ICR_classification_k,"_across_cancers.png"), res=600,height=6,width=15,unit="in")
+boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= HML_cluster, y= ICRscore, fill = Cancer)) +
   geom_boxplot(outlier.colour = NA) +
-  scale_fill_manual(values = mean_ICR_perCancer$color) +
-  scale_x_discrete("Cancertype") + scale_y_continuous("ICR score") +
-  #facet_grid(. ~ Cancer) +
-  ggtitle(paste0("ICR scores in ", subset, " according to ", ICR_classification_k, " across cancers")) +
+  scale_fill_manual(values = Cancer_color_table$color) +
+  scale_y_continuous("ICR score") +
+  facet_grid(. ~ Cancer) +
+  ggtitle(paste0("ICR scores in ", subset, " according to ", ICR_classification_k, " across cancers ordered by ", basis_ordering)) +
   theme(plot.title = element_text(size=14, face = "bold")) + theme(axis.title = element_text(size = 13)) + 
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "grey", size = 0.2),
