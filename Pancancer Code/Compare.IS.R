@@ -53,7 +53,7 @@ print (paste0( "with correlation of ", round(unscaled.cor$estimate,2)))
 }
 
 #IS Master file
-Immunescore.master <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.PANCANCER.UNSPLIT.DBGS3.csv",row.names = 1)
+Immunescore.master <- read.csv ("./3 ANALISYS/IMMUNOSCORE/immunoscore.TCGA.PANCANCER.UNSPLIT.DBGS3.csv",row.names = 1) #unfiltered IS score matrix
 Immunescore.master$Patient_ID <- substring(Immunescore.master$Patient_ID,1,12)
 
 N.sets = length(Cancersets)
@@ -77,6 +77,7 @@ Immunescore.master$Scaled.By.Cancer.ACT <- as.numeric(Immunescore.master$Scaled.
 Immunescore.master$Scaled.By.Cancer.INH <- as.numeric(Immunescore.master$Scaled.By.Cancer.INH)
 Immunescore.master$Cancer.Type <- clinical.data$acronym[match(Immunescore.master$Patient_ID,clinical.data$bcr_patient_barcode)]
 Immunescore.master.clean <- Immunescore.master[complete.cases(Immunescore.master),]
+filters.data <- Immunescore.master[-which(rownames(Immunescore.master) %in% rownames(Immunescore.master.clean)),]
 write.csv(Immunescore.master.clean,file = "./3 ANALISYS/IMMUNOSCORE/immunoscore.Master.clean.v2.csv")
 cor.test(Immunescore.master.clean$ALL,Immunescore.master.clean$Scaled.By.Cancer)
 Immunescore.master.clean$Scaled.By.Cancer

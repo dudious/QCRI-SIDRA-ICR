@@ -37,7 +37,11 @@ ggkm <- function(sfit,
                  main = "Kaplan-Meier Plot",
                  pval = TRUE,
                  subs = NULL,
-                 cbPalette,
+                 cbPalette = c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080"),
+                 PLOT_HR = NA,
+                 PLOT_P = NA,
+                 PLOT_CI1 = NA,
+                 PLOT_CI2 = NA,
                  ...) {
   
   #############
@@ -151,7 +155,7 @@ ggkm <- function(sfit,
   # 4 colors (blue,green,orange,red)
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000")
   # 5 colors (red, blue, green, orange, purple)
-  cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080")
+  #cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080")
   # 2 colors (red,black)
   #cbPalette <- c("#FF0000","#000000")
   p <- ggplot( .df, aes(time, surv)) +
@@ -188,7 +192,7 @@ ggkm <- function(sfit,
   #if(pval){
    # p <- annotate("text",x = 0.6, y = 0.1, label = paste0("It works! p = ", p[1]))
  # }
-  
+  if(is.na(PLOT_HR)==FALSE){
   if(pval) {
     #sdiff <- survdiff(eval(sfit$call$formula), data = eval(sfit$call$data))
     #pval <- pchisq(sdiff$chisq,length(sdiff$n) - 1,lower.tail = FALSE)
@@ -196,7 +200,7 @@ ggkm <- function(sfit,
     # MOVE P-VALUE LEGEND HERE BELOW [set x and y]
     #p <- p + annotate("text",x = 150, y = 0.1,label = pvaltxt)
     p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt)
-  }
+  }}
   
   
   #if(pval) {
