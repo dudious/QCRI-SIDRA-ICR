@@ -25,13 +25,6 @@ assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.15_Histogram_ICR/3.15_Histogram_ICR",                                                # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 Score_type = "ICRscore"                                                                                                 # Score_type can be "ICRscore" or "Scaled_ICRscore"
-my.palette = colorRampPalette(c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
-                                "#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
-                                "#FDCDAC", "#FFFD99", "#FC9998", "#B2DE68", "#A6CEE3",
-                                "#F12B7E", "#4DAE4B", "#D96002", "#FB7F72", "#E4211E",
-                                "#FC8D62", "#DECAE4", "#F1E1CC", "#D9D9D9", "#E6AB03",
-                                "#FFFECC", "#7FB1D3", "#FFED6F", "#E5C494", "#A5761D",
-                                "#34A02C", "#8DD3C7"))
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
@@ -105,7 +98,10 @@ for (i in 1:N.sets) {
                         main = paste0("Histogram ", Score_type," in ", Cancer),
                         xlab = Score_type,
                         fill = I("#EB6D7D"),
-                        col = I("black"))
+                        col = I("black")) +
+    theme(axis.text=element_text(size=20),
+          axis.title=element_text(size=16,face="bold"),
+          title = element_text(size=17))
   print(histogram_ICR)
   
   dev.off()

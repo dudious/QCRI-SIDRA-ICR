@@ -43,7 +43,7 @@ Legend_colors = c("blue","green","red", "pink", "purple")
 
 # Load data and R scripts
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-load(paste0(code_path, "Datalists/Gene_Lists.Rdata"))
+load(paste0(code_path, "Datalists/Selected.pathways.Rdata"))
 load(paste0(code_path, "Datalists/marker_list_bindea2.RData"))
 
 # Create folders and log file
@@ -220,14 +220,14 @@ for (i in 1:N.sets) {
 
   ## Hallmark ssGSEA
   # Check availability of Hallmark genes in the dataset
-  available_genes_RNAseq = unlist(Gene_Lists)[which(unlist(Gene_Lists) %in% rownames(Expression.data))]
-  unavailable_genes_RNAseq = unlist(Gene_Lists)[-which(unlist(Gene_Lists) %in% rownames(Expression.data))]
-  cat(paste0("Hallmark ssGSEA ", Cancer, ". Total number of hallmark genes is ", length(unlist(Gene_Lists)), ".",
-             " Of which ", length(unlist(Gene_Lists)[unlist(Gene_Lists) %in% available_genes]), 
+  available_genes_RNAseq = unlist(Selected.pathways)[which(unlist(Selected.pathways) %in% rownames(Expression.data))]
+  unavailable_genes_RNAseq = unlist(Selected.pathways)[-which(unlist(Selected.pathways) %in% rownames(Expression.data))]
+  cat(paste0("Hallmark ssGSEA ", Cancer, ". Total number of hallmark genes is ", length(unlist(Selected.pathways)), ".",
+             " Of which ", length(unlist(Selected.pathways)[unlist(Selected.pathways) %in% available_genes]), 
              " genes are available in expression data.\n"),
       file = Log_file, append = TRUE, sep = "\n")
   
-  Hallmark.enrichment.score = gsva(Expression.data, Gene_Lists, method="ssgsea")
+  Hallmark.enrichment.score = gsva(Expression.data, Selected.pathways, method="ssgsea")
   Hallmark.enrichment.z.score = Hallmark.enrichment.score 
   for(j in 1: nrow(Hallmark.enrichment.z.score))  {
     Hallmark.enrichment.z.score[j,] = (Hallmark.enrichment.score[j,]-mean(Hallmark.enrichment.score[j,]))/sd(Hallmark.enrichment.score[j,]) # z-score the enrichment matrix
@@ -261,13 +261,13 @@ for (i in 1:N.sets) {
   ## Hallmark col means
   
   #z-score matrix
-  Hallmark.col.means <- data.frame(matrix(nrow=length(Gene_Lists), ncol=ncol(Expression.data)))
+  Hallmark.col.means <- data.frame(matrix(nrow=length(Selected.pathways), ncol=ncol(Expression.data)))
   colnames(Hallmark.col.means) = colnames(Expression.data)
-  rownames(Hallmark.col.means) = names(Gene_Lists)
+  rownames(Hallmark.col.means) = names(Selected.pathways)
   
  
-  for(i in 1:length(Gene_Lists)){
-    pathway_genes = unlist(Gene_Lists[i], use.names = FALSE)
+  for(i in 1:length(Selected.pathways)){
+    pathway_genes = unlist(Selected.pathways[i], use.names = FALSE)
     available_pathway_genes = pathway_genes[which(pathway_genes %in% rownames(Expression.data))]
     Hallmark.col.means[i,] = colMeans(Expression.data[available_pathway_genes,])
   }
