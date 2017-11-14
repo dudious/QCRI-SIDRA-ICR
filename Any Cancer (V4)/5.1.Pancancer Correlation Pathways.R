@@ -30,7 +30,7 @@ Log_file = paste0("./1_Log_Files/5.1_Pancancer_Correlation_matrix_Signatures/5.1
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
 test = "pearson"
-display_correlations = "irrespective_of_significance"                                                                   # Can either be "only_significant" or "irrespective_of_significance"         
+display_correlations = "irrespective_of_significance"                                                                                # Can either be "only_significant" or "irrespective_of_significance"         
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                    # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
@@ -165,7 +165,7 @@ pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_tabl
 pancancer_all_correlation_table = pancancer_all_correlation_table[,-c(14)]
 
 ## Bindea correlation heatmap
-#png(paste0("./5_Figures/Pancancer_plots/Bindea_ICR_correlation_", display_correlations, ".png"),res=600,height= 10,width=10,unit="in")
+png(paste0("./5_Figures/Pancancer_plots/Bindea_ICR_correlation_", display_correlations, ".png"),res=600,height= 10,width=10,unit="in")
 heatmap.3 (pancancer_Bindea_correlation_table,
           col= my.palette,
           main = paste0("Pan-Cancer ", test, " correlation \n between ICR and Bindea gene signatures "),
@@ -176,10 +176,10 @@ heatmap.3 (pancancer_Bindea_correlation_table,
 
 title(sub = list(paste0("Correlations between ICR and gene signatures were calculated with R package corrplot. \n", 
                         gsub("_", " ", str_to_title(display_correlations)), "."), cex = 1), outer = FALSE, line = -1)
-#dev.off()
+dev.off()
 
 ## xCell correlation heatmap
-#png(paste0("./5_Figures/Pancancer_plots/xCell_ICR_correlation_", display_correlations, ".png"),res=600,height= 15,width=13,unit="in")
+png(paste0("./5_Figures/Pancancer_plots/xCell_ICR_correlation_", display_correlations, ".png"),res=600,height= 15,width=13,unit="in")
 heatmap.3 (pancancer_xCell_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation \n between ICR and xCell gene signatures "),
@@ -190,10 +190,10 @@ heatmap.3 (pancancer_xCell_correlation_table,
 
 title(sub = list(paste0("Correlations between ICR and gene signatures were calculated with R package corrplot. \n", 
                         gsub("_", " ", str_to_title(display_correlations)), "."), cex = 1), outer = FALSE, line = -0.8)
-#dev.off()
+dev.off()
 
 ## Hallmark_GSEA correlation heatmap
-#png(paste0("./5_Figures/Pancancer_plots/Hallmark_GSEA_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/Hallmark_GSEA_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
 heatmap.3 (pancancer_Hallmark_GSEA_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and Hallmark pathways (GSEA) "),
@@ -204,10 +204,10 @@ heatmap.3 (pancancer_Hallmark_GSEA_correlation_table,
 
 title(sub = list(paste0("Correlations between ICR and gene signatures were calculated with R package corrplot. \n", 
                         gsub("_", " ", str_to_title(display_correlations)), "."), cex = 1), outer = FALSE, line = -1)
-#dev.off()
+dev.off()
 
 ## Hallmark_CM correlation heatmap
-#png(paste0("./5_Figures/Pancancer_plots/Hallmark_CM_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/Hallmark_CM_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
 heatmap.3 (pancancer_Hallmark_CM_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and Hallmark pathways (CMs) "),
@@ -218,10 +218,10 @@ heatmap.3 (pancancer_Hallmark_CM_correlation_table,
 
 title(sub = list(paste0("Correlations between ICR and gene signatures were calculated with R package corrplot. \n", 
                         gsub("_", " ", str_to_title(display_correlations)), "."), cex = 1), outer = FALSE, line = -1)
-#dev.off()
+dev.off()
 
 ## Hallmark_all correlation heatmap
-#png(paste0("./5_Figures/Pancancer_plots/All_combined_ICR_correlation_", display_correlations, ".png"),res=600,height= 30, width=20, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/All_combined_ICR_correlation_", display_correlations, ".png"),res=600,height= 37, width=20, unit="in")
 heatmap.3 (pancancer_all_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and other gene signatures "),

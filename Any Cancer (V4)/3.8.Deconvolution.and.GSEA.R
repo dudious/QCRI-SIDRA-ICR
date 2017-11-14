@@ -23,10 +23,10 @@ source(paste0(code_path,"R tools/heatmap.3.R"))
 if(!("xCell" %in% installed.packages()[,"Package"])){
   required.packages = c("devtools")
   ipak(required.packages)
+  devtools::install_github('dviraran/xCell')
 }
 required.bioconductor.packages = c("GSVA","heatmap3", "gclus")                                                                   
 ibiopak(required.bioconductor.packages)
-devtools::install_github('dviraran/xCell')
 library ("xCell")
 
 # Set Parameters
@@ -34,6 +34,7 @@ CancerTYPES = "ALL"                                                             
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"                                                                                          # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
+pw_selection_version = "3.0"
 Log_file = paste0("./1_Log_Files/3.8_Deconvolution_Bindea/3.8_Deconvolution_Bindea_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 297)
@@ -43,7 +44,7 @@ Legend_colors = c("blue","green","red", "pink", "purple")
 
 # Load data and R scripts
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-load(paste0(code_path, "Datalists/Selected.pathways.Rdata"))
+load(paste0(code_path, "Datalists/Selected.pathways.",pw_selection_version,".Rdata"))
 load(paste0(code_path, "Datalists/marker_list_bindea2.RData"))
 
 # Create folders and log file

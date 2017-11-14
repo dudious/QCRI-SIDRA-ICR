@@ -139,7 +139,7 @@ for (i in 1:N.sets) {
   par(cex = 0.45)
   lims=c(-1,1)
   if (length(Bindea_cor[Bindea_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(Bindea_cor),color = c(rep("#CC0506",25)),stringsAsFactors = FALSE)
+  annotation = data.frame (gene = rownames(Bindea_cor),color = c(rep("#CC0506",nrow(Bindea_cor))),stringsAsFactors = FALSE)
   annotation = annotation[corrMatOrder(Bindea_cor,order="FPC"),]
   
   mean_correlation = round(mean(Bindea_cor),2)
@@ -192,7 +192,7 @@ for (i in 1:N.sets) {
   par(cex = 0.45)
   lims=c(-1,1)
   if (length(xCell_cor[xCell_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(xCell_cor),color = c(rep("#CC0506",68)),stringsAsFactors = FALSE)
+  annotation = data.frame (gene = rownames(xCell_cor),color = c(rep("#CC0506",nrow(xCell_cor))),stringsAsFactors = FALSE)
   annotation = annotation[corrMatOrder(xCell_cor,order="FPC"),]
   
   mean_correlation = round(mean(xCell_cor),2)
@@ -245,7 +245,7 @@ for (i in 1:N.sets) {
   par(cex = 0.45)
   lims=c(-1,1)
   if (length(Hallmark_GSEA_cor[Hallmark_GSEA_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(Hallmark_GSEA_cor),color = c(rep("#CC0506",59)),stringsAsFactors = FALSE)
+  annotation = data.frame (gene = rownames(Hallmark_GSEA_cor),color = c(rep("#CC0506",nrow(Hallmark_GSEA_cor))),stringsAsFactors = FALSE)
   annotation = annotation[corrMatOrder(Hallmark_GSEA_cor,order="FPC"),]
   
   mean_correlation = round(mean(Hallmark_GSEA_cor),2)
@@ -298,7 +298,7 @@ for (i in 1:N.sets) {
   par(cex = 0.45)
   lims=c(-1,1)
   if (length(Hallmark_CM_cor[Hallmark_CM_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(Hallmark_CM_cor),color = c(rep("#CC0506",59)),stringsAsFactors = FALSE)
+  annotation = data.frame (gene = rownames(Hallmark_CM_cor),color = c(rep("#CC0506",nrow(Hallmark_CM_cor))),stringsAsFactors = FALSE)
   annotation = annotation[corrMatOrder(Hallmark_CM_cor,order="FPC"),]
   
   mean_correlation = round(mean(Hallmark_CM_cor),2)
@@ -350,7 +350,7 @@ for (i in 1:N.sets) {
   par(cex = 0.45)
   lims=c(-1,1)
   if (length(all_GSEA_cor[all_GSEA_cor<0]) == 0) {lims=c(0,1)}
-  annotation = data.frame (gene = rownames(all_GSEA_cor),color = c(rep("#CC0506",150)),stringsAsFactors = FALSE)
+  annotation = data.frame (gene = rownames(all_GSEA_cor),color = c(rep("#CC0506", nrow(all_GSEA_cor))),stringsAsFactors = FALSE)
   annotation = annotation[corrMatOrder(all_GSEA_cor,order="FPC"),]
   
   mean_correlation = round(mean(all_GSEA_cor),2)

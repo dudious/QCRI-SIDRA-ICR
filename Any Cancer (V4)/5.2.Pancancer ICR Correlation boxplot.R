@@ -94,6 +94,10 @@ ICR_correlation_table = ICR_correlation_table[-c(1),]
 ICR_correlation_table = ICR_correlation_table[order(match(ICR_correlation_table$Cancertype,Cancer_order)),]
 ICR_correlation_table$Cancertype = factor(ICR_correlation_table$Cancertype,levels = Cancer_order)
 
+load(paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
+
+Cancer_color_table = Cancer_color_table[order(match(Cancer_color_table$Group.1, Cancer_order)),]
+     
 png(paste0("./5_Figures/Correlation_plots/ICR_Correlation_plots/",
            download.method, "/ICR_", test, "_Correlation_boxplot_pancancer.png"), res=600,height=6,width=14,unit="in")
 
@@ -101,7 +105,7 @@ boxplot_correlation = ggplot(data = ICR_correlation_table, aes(x= Cancertype, y=
   geom_boxplot(outlier.colour = NA) +
   labs(fill = "Cancer type") +
   scale_y_continuous("Mean correlation") +
-  scale_fill_manual(values = mean_ICR_perCancer$color) + 
+  scale_fill_manual(values = Cancer_color_table$color) + 
   ggtitle("Pearson correlation between expression of ICR genes across cancers") + 
   theme(plot.title = element_text(size=14, face = "bold")) +
   guides(fill=FALSE) + 
