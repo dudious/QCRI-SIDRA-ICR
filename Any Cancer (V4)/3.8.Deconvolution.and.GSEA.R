@@ -14,8 +14,8 @@
 # Setup environment
 rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                          # Set code path to the location were the R code is located
 
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
@@ -34,7 +34,7 @@ CancerTYPES = "ALL"                                                             
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"                                                                                          # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
-pw_selection_version = "3.0"
+pw_selection_version = "3.1"
 Log_file = paste0("./1_Log_Files/3.8_Deconvolution_Bindea/3.8_Deconvolution_Bindea_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 297)
