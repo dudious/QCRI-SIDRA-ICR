@@ -153,14 +153,9 @@ ggkm <- function(sfit,
   # 5 colors c(blue,green,orange,red,purple)
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000", "#800080")
   # 4 colors (blue,green,orange,red)
-  #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000")
-<<<<<<< HEAD
-  # 5 colors (red, blue, green, orange, purple)
   #cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080")
-=======
   # 5 colors (red, blue, green, yellow, purple)
   cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#EDEB02", "#800080")
->>>>>>> 62ebfaa16b553fc84c8262ca40e6bc9533e2f644
   # 2 colors (red,black)
   #cbPalette <- c("#FF0000","#000000")
   p <- ggplot( .df, aes(time, surv)) +
