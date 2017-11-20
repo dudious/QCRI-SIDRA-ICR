@@ -11,18 +11,17 @@
 ###
 #################################################################
 
+#### Xcell is not included in the log file !!!!
+
 # Setup environment
 rm(list=ls())
 
-<<<<<<< HEAD
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                          # Set code path to the location were the R code is located
-=======
+
 #setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
 setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
 #code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
-code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
->>>>>>> 7975b80375887553ffc13b33ff0067d8351d80b4
+#code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
+code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"  
 
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
