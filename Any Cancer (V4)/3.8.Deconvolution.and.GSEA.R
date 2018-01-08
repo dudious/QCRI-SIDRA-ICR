@@ -14,10 +14,10 @@
 # Setup environment
 rm(list=ls())
 
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
-#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
-code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+#code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
 
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
@@ -93,7 +93,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-
+i=1
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
@@ -162,9 +162,10 @@ for (i in 1:N.sets) {
   annotation$HML_cluster.col[annotation$HML_cluster=="ICR Low"] = "blue"
   annotation$Bindea_cluster.col[annotation$bindea_cluster_name=="Bindea Low"] = "pink"
   annotation$Bindea_cluster.col[annotation$bindea_cluster_name=="Bindea High"] = "purple"
+  Bindea_order = c("Bindea Low", "Bindea High")
   ICR_order = c("ICR Low","ICR Medium","ICR High")
-  annotation = annotation[order(match(annotation$HML_cluster,ICR_order)),]
   annotation = annotation[, -which(colnames(annotation) %in% c("bindea_cluster", "bindea_score"))]
+  annotation = annotation[order(match(annotation$HML_cluster,ICR_order), match(annotation$bindea_cluster_name, Bindea_order)),]
   annotation.blot = as.matrix(annotation[,c("HML_cluster.col","Bindea_cluster.col"), drop= FALSE])
   annotation.blot = annotation.blot[colnames(Expression.data),]                                                                                        # The sample order in annotation.blot needs to be the same as in Expression.data
   
