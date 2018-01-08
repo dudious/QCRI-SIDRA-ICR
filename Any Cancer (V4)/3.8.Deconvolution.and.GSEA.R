@@ -16,19 +16,14 @@
 # Setup environment
 rm(list=ls())
 
-<<<<<<< HEAD
-
 #setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
 setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+
 #code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"  
-=======
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
-#code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
->>>>>>> e78e02cd3e46ae35a7279720b6baed54a4b3f347
+code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Setwd to location were output files have to be saved.
+
+
 
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
@@ -104,7 +99,6 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-i=1
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
