@@ -79,6 +79,7 @@ cat("This is a log file for Deconvolution using Bindeas gene signatures, xCell a
     paste0("CancerTYPES = ", CancerTYPES),                                                          
     paste0("Cancer_skip = ", Cancer_skip),
     paste0("download.method = ", download.method),
+    paste0("pathway selection version used =", pw_selection_version),
     "",
     "Scripts output :",
     "",

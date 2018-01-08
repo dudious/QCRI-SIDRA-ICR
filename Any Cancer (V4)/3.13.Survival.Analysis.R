@@ -166,7 +166,8 @@ for (i in 1:N.sets) {
   pvaltxt = ifelse(pval < 0.0001,"p < 0.0001",paste("p =", signif(pval, 3)))
   
   TS.Surv[,"Group"] = as.factor(TS.Surv[,"Group"])
-  TS.Surv[,"Group"] = relevel(TS.Surv[,"Group"], "ICR High")
+  # Check this!!
+  ##TS.Surv[,"Group"] = relevel(TS.Surv[,"Group"], "ICR High")
   mHR = coxph(formula = msurv ~ TS.Surv[,"Group"],data = TS.Surv, subset = TS.Surv$Group %in% c("ICR High", "ICR Low"))
   mHR.extract = extract.coxph(mHR, include.aic = TRUE,
                               include.rsquared = TRUE, include.maxrs=TRUE,
