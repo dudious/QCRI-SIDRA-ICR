@@ -19,12 +19,15 @@ Codepath          = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/"
 download.method   = "TCGA_Assembler"   
 Filtersamples     = "UnFiltered"    # altervatives : Filtered , UnFiltered
 Surv.cutoff.years = 10            # SET cut-off
-Gene              = "CSPG4"
-GeneIsSignature   = "FALSE"
-GeneSignature     = c("PLCB1", "PLCB2", "PLCB3", "PLCB4", "PLCG1", "PLCG2", "PLCD1", "PLCD3", "PLCD4", "PLCE1", "PLCH1", "PLCH2", "PLCL1", "PLCL2")
+Gene              = "PLs.ALL"
+GeneIsSignature   = "TRUE"
+GeneSignature     = c("PLCB1","PLCB2","PLCB3","PLCB4","PLCD1","PLCD3","PLCD4","PLCE1","PLCG1","PLCG2",
+                      "PLCH1","PLCH2","PLCL1","PLCL2","PLCZ1","PLD1","PLD2")
+  
+  #c("PLCB1", "PLCB2", "PLCB3", "PLCB4", "PLCG1", "PLCG2", "PLCD1", "PLCD3", "PLCD4", "PLCE1", "PLCH1", "PLCH2", "PLCL1", "PLCL2")
 
 Division          = "Tertile"
-Cancersets        = "BRCA"
+Cancersets        = "ALL"
 
 # DO ALL
 TCGA.cancersets <- read.csv (paste0(Codepath,"Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)

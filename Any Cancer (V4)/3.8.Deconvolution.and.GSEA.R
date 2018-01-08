@@ -14,8 +14,10 @@
 # Setup environment
 rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
 
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
