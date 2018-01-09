@@ -78,6 +78,7 @@ for (i in 1:N.sets){
   load(paste0("./4_Analysis/",download.method, "/", Cancer, "/Signature_Enrichment/GSEA_", Cancer, 
               "_Bindea_xCell_HallmarkPathways.Rdata"))
   
+  # Selection of pathways to display in plot
   if(subset == "ALL_SIG"){
     cor_pathways = pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < 0 | pancancer_Hallmark_GSEA_correlation_table[,Cancer] > 0), ]
   }
@@ -116,6 +117,9 @@ for (i in 1:N.sets){
     oncoprint_matrix[oncoprint_matrix == 100] = "UP"
     oncoprint_matrix[oncoprint_matrix == -100] = NA
     oncoprint_matrix[oncoprint_matrix == 0] = NA
+    
+    # Save oncoprint_matrix with all pathways to the working environment
+    assign(paste0(Cancer, "_all_pathways_onco_matrix"), oncoprint_matrix)
     
     # Filter to only plot the selected cor_pathways
     oncoprint_matrix = oncoprint_matrix[which(rownames(oncoprint_matrix) %in% cor_pathways),]
@@ -278,3 +282,10 @@ AlloncoPrintMatrixes = grep(pattern = StringsToSelect, ls(), value = TRUE)
 
 save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                  "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))
+
+StringsToSelect2 = "_all_pathways_onco_matrix"
+AllPathwaysAlloncoPrintMatrixes = grep(pattern = StringsToSelect2, ls(), value = TRUE)
+save(list = c(AllPathwaysAlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+                                                              "/All_Hallmark_pathways_Oncoprint_matrixes", expression_units, "_", z_score_upregulation, "_", subset, "_",
+                                                              cor_cutoff, ".Rdata"))
+
