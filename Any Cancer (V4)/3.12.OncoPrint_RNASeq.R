@@ -12,12 +12,17 @@
 #################################################################
 
 
-## In pipeline: Run scripts 5.1 and 5.2 first!
+## In pipeline: Run script 5.1 first!
 
-rm(list = ls())
+# Setup environment
+rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+
+#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+#code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
+code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"
 
 source(paste0(code_path, "R tools/ipak.function.R"))
 
@@ -148,10 +153,10 @@ for (i in 1:N.sets){
   #}
   
   dir.create(paste0("./5_Figures/OncoPrints/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/"), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
   
   alter_fun = list(
     background = function(x, y, w, h) grid.rect(x, y, w*0.8, h*0.9, gp = gpar(fill = "grey", col = NA)),
@@ -206,7 +211,7 @@ for (i in 1:N.sets){
   }
   
   # Run oncoPrint function for a second time to generate the figure, no algorithm used in this function: 
-  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
              "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_", Cancer, ".png"),res=600,height= 9,width= 18,unit="in")
   
   #col_fun_oncoprint = colorRamp2(c("UP", ""), c("red", "grey"))
@@ -271,5 +276,5 @@ for (i in 1:N.sets){
 StringsToSelect = "_oncoprint_matrix|_matrix_heatmap_oncoprint"
 AlloncoPrintMatrixes = grep(pattern = StringsToSelect, ls(), value = TRUE)
 
-save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                  "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))

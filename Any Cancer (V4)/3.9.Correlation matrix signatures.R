@@ -14,8 +14,12 @@
 # Setup environment
 rm(list=ls())
 
-setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                     # Setwd to location were output files have to be saved.
-code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                           # Set code path to the location were the R code is located
+#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+
+#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+#code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
+code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Set code path to the location were the R code is located
 
 source(paste0(code_path, "R tools/ipak.function.R")) 
 
@@ -26,7 +30,7 @@ ipak(required.packages)                                                         
 CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
 download.method = "TCGA_Assembler"                                                                                       # Specify download method (this information to be used when saving the file)
-colpattern = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 297)                                                 # Specify which genes will be correlated
+colpattern = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 200)                                                 # Specify which genes will be correlated
 Log_file = paste0("./1_Log_Files/3.9_Correlation_matrix_Signatures/3.9_Correlation_matrix_signatures", 
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
@@ -136,7 +140,7 @@ for (i in 1:N.sets) {
              "/", "Bindea_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
   
   cex.before <- par("cex")
-  par(cex = 0.45)
+  par(cex = 0.35)
   lims=c(-1,1)
   if (length(Bindea_cor[Bindea_cor<0]) == 0) {lims=c(0,1)}
   annotation = data.frame (gene = rownames(Bindea_cor),color = c(rep("#CC0506",nrow(Bindea_cor))),stringsAsFactors = FALSE)
@@ -146,20 +150,21 @@ for (i in 1:N.sets) {
   corrplot.mixed (Bindea_cor,
                   #type="lower",
                   #p.mat = Bindea_cor_sign[[1]],                                                                            # add significance to correlations
-                  col = colpattern,
-                  lower = "square",
-                  upper ="number",
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
                   order="FPC",
                   cl.lim=lims,                                                                                               # only positive correlations
                   tl.pos ="lt",
                   tl.col = as.character(annotation$color),
                   insig= "pch",                                                                                              # remove insignificant correlations
                   pch = "x",
-                  pch.cex= 1.5,
-                  tl.cex = 1.2,
+                  pch.cex= 1.8,
+                  tl.cex = 1.4,
                   cl.cex = 1/par("cex"),
                   cex.main = 1/par("cex"),
-                  mar=c(6,4.1,7,5))
+                  mar=c(8,4.1,6,5))
   title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between Bindea signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(Bindea.enrichment.z.score)), "."),
                     cex = 2.2), line = -2.5, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
@@ -189,7 +194,7 @@ for (i in 1:N.sets) {
              "/", "xCell_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
   
   cex.before <- par("cex")
-  par(cex = 0.45)
+  par(cex = 0.35)
   lims=c(-1,1)
   if (length(xCell_cor[xCell_cor<0]) == 0) {lims=c(0,1)}
   annotation = data.frame (gene = rownames(xCell_cor),color = c(rep("#CC0506",nrow(xCell_cor))),stringsAsFactors = FALSE)
@@ -199,20 +204,21 @@ for (i in 1:N.sets) {
   corrplot.mixed (xCell_cor,
                   #type="lower",
                   #p.mat = xCell_cor_sign[[1]],                                                                            # add significance to correlations
-                  col = colpattern,
-                  lower = "square",
-                  upper ="number",
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
                   order="FPC",
                   cl.lim=lims,                                                                                               # only positive correlations
                   tl.pos ="lt",
                   tl.col = as.character(annotation$color),
                   insig= "pch",                                                                                              # remove insignificant correlations
                   pch = "x",
-                  pch.cex= 1.5,
-                  tl.cex = 0.5,
+                  pch.cex= 1.8,
+                  tl.cex = 0.8,
                   cl.cex = 1/par("cex"),
                   cex.main = 1/par("cex"),
-                  mar=c(6,4.1,7,5))
+                  mar=c(8,4.1,6,5))
   title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between xCell signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(xCell.matrix)), "."),
                     cex = 2.2), line = -2.5, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
@@ -242,7 +248,7 @@ for (i in 1:N.sets) {
              "/", "Hallmark_GSEA_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
   
   cex.before <- par("cex")
-  par(cex = 0.45)
+  par(cex = 0.35)
   lims=c(-1,1)
   if (length(Hallmark_GSEA_cor[Hallmark_GSEA_cor<0]) == 0) {lims=c(0,1)}
   annotation = data.frame (gene = rownames(Hallmark_GSEA_cor),color = c(rep("#CC0506",nrow(Hallmark_GSEA_cor))),stringsAsFactors = FALSE)
@@ -252,20 +258,21 @@ for (i in 1:N.sets) {
   corrplot.mixed (Hallmark_GSEA_cor,
                   #type="lower",
                   #p.mat = Hallmark_GSEA_cor_sign[[1]],                                                                            # add significance to correlations
-                  col = colpattern,
-                  lower = "square",
-                  upper ="number",
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
                   order="FPC",
                   cl.lim=lims,                                                                                               # only positive correlations
                   tl.pos ="lt",
                   tl.col = as.character(annotation$color),
                   insig= "pch",                                                                                              # remove insignificant correlations
                   pch = "x",
-                  pch.cex= 1.5,
+                  pch.cex= 1.8,
                   tl.cex = 0.5,
                   cl.cex = 1/par("cex"),
                   cex.main = 1/par("cex"),
-                  mar=c(6,4.1,7,5))
+                  mar=c(8,4.1,6,5))
   title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between Hallmark GSEA signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(Hallmark.enrichment.z.score)), "."),
                     cex = 2.2), line = -2.5, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
@@ -295,7 +302,7 @@ for (i in 1:N.sets) {
              "/", "Hallmark_CM_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
   
   cex.before <- par("cex")
-  par(cex = 0.45)
+  par(cex = 0.35)
   lims=c(-1,1)
   if (length(Hallmark_CM_cor[Hallmark_CM_cor<0]) == 0) {lims=c(0,1)}
   annotation = data.frame (gene = rownames(Hallmark_CM_cor),color = c(rep("#CC0506",nrow(Hallmark_CM_cor))),stringsAsFactors = FALSE)
@@ -305,20 +312,21 @@ for (i in 1:N.sets) {
   corrplot.mixed (Hallmark_CM_cor,
                   #type="lower",
                   #p.mat = Hallmark_CM_cor_sign[[1]],                                                                            # add significance to correlations
-                  col = colpattern,
-                  lower = "square",
-                  upper ="number",
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
                   order="FPC",
                   cl.lim=lims,                                                                                               # only positive correlations
                   tl.pos ="lt",
                   tl.col = as.character(annotation$color),
                   insig= "pch",                                                                                              # remove insignificant correlations
                   pch = "x",
-                  pch.cex= 1.5,
+                  pch.cex= 1.8,
                   tl.cex = 0.5,
                   cl.cex = 1/par("cex"),
                   cex.main = 1/par("cex"),
-                  mar=c(6,4.1,7,5))
+                  mar=c(8,4.1,6,5))
   title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between Hallmark CM signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(Hallmark.enrichment.z.score)), "."),
                     cex = 2.2), line = -2.5, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
@@ -347,7 +355,7 @@ for (i in 1:N.sets) {
              "/", "Combined_signatures_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
   
   cex.before <- par("cex")
-  par(cex = 0.45)
+  par(cex = 0.35)
   lims=c(-1,1)
   if (length(all_GSEA_cor[all_GSEA_cor<0]) == 0) {lims=c(0,1)}
   annotation = data.frame (gene = rownames(all_GSEA_cor),color = c(rep("#CC0506", nrow(all_GSEA_cor))),stringsAsFactors = FALSE)
@@ -357,20 +365,21 @@ for (i in 1:N.sets) {
   corrplot.mixed (all_GSEA_cor,
                   #type="lower",
                   #p.mat = Hallmark_CM_cor_sign[[1]],                                                                            # add significance to correlations
-                  col = colpattern,
-                  lower = "square",
-                  upper ="number",
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
                   order="FPC",
                   cl.lim=lims,                                                                                               # only positive correlations
                   tl.pos ="lt",
                   tl.col = as.character(annotation$color),
                   insig= "pch",                                                                                              # remove insignificant correlations
                   pch = "x",
-                  pch.cex= 1.5,
+                  pch.cex= 1.8,
                   tl.cex = 0.5,
                   cl.cex = 1/par("cex"),
                   cex.main = 1/par("cex"),
-                  mar=c(6,4.1,7,5))
+                  mar=c(8,4.1,6,5))
   title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between bindea, xCell and Hallmark signatures CM signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(matrix_all_GSEA)), "."),
                     cex = 2.2), line = -2.5, adj = 0.55)
   title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
