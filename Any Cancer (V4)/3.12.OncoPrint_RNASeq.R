@@ -17,12 +17,12 @@
 # Setup environment
 rm(list=ls())
 
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
 
-#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"
+#code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"
 
 source(paste0(code_path, "R tools/ipak.function.R"))
 
@@ -47,8 +47,9 @@ expression_units = "z_score"                                                    
 z_score_upregulation = 1.5
 z_score_downregulation = -1.5
 subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
-cor_cutoff = 0
+cor_cutoff = 0.3
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
+IPA_excluded = "IPA_excluded"                                                                                            # If all IPA pathways need to be excluded, set IPA_excluded
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
@@ -65,7 +66,6 @@ if (CancerTYPES == "ALL") {
 }
 N.sets = length(CancerTYPES)
 
-i=3
 for (i in 1:N.sets){
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -98,6 +98,10 @@ for (i in 1:N.sets){
     }else{next}
   }
   cor_pathways = row.names(cor_pathways)
+  
+  if(IPA_excluded == "IPA_excluded"){
+   cor_pathways = cor_pathways[-grep(pattern = "IPA", cor_pathways)]
+  }
   
   if("ICR_genes" %in% cor_pathways & "ICR_score" %in% cor_pathways){
     pathway_order = c("ICR cluster", "ICR_genes", cor_pathways[-which(cor_pathways == "ICR_score" | cor_pathways == "ICR_genes")])
@@ -157,10 +161,10 @@ for (i in 1:N.sets){
   #}
   
   dir.create(paste0("./5_Figures/OncoPrints/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/"), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
   
   alter_fun = list(
     background = function(x, y, w, h) grid.rect(x, y, w*0.8, h*0.9, gp = gpar(fill = "grey", col = NA)),
@@ -196,7 +200,7 @@ for (i in 1:N.sets){
   pathway_order_heatmap = pathway_order
   pathway_order_heatmap[1] = "ICR_genes"
   matrix_heatmap_oncoprint = Hallmark.enrichment.z.score[match(pathway_order_heatmap, rownames(Hallmark.enrichment.z.score)), column_order_oncoprint]
-  #rownames(matrix_heatmap_oncoprint)[1] = "ICR cluster"
+  rownames(matrix_heatmap_oncoprint)[1] = "ICR cluster"
   
   # Filter out Medium Tumors if needed (specify in parameters in top of this script)
   if(ICR_medium_excluded == "ICR_medium_excluded"){
@@ -215,7 +219,7 @@ for (i in 1:N.sets){
   }
   
   # Run oncoPrint function for a second time to generate the figure, no algorithm used in this function: 
-  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
              "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_", Cancer, ".png"),res=600,height= 9,width= 18,unit="in")
   
   #col_fun_oncoprint = colorRamp2(c("UP", ""), c("red", "grey"))
@@ -280,12 +284,12 @@ for (i in 1:N.sets){
 StringsToSelect = "_oncoprint_matrix|_matrix_heatmap_oncoprint"
 AlloncoPrintMatrixes = grep(pattern = StringsToSelect, ls(), value = TRUE)
 
-save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                  "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))
 
 StringsToSelect2 = "_all_pathways_onco_matrix"
 AllPathwaysAlloncoPrintMatrixes = grep(pattern = StringsToSelect2, ls(), value = TRUE)
-save(list = c(AllPathwaysAlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v2/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+save(list = c(AllPathwaysAlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                               "/All_Hallmark_pathways_Oncoprint_matrixes", expression_units, "_", z_score_upregulation, "_", subset, "_",
                                                               cor_cutoff, ".Rdata"))
 
