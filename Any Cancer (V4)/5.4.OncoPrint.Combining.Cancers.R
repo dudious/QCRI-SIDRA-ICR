@@ -30,11 +30,11 @@ source(paste0(code_path, "R tools/oncoPrint.R"))                                
 source(paste0(code_path, "R tools/heatmap.3.R"))
 
 # Set Parameters
-CancerTYPES = c("BRCA", "COAD")                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = c("SARC", "GBM", "UCS", "OV")                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-pathway_selection = "intersection"                                                                                             # Specify whether you want to combine pathways that overlap between all cancers that are used as input (intersection)
+pathway_selection = "union"                                                                                             # Specify whether you want to combine pathways that overlap between all cancers that are used as input (intersection)
                                                                                                                         # or if you want include all pathways that appear in either one of the cancers used as input (union). 
 download.method = "TCGA_Assembler"
 Log_file = paste0("./1_Log_Files/5.4_OncoPrint_Combining_Cancers_RNASeq/3.12_OncoPrint_RNASeq_Log_File_",               # Specify complete name of the logfile that will be saved during this script
@@ -43,10 +43,10 @@ assay.platform = "gene_RNAseq"
 subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
 cor_cutoff = 0
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
-
+IPA_excluded = "IPA_excluded"
 
 # Load data
-load("./5_Figures/OncoPrints/Hallmark_OncoPrints_v3/TCGA_Assembler/z_score_1.5_COR_COEF_0/All_Hallmark_pathways_Oncoprint_matrixesz_score_1.5_COR_COEF_0.Rdata")
+load("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/TCGA_Assembler/z_score_1.5_COR_COEF_0/All_Hallmark_pathways_Oncoprint_matrixesz_score_1.5_COR_COEF_0.Rdata")
 
 if(subset == "ALL_SIG" | subset == "INV_COR_SIG" | subset == "POS_COR_SIG"){
   load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant.Rdata")
@@ -106,6 +106,13 @@ if(subset == "COR_COEF"){
   }
 }
 
+if(IPA_excluded == "IPA_excluded"){
+  cor_pathways = cor_pathways[grep(pattern = "IPA", cor_pathways, invert = TRUE)]
+}
+if(length(cor_pathways) == 0){
+  next
+}
+
 cor_pathways = c(cor_pathways, "ICR cluster")
 
 # Filter to only plot the selected cor_pathways
@@ -137,7 +144,8 @@ if(ICR_medium_excluded == "ICR_medium_excluded"){
 }
 
 png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
-           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded ,".png"),res=600,height= 9,width= 18,unit="in")
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_",
+           IPA_excluded, ".png"),res=600,height= 9,width= 18,unit="in")
 oncoPrint(matrix_oncoprint_input,
           alter_fun = alter_fun,
           col = col,

@@ -12,12 +12,12 @@
 # Setup environment
 rm(list=ls())
 
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
 
-#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"
+#code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"
 
 source(paste0(code_path, "R tools/ipak.function.R"))
 source(paste0(code_path, "R tools/heatmap.3.R"))
@@ -34,7 +34,8 @@ Log_file = paste0("./1_Log_Files/5.1_Pancancer_Correlation_matrix_Signatures/5.1
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
 test = "pearson"
-display_correlations = "irrespective_of_significance"                                                                                # Can either be "only_significant" or "irrespective_of_significance"         
+display_correlations = "irrespective_of_significance"                                                                                # Can either be "only_significant" or "irrespective_of_significance"
+IPA_excluded = "IPA_excluded"
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                    # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
@@ -91,7 +92,6 @@ rownames(pancancer_Hallmark_CM_correlation_table) = rownames(Hallmark_CM_cor)
 pancancer_all_correlation_table = rbind(pancancer_all_correlation_table, matrix(nrow = nrow(all_GSEA_cor),ncol=N.sets))
 rownames(pancancer_all_correlation_table) = rownames(all_GSEA_cor)
 
-i = 1
 for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -168,6 +168,12 @@ pancancer_Hallmark_GSEA_correlation_table = pancancer_Hallmark_GSEA_correlation_
 pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_table[,-c(14)]
 pancancer_all_correlation_table = pancancer_all_correlation_table[,-c(14)]
 
+if(IPA_excluded == "IPA_excluded"){
+  pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_table[grep(pattern = "IPA", rownames(pancancer_Hallmark_CM_correlation_table), invert = TRUE),]
+  pancancer_Hallmark_GSEA_correlation_table = pancancer_Hallmark_GSEA_correlation_table[grep(pattern = "IPA", rownames(pancancer_Hallmark_GSEA_correlation_table), invert = TRUE),]
+  pancancer_all_correlation_table = pancancer_all_correlation_table[grep(pattern = "IPA", rownames(pancancer_all_correlation_table), invert = TRUE),]
+}
+
 ## Bindea correlation heatmap
 png(paste0("./5_Figures/Pancancer_plots/Bindea_ICR_correlation_", display_correlations, ".png"),res=600,height= 10,width=10,unit="in")
 heatmap.3 (pancancer_Bindea_correlation_table,
@@ -197,7 +203,7 @@ title(sub = list(paste0("Correlations between ICR and gene signatures were calcu
 dev.off()
 
 ## Hallmark_GSEA correlation heatmap
-png(paste0("./5_Figures/Pancancer_plots/Hallmark_GSEA_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/Hallmark_GSEA_ICR_correlation_", display_correlations, "_", IPA_excluded, ".png"),res=600,height= 16, width=16, unit="in")
 heatmap.3 (pancancer_Hallmark_GSEA_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and Hallmark pathways (GSEA) "),
@@ -211,7 +217,7 @@ title(sub = list(paste0("Correlations between ICR and gene signatures were calcu
 dev.off()
 
 ## Hallmark_CM correlation heatmap
-png(paste0("./5_Figures/Pancancer_plots/Hallmark_CM_ICR_correlation_", display_correlations, ".png"),res=600,height= 16, width=16, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/Hallmark_CM_ICR_correlation_", display_correlations, "_", IPA_excluded, ".png"),res=600,height= 16, width=16, unit="in")
 heatmap.3 (pancancer_Hallmark_CM_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and Hallmark pathways (CMs) "),
@@ -225,7 +231,7 @@ title(sub = list(paste0("Correlations between ICR and gene signatures were calcu
 dev.off()
 
 ## Hallmark_all correlation heatmap
-png(paste0("./5_Figures/Pancancer_plots/All_combined_ICR_correlation_", display_correlations, ".png"),res=600,height= 37, width=20, unit="in")
+png(paste0("./5_Figures/Pancancer_plots/All_combined_ICR_correlation_", display_correlations, "_", IPA_excluded , ".png"),res=600,height= 37, width=20, unit="in")
 heatmap.3 (pancancer_all_correlation_table,
            col= my.palette,
            main = paste0("Pan-Cancer ", test, " correlation between \nICR and other gene signatures "),
@@ -241,7 +247,7 @@ dev.off()
 dir.create("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation", showWarnings = FALSE)
 save(pancancer_Bindea_correlation_table, pancancer_xCell_correlation_table, pancancer_Hallmark_GSEA_correlation_table,
      pancancer_Hallmark_CM_correlation_table, pancancer_all_correlation_table,
-     file = paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/", "Correlation_Bindea_xCell_Hallmark_", display_correlations,".Rdata"))
+     file = paste0("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/", "Correlation_Bindea_xCell_Hallmark_", display_correlations, "_", IPA_excluded, ".Rdata"))
 end.time <- Sys.time ()
 time <- end.time - start.time
 print (paste0("Between start script and completion script: ", time))

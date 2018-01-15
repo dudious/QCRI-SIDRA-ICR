@@ -66,6 +66,7 @@ if (CancerTYPES == "ALL") {
 }
 N.sets = length(CancerTYPES)
 
+i=2
 for (i in 1:N.sets){
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -93,14 +94,18 @@ for (i in 1:N.sets){
   }
   if(subset == "COR_COEF"){
     cor_pathways_neg = pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < -cor_cutoff),] 
-    if(is.matrix(cor_pathways_neg)){
-      cor_pathways = cor_pathways_neg
-    }else{next}
+    if(length(cor_pathways_neg) == 0){
+      next} 
+    if(length(cor_pathways_neg) > 0){
+      cor_pathways = rownames(pancancer_Hallmark_GSEA_correlation_table)[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < -cor_cutoff)] 
+    }
   }
-  cor_pathways = row.names(cor_pathways)
   
   if(IPA_excluded == "IPA_excluded"){
-   cor_pathways = cor_pathways[-grep(pattern = "IPA", cor_pathways)]
+   cor_pathways = cor_pathways[grep(pattern = "IPA", cor_pathways, invert = TRUE)]
+  }
+  if(length(cor_pathways) == 0){
+    next
   }
   
   if("ICR_genes" %in% cor_pathways & "ICR_score" %in% cor_pathways){
@@ -126,8 +131,7 @@ for (i in 1:N.sets){
     assign(paste0(Cancer, "_all_pathways_onco_matrix"), oncoprint_matrix)
     
     # Filter to only plot the selected cor_pathways
-    oncoprint_matrix = oncoprint_matrix[which(rownames(oncoprint_matrix) %in% cor_pathways),]
-    
+    oncoprint_matrix = oncoprint_matrix[which(rownames(oncoprint_matrix) %in% cor_pathways), , drop = FALSE]
     oncoprint_matrix = rbind(oncoprint_matrix, table_cluster_assignment$HML_cluster[match(colnames(oncoprint_matrix), row.names(table_cluster_assignment))])
     rownames(oncoprint_matrix)[nrow(oncoprint_matrix)] = "ICR cluster"
     oncoprint_matrix[oncoprint_matrix == "ICR Low" | oncoprint_matrix == "ICR Medium"] = NA
