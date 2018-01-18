@@ -29,24 +29,40 @@ ibiopak(required.bioconductor.packages)
 source(paste0(code_path, "R tools/oncoPrint.R"))                                                                        # source adapted version of oncoPrint version (Other functions of ComplexHeatmap packages are still required still required)
 source(paste0(code_path, "R tools/heatmap.3.R"))
 
+# Previously used parameters
+Group_yellow = c("UCS", "OV", "SARC", "THYM", "GBM", "LGG")
+Group_red = c("UCEC", "MESO", "LUAD", "LUSC", "LIHC", "KIRC", "STAD", "HNSC", "ESCA", "SKCM",
+              "CHOL", "CESC")
+Group_red_yellow_blue = c("UCEC", "MESO", "LUAD", "LUSC", "LIHC", "KIRC", "STAD", "HNSC", "ESCA", "SKCM",
+                          "CHOL", "CESC", "UCS", "OV", "SARC", "THYM", "GBM", "LGG", "TGCT") 
+Group_test = c("SARC", "GBM")
+
+Pathway_set1 = c("BARRIER GENES", "[HM] GLYCOLYSIS", "[HM] ESTROGEN RESPONSE LATE", "[HM] ESTROGEN RESPONSE EARLY",
+                 "[HM] KRAS SIGNALING DN", "[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING", "[HM] HEDGEHOG SIGNALING")
+Pathway_set2 = c("[HM] ESTROGEN RESPONSE EARLY",
+                 "[HM] KRAS SIGNALING DN", "[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING", "[HM] HEDGEHOG SIGNALING")
+
+
+
 # Set Parameters
-CancerTYPES = c("SARC", "GBM", "UCS", "OV")                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = Group_red_yellow_blue                                                                                    # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-pathway_selection = "union"                                                                                             # Specify whether you want to combine pathways that overlap between all cancers that are used as input (intersection)
+pathway_selection = "intersection"                                                                                      # Specify whether you want to combine pathways that overlap between all cancers that are used as input (intersection)
                                                                                                                         # or if you want include all pathways that appear in either one of the cancers used as input (union). 
 download.method = "TCGA_Assembler"
 Log_file = paste0("./1_Log_Files/5.4_OncoPrint_Combining_Cancers_RNASeq/3.12_OncoPrint_RNASeq_Log_File_",               # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
-subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
-cor_cutoff = 0
+subset = Pathway_set2                                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
+cor_cutoff = 0.1                                                                                                        # Cor-cutoff to define which pathways are selected for each cancer
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"
 
 # Load data
-load("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/TCGA_Assembler/z_score_1.5_COR_COEF_0/All_Hallmark_pathways_Oncoprint_matrixesz_score_1.5_COR_COEF_0.Rdata")
+load(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/TCGA_Assembler/z_score_1.5_COR_COEF_", cor_cutoff,
+            "/All_Hallmark_pathways_Oncoprint_matrixesz_score_1.5_COR_COEF_", cor_cutoff, ".Rdata"))
 
 if(subset == "ALL_SIG" | subset == "INV_COR_SIG" | subset == "POS_COR_SIG"){
   load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant.Rdata")
@@ -93,7 +109,7 @@ complete_matrix = oncoprint_matrix
 if(subset == "COR_COEF"){
   for (i in 1:N.sets){
     Cancer = CancerTYPES[i]
-    assign(paste0("cor_pathways_", Cancer), row.names(pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < -cor_cutoff),]))
+    assign(paste0("cor_pathways_", Cancer), row.names(pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < cor_cutoff),]))
   }
   cor_pathways_to_combine = grep(pattern = "cor_pathways_", ls(), value = TRUE)
   cor_pathways_to_combine_list = mget(cor_pathways_to_combine)
@@ -104,6 +120,8 @@ if(subset == "COR_COEF"){
   if(pathway_selection == "union"){
     cor_pathways = unique(Reduce(c, cor_pathways_to_combine_list))
   }
+}else{
+  cor_pathways = subset
 }
 
 if(IPA_excluded == "IPA_excluded"){
@@ -143,19 +161,50 @@ if(ICR_medium_excluded == "ICR_medium_excluded"){
   matrix_oncoprint_input = complete_matrix[,-which(colnames(complete_matrix) %in% excluded_patients)]
 }
 
+oncoPrint(matrix_oncoprint_input,
+          alter_fun = alter_fun,
+          col = col,
+          heatmap_legend_param = list(title= "", at = c("UP"),
+                                      labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
+          column_title = paste0("OncoPrint: ", paste(CancerTYPES, collapse = " "), " RNASeq expression", "\n N patients = ", number_of_patients,
+                                "\n cor cutoff = ", cor_cutoff, " pathways included: ", pathway_selection, " of all cancers"),
+          row_order = pathway_order,
+          show_row_barplot = FALSE,
+          row_barplot_width = unit(7, "in"),
+          top_annotation = NULL,
+          width = unit(8, "in"),
+          row_title = "Hallmark pathways",
+          column_title_gp = gpar(fontface = 2, fontsize = 16))
+
+load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata")
+matrix_oncoprint_input = matrix_oncoprint_input[,column_order_oncoprint]
+cancer_order = ICR_cluster_assignment_allcancers$Cancer[match(colnames(matrix_oncoprint_input), rownames(ICR_cluster_assignment_allcancers))]
+
+cancer_annotation_bar = as.character(cancer_order)
+df_Annotation = data.frame(cancer_annotation_bar)
+colors = Cancer_color_table$color
+colors = setNames(colors, Cancer_color_table$Group.1)
+
+#subset, "_cor_cutoff_", cor_cutoff, 
+#"_Pathway_set_2"
+
 png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
-           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_",
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_2", "_", ICR_medium_excluded, "_",
            IPA_excluded, ".png"),res=600,height= 9,width= 18,unit="in")
 oncoPrint(matrix_oncoprint_input,
           alter_fun = alter_fun,
           col = col,
           heatmap_legend_param = list(title= "", at = c("UP"),
                                       labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
-          column_title = paste0("OncoPrint: ", paste(CancerTYPES, collapse = " "), " RNASeq expression", "\n N patients = ", number_of_patients),
+          column_title = paste0("OncoPrint: ", paste(CancerTYPES, collapse = " "), " RNASeq expression", "\n N patients = ", number_of_patients,
+                                ", Pathway set 2"),
+                                #"\n cor cutoff = ", cor_cutoff, " pathways included: ", pathway_selection, " of all cancers"),
           row_order = pathway_order,
           show_row_barplot = FALSE,
           row_barplot_width = unit(7, "in"),
-          top_annotation = NULL,
+          top_annotation = HeatmapAnnotation(df = df_Annotation,
+                                             col = list(cancer_annotation_bar = colors),
+                                             annotation_height = unit(2, "cm")),
           width = unit(8, "in"),
           row_title = "Hallmark pathways",
           column_title_gp = gpar(fontface = 2, fontsize = 16))

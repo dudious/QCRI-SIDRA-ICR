@@ -47,7 +47,7 @@ expression_units = "z_score"                                                    
 z_score_upregulation = 1.5
 z_score_downregulation = -1.5
 subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
-cor_cutoff = 0.3
+cor_cutoff = 0.1                                                                                                         # Add minus sign for negative correlations!
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"                                                                                            # If all IPA pathways need to be excluded, set IPA_excluded
 
@@ -93,11 +93,11 @@ for (i in 1:N.sets){
     cor_pathways = pancancer_Hallmark_GSEA_correlation_table
   }
   if(subset == "COR_COEF"){
-    cor_pathways_neg = pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < -cor_cutoff),] 
+    cor_pathways_neg = pancancer_Hallmark_GSEA_correlation_table[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < cor_cutoff),] 
     if(length(cor_pathways_neg) == 0){
       next} 
     if(length(cor_pathways_neg) > 0){
-      cor_pathways = rownames(pancancer_Hallmark_GSEA_correlation_table)[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < -cor_cutoff)] 
+      cor_pathways = rownames(pancancer_Hallmark_GSEA_correlation_table)[which(pancancer_Hallmark_GSEA_correlation_table[,Cancer] < cor_cutoff)] 
     }
   }
   

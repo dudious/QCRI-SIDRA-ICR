@@ -16,12 +16,12 @@
 # Setup environment
 rm(list=ls())
 
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
 
-#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Setwd to location were output files have to be saved.
+#code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Setwd to location were output files have to be saved.
 
 
 
@@ -42,7 +42,7 @@ CancerTYPES = "ALL"                                                             
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"                                                                                          # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
-pw_selection_version = "3.1"
+pw_selection_version = "3.2"
 Log_file = paste0("./1_Log_Files/3.8_Deconvolution_Bindea/3.8_Deconvolution_Bindea_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 297)
@@ -53,7 +53,7 @@ Legend_colors = c("blue","green","red", "pink", "purple")
 # Load data and R scripts
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
 load(paste0(code_path, "Datalists/Selected.pathways.",pw_selection_version,".Rdata"))
-load(paste0(code_path, "Datalists/marker_list_bindea2.RData"))
+load(paste0(code_path, "Datalists/marker_list_bindea3.RData"))
 
 # Create folders and log file
 dir.create(paste0("./5_Figures/"),showWarnings = FALSE)
@@ -128,23 +128,23 @@ for (i in 1:N.sets) {
   
   Expression.data = log(filtered.norm.RNAseqData +1, 2)
   available_genes = rownames(Expression.data)
-  unavailable_genes_RNAseq = unlist(marker_list)[-which(unlist(marker_list) %in% rownames(Expression.data))]
+  unavailable_genes_RNAseq = unlist(Bindea_ORIG)[-which(unlist(Bindea_ORIG) %in% rownames(Expression.data))]
   
-  cat(paste0("Bindea ssGSEA ", Cancer, ". Total number of Bindea genes is ", length(unlist(marker_list)), ".",
-             " Of which ", length(unlist(marker_list)[unlist(marker_list) %in% available_genes]), 
+  cat(paste0("Bindea ssGSEA ", Cancer, ". Total number of Bindea genes is ", length(unlist(Bindea_ORIG)), ".",
+             " Of which ", length(unlist(Bindea_ORIG)[unlist(Bindea_ORIG) %in% available_genes]), 
              " genes are available in expression data."), file = Log_file, append = TRUE, sep = "\n")
   
   ## Bindea ssGSEA
-  Bindea.enrichment.score = gsva(Expression.data,marker_list,method="ssgsea")
+  Bindea.enrichment.score = gsva(Expression.data,Bindea_ORIG,method="ssgsea")
   Bindea.enrichment.z.score = Bindea.enrichment.score 
   for(j in 1: nrow(Bindea.enrichment.z.score))  {
     Bindea.enrichment.z.score[j,] = (Bindea.enrichment.score[j,]-mean(Bindea.enrichment.score[j,]))/sd(Bindea.enrichment.score[j,]) # z-score the enrichment matrix
   }
-  #Bindea.enrichment.ordered = Bindea.enrichment.z.score
-  #Bindea.enrichment.ordered = rbind(Bindea.enrichment.ordered, colMeans(Bindea.enrichment.ordered))
-  #rownames(Bindea.enrichment.ordered)[25] = "Bindea_enrichment_score"
-  #Bindea.enrichment.ordered = Bindea.enrichment.ordered[, order(Bindea.enrichment.ordered[which(rownames(Bindea.enrichment.ordered) == "Bindea_enrichment_score"),])]
-  #Bindea.enrichment.z.score = Bindea.enrichment.z.score[,colnames(Bindea.enrichment.ordered)]
+  Bindea.enrichment.ordered = Bindea.enrichment.z.score
+  Bindea.enrichment.ordered = rbind(Bindea.enrichment.ordered, colMeans(Bindea.enrichment.ordered))
+  rownames(Bindea.enrichment.ordered)[25] = "Bindea_enrichment_score"
+  Bindea.enrichment.ordered = Bindea.enrichment.ordered[, order(Bindea.enrichment.ordered[which(rownames(Bindea.enrichment.ordered) == "Bindea_enrichment_score"),])]
+  Bindea.enrichment.z.score = Bindea.enrichment.z.score[,colnames(Bindea.enrichment.ordered)]
   
   ## Bindea cluster (hierarchical)
   sHc = hclust(ddist <- dist(t(Bindea.enrichment.z.score)), method = "ward.D2")
@@ -197,6 +197,71 @@ for (i in 1:N.sets) {
   
   dev.off()
   
+  
+  
+  
+  ## Patrick bindea_patrick ssGSEA
+  bindea_patrick.enrichment.score = gsva(Expression.data,Bindea_PATRICK,method="ssgsea")
+  bindea_patrick.enrichment.z.score = bindea_patrick.enrichment.score 
+  for(j in 1: nrow(bindea_patrick.enrichment.z.score))  {
+    bindea_patrick.enrichment.z.score[j,] = (bindea_patrick.enrichment.score[j,]-mean(bindea_patrick.enrichment.score[j,]))/sd(bindea_patrick.enrichment.score[j,]) # z-score the enrichment matrix
+  }
+  bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.z.score
+  bindea_patrick.enrichment.ordered = rbind(bindea_patrick.enrichment.ordered, colMeans(bindea_patrick.enrichment.ordered))
+  rownames(bindea_patrick.enrichment.ordered)[25] = "bindea_patrick_enrichment_score"
+  bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.ordered[, order(bindea_patrick.enrichment.ordered[which(rownames(bindea_patrick.enrichment.ordered) == "bindea_patrick_enrichment_score"),])]
+  bindea_patrick.enrichment.z.score = bindea_patrick.enrichment.z.score[,colnames(bindea_patrick.enrichment.ordered)]
+  
+  ## bindea_patrick cluster (hierarchical)
+  sHc = hclust(ddist <- dist(t(bindea_patrick.enrichment.z.score)), method = "ward.D2")
+  
+  plot(sHc,labels=FALSE)
+  
+  ## Annotation for plotting
+  annotation <- table_cluster_assignment[,"HML_cluster",drop=FALSE]
+  # bindea_patrick classification
+  annotation$bindea_patrick_cluster = cutree(sHc,k = 2)[match(rownames(annotation),names(cutree(sHc,k = 2)))]
+  annotation = annotation[colnames(bindea_patrick.enrichment.score),]
+  annotation$bindea_patrick_score = colMeans(bindea_patrick.enrichment.score)
+  bindea_patrick_cluster_means = aggregate(bindea_patrick_score~bindea_patrick_cluster,data=annotation,FUN=mean)
+  bindea_patrick_cluster_means = bindea_patrick_cluster_means[order(bindea_patrick_cluster_means$bindea_patrick_score),]
+  bindea_patrick_cluster_means$bindea_patrick_cluster_name = c("Bindea Low","Bindea High")
+  annotation$bindea_patrick_cluster_name = bindea_patrick_cluster_means$bindea_patrick_cluster_name[match(annotation$bindea_patrick_cluster,bindea_patrick_cluster_means$bindea_patrick_cluster)]
+  
+  annotation$HML_cluster.col[annotation$HML_cluster=="ICR High"] = "red"
+  annotation$HML_cluster.col[annotation$HML_cluster=="ICR Medium"] = "green"
+  annotation$HML_cluster.col[annotation$HML_cluster=="ICR Low"] = "blue"
+  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea Low"] = "pink"
+  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea High"] = "purple"
+  bindea_patrick_order = c("Bindea Low", "Bindea High")
+  ICR_order = c("ICR Low","ICR Medium","ICR High")
+  annotation = annotation[, -which(colnames(annotation) %in% c("bindea_patrick_cluster", "bindea_patrick_score"))]
+  annotation = annotation[order(match(annotation$HML_cluster,ICR_order), match(annotation$bindea_patrick_cluster_name, bindea_patrick_order)),]
+  annotation.blot = as.matrix(annotation[,c("HML_cluster.col","bindea_patrick_cluster.col"), drop= FALSE])
+  annotation.blot = annotation.blot[colnames(Expression.data),]                                                                                        # The sample order in annotation.blot needs to be the same as in Expression.data
+  
+  ### bindea_patrick plotting
+  png(paste0("./5_Figures/Heatmaps/bindea_patrick_Heatmaps/", download.method, "/bindea_patrick_Patrick_Heatmap.3_RNASeq_",Cancer,".png"),res=600,height=9,width=9,unit="in")
+  bindea_patrick.enrichment.z.score <- bindea_patrick.enrichment.z.score[,rownames(annotation.blot)]
+  heatmap.3((as.matrix(bindea_patrick.enrichment.z.score)),
+            main= paste0(Cancer, "\nssGSEA/ Bindea signatures selected according to Patrick Danaher et al (2017)"),
+            col=my.palette,
+            ColSideColors=annotation.blot,
+            font_size_col_Labs = 1.5,
+            cex.main = 10,
+            ColSideLabs = ColsideLabels,
+            Colv= as.dendrogram(sHc),
+            labCol=NA,
+            side.height.fraction = 0.3,
+            cexRow = 1.3,
+            margins = c(13, 11))
+  
+  title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data \n was obtained from TCGA, using ", download.method, " v2.0.3.\n",
+                          "bindea_patrick enrichment z-scores were used to generate this heatmap."), cex = 1), outer = FALSE, line = -1, adj = 0.65)
+  legend("topright",legend = Legend,
+         col = Legend_colors,lty= 0.5,lwd = 0.5, cex = 0.7, pch= 15, pt.cex = 1.0)
+  
+  dev.off()
   
   ## xCell
   cat (paste0 ("Calculating xCell scores ",Cancer,"."))
