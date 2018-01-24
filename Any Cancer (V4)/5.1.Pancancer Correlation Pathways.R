@@ -34,8 +34,8 @@ Log_file = paste0("./1_Log_Files/5.1_Pancancer_Correlation_matrix_Signatures/5.1
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
 test = "pearson"
-display_correlations = "irrespective_of_significance"                                                                                # Can either be "only_significant" or "irrespective_of_significance"
-IPA_excluded = "IPA_excluded"
+display_correlations = "irrespective_of_significance"                                                                    # Can either be "only_significant" or "irrespective_of_significance"
+IPA_excluded = "only_significant"
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                    # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
@@ -169,9 +169,9 @@ pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_tabl
 pancancer_all_correlation_table = pancancer_all_correlation_table[,-c(14)]
 
 if(IPA_excluded == "IPA_excluded"){
-  pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_table[grep(pattern = "IPA", rownames(pancancer_Hallmark_CM_correlation_table), invert = TRUE),]
-  pancancer_Hallmark_GSEA_correlation_table = pancancer_Hallmark_GSEA_correlation_table[grep(pattern = "IPA", rownames(pancancer_Hallmark_GSEA_correlation_table), invert = TRUE),]
-  pancancer_all_correlation_table = pancancer_all_correlation_table[grep(pattern = "IPA", rownames(pancancer_all_correlation_table), invert = TRUE),]
+  pancancer_Hallmark_CM_correlation_table = pancancer_Hallmark_CM_correlation_table[grep(pattern = "IPA]", rownames(pancancer_Hallmark_CM_correlation_table), invert = TRUE),]
+  pancancer_Hallmark_GSEA_correlation_table = pancancer_Hallmark_GSEA_correlation_table[grep(pattern = "IPA]", rownames(pancancer_Hallmark_GSEA_correlation_table), invert = TRUE),]
+  pancancer_all_correlation_table = pancancer_all_correlation_table[grep(pattern = "IPA]", rownames(pancancer_all_correlation_table), invert = TRUE),]
 }
 
 ## Bindea correlation heatmap

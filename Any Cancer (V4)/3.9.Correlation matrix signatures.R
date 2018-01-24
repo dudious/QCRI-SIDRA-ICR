@@ -14,12 +14,12 @@
 # Setup environment
 rm(list=ls())
 
-#setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
-setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
+setwd("~/Dropbox (TBI-Lab)/TCGA Analysis pipeline/")                                                                    # Setwd to location were output files have to be saved.
+#setwd("~/Dropbox (TBI-Lab)/External Collaborations/TCGA Analysis pipeline/")    
 
-#code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
+code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"                                          # Set code path to the location were the R code is located
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
-code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Set code path to the location were the R code is located
+#code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Set code path to the location were the R code is located
 
 source(paste0(code_path, "R tools/ipak.function.R")) 
 
@@ -48,6 +48,7 @@ if (CancerTYPES == "ALL") {
 dir.create("./5_Figures/",showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/Bindea_Correlation_plots"), showWarnings = FALSE)
+dir.create(paste0("./5_Figures/Correlation_plots/bindea_patrick_Correlation_plots"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/xCell_Correlation_plots"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/Hallmark_Correlation_plots"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/Hallmark_Correlation_plots/ssGSEA_correlation_plots"), showWarnings = FALSE)
@@ -55,6 +56,7 @@ dir.create(paste0("./5_Figures/Correlation_plots/Hallmark_Correlation_plots/colM
 dir.create(paste0("./5_Figures/Correlation_plots/Combined_Signature_Correlation_plots/"), showWarnings = FALSE)
 
 dir.create(paste0("./5_Figures/Correlation_plots/Bindea_Correlation_plots/", download.method), showWarnings = FALSE)
+dir.create(paste0("./5_Figures/Correlation_plots/bindea_patrick_Correlation_plots/", download.method), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/xCell_Correlation_plots/", download.method), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/Hallmark_Correlation_plots/ssGSEA_correlation_plots/", download.method), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Correlation_plots/Hallmark_Correlation_plots/colMeans_correlation_plots/", download.method), showWarnings = FALSE)
@@ -174,6 +176,76 @@ for (i in 1:N.sets) {
   
   cat(paste0("For ", Cancer, " mean bindea correlation is ", mean_correlation), file = Log_file, append = TRUE, sep = "\n")
   mean_correlation_table$Mean.correlation.Bindea[mean_correlation_table$Cancertype == Cancer] = mean_correlation
+  
+  ### bindea_patrick
+  # Correlation matrix bindea_patrick z scores
+  print(paste0("Generating bindea_patrick z score correlation matrix for ", Cancer))
+  
+  bindea_patrick.enrichment.z.score.df = as.data.frame(t(bindea_patrick.enrichment.z.score))
+  bindea_patrick.enrichment.z.score.df$ICR_score = table_cluster_assignment$ICRscore[match(row.names(bindea_patrick.enrichment.z.score.df), row.names(table_cluster_assignment))]
+  
+  bindea_patrick_cor <- cor (bindea_patrick.enrichment.z.score.df, method=test)
+  
+  # Correlation significance
+  cor.mtest <- function(mat, conf.level = 0.95) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat <- lowCI.mat <- uppCI.mat <- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    diag(lowCI.mat) <- diag(uppCI.mat) <- 1
+    for (i in 1:(n - 1)) {
+      for (j in (i + 1):n) {
+        tmp <- cor.test(mat[, i], mat[, j], method = test, conf.level = conf.level)
+        p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
+        uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
+      }
+    }
+    return(list(p.mat, lowCI.mat, uppCI.mat))
+  }
+  bindea_patrick_cor_sign = cor.mtest(bindea_patrick.enrichment.z.score.df, 0.95)
+  
+  print(paste0("Generating bindea_patrick z score correlation plot for ", Cancer))
+  
+  # Correlation plot
+  png(paste0("./5_Figures/Correlation_plots/bindea_patrick_Correlation_plots/", download.method,
+             "/", "bindea_patrick_", test, "_Correlation_plot_", Cancer, ".png"), res=600,height=6,width=6,unit="in")
+  
+  cex.before <- par("cex")
+  par(cex = 0.35)
+  lims=c(-1,1)
+  if (length(bindea_patrick_cor[bindea_patrick_cor<0]) == 0) {lims=c(0,1)}
+  annotation = data.frame (gene = rownames(bindea_patrick_cor),color = c(rep("#CC0506",nrow(bindea_patrick_cor))),stringsAsFactors = FALSE)
+  annotation = annotation[corrMatOrder(bindea_patrick_cor,order="FPC"),]
+  
+  mean_correlation = round(mean(bindea_patrick_cor),2)
+  corrplot.mixed (bindea_patrick_cor,
+                  #type="lower",
+                  #p.mat = bindea_patrick_cor_sign[[1]],                                                                            # add significance to correlations
+                  lower.col = "black",
+                  upper.col = colpattern,
+                  lower = "number",
+                  upper = "square",
+                  order="FPC",
+                  cl.lim=lims,                                                                                               # only positive correlations
+                  tl.pos ="lt",
+                  tl.col = as.character(annotation$color),
+                  insig= "pch",                                                                                              # remove insignificant correlations
+                  pch = "x",
+                  pch.cex= 1.8,
+                  tl.cex = 1.4,
+                  cl.cex = 1/par("cex"),
+                  cex.main = 1/par("cex"),
+                  mar=c(8,4.1,6,5))
+  title(main = list(paste0(Cancer, "\n", str_to_title(test), " correlation between bindea_patrick signatures. \n ","Mean: ", mean_correlation,". Number of patients: ", nrow(t(bindea_patrick.enrichment.z.score)), "."),
+                    cex = 2.2), line = -2.5, adj = 0.55)
+  title(sub = list(paste0("Figure: EDAseq normalized, log transformed gene expression data was \n obtained from TCGA, using ", download.method, " v2.0.3. \n",
+                          "Significance level of correlation is represented by the size of the squares."), cex = 1.5), line = 1.5, adj = 0.55)
+  par(cex = cex.before)
+  dev.off()
+  
+  cat(paste0("For ", Cancer, " mean bindea_patrick correlation is ", mean_correlation), file = Log_file, append = TRUE, sep = "\n")
+  mean_correlation_table$Mean.correlation.bindea_patrick[mean_correlation_table$Cancertype == Cancer] = mean_correlation
   
   ### xCell
   print(paste0("Generating xCell correlation matrix for ", Cancer))

@@ -45,7 +45,7 @@ Pathway_set2 = c("[HM] ESTROGEN RESPONSE EARLY",
 
 
 # Set Parameters
-CancerTYPES = Group_red_yellow_blue                                                                                    # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = Group_test                                                                                    # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
@@ -55,20 +55,20 @@ download.method = "TCGA_Assembler"
 Log_file = paste0("./1_Log_Files/5.4_OncoPrint_Combining_Cancers_RNASeq/3.12_OncoPrint_RNASeq_Log_File_",               # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
-subset = Pathway_set2                                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
-cor_cutoff = 0.1                                                                                                        # Cor-cutoff to define which pathways are selected for each cancer
+subset = "COR_COEF"                                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
+cor_cutoff = -0.1                                                                                                        # Cor-cutoff to define which pathways are selected for each cancer
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"
 
 # Load data
-load(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/TCGA_Assembler/z_score_1.5_COR_COEF_", cor_cutoff,
+load(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/TCGA_Assembler/z_score_1.5_COR_COEF_", cor_cutoff,
             "/All_Hallmark_pathways_Oncoprint_matrixesz_score_1.5_COR_COEF_", cor_cutoff, ".Rdata"))
 
 if(subset == "ALL_SIG" | subset == "INV_COR_SIG" | subset == "POS_COR_SIG"){
-  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant.Rdata")
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant_IPA_excluded.Rdata")
 }
 if(subset == "COR_COEF"){
-  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_irrespective_of_significance.Rdata")
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_irrespective_of_significance_IPA_excluded.Rdata")
 }
 
 
@@ -198,7 +198,7 @@ oncoPrint(matrix_oncoprint_input,
                                       labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
           column_title = paste0("OncoPrint: ", paste(CancerTYPES, collapse = " "), " RNASeq expression", "\n N patients = ", number_of_patients,
                                 ", Pathway set 2"),
-                                #"\n cor cutoff = ", cor_cutoff, " pathways included: ", pathway_selection, " of all cancers"),
+                                #"\n cor cutoff for all cancers: < ", cor_cutoff, " pathways included: ", pathway_selection, " of all cancers"),
           row_order = pathway_order,
           show_row_barplot = FALSE,
           row_barplot_width = unit(7, "in"),

@@ -47,17 +47,17 @@ expression_units = "z_score"                                                    
 z_score_upregulation = 1.5
 z_score_downregulation = -1.5
 subset = "COR_COEF"                                                                                                      # Options: "ALL_SIG" or "INV_COR_SIG" or "POS_COR_SIG" or "COR_COEF"
-cor_cutoff = 0.1                                                                                                         # Add minus sign for negative correlations!
+cor_cutoff = 0                                                                                                         # Add minus sign for negative correlations!
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"                                                                                            # If all IPA pathways need to be excluded, set IPA_excluded
 
 # Load data
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 if(subset == "ALL_SIG" | subset == "INV_COR_SIG" | subset == "POS_COR_SIG"){
-  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant.Rdata")
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_only_significant_IPA_excluded.Rdata")
 }
 if(subset == "COR_COEF"){
-  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_irrespective_of_significance.Rdata")
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_irrespective_of_significance_IPA_excluded.Rdata")
 }
 
 # Define parameters (based on loaded data)
@@ -66,7 +66,17 @@ if (CancerTYPES == "ALL") {
 }
 N.sets = length(CancerTYPES)
 
-i=2
+row.names(TCGA.cancersets) = TCGA.cancersets$cancerType
+pancancer_ICR_vs_oncogenic_upregulation_table = t(TCGA.cancersets)[-c(1,2),]
+pancancer_ICR_vs_oncogenic_upregulation_table = rbind(pancancer_ICR_vs_oncogenic_upregulation_table,
+                                                      matrix(nrow = 7,ncol=N.sets))
+rownames(pancancer_ICR_vs_oncogenic_upregulation_table) = c("Total_ICR_High", "ICR_High_OncogenicPathways_UP",
+                                                            "Percentage_in_ICR_High",
+                                                            "Total_ICR_Low", "ICR_Low_OncogenicPathways_UP",
+                                                            "Percentage_in_ICR_Low",
+                                                            "Higher_in_ICR_Low")
+
+i=28
 for (i in 1:N.sets){
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -165,10 +175,10 @@ for (i in 1:N.sets){
   #}
   
   dir.create(paste0("./5_Figures/OncoPrints/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/"), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method), showWarnings = FALSE)
-  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/"), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method), showWarnings = FALSE)
+  dir.create(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method, "/", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff), showWarnings = FALSE)
   
   alter_fun = list(
     background = function(x, y, w, h) grid.rect(x, y, w*0.8, h*0.9, gp = gpar(fill = "grey", col = NA)),
@@ -222,8 +232,37 @@ for (i in 1:N.sets){
     oncoprint_matrix = complete_matrix[, -which(colnames(complete_matrix) %in% excluded_patients)]
   }
   
+  # Make calculations on oncoprint matrix and save in table and also print in png
+  Total_ICR_High = sum(oncoprint_matrix[which(rownames(oncoprint_matrix) == "ICR cluster"),] == "UP")
+  Total_ICR_Low = sum(oncoprint_matrix[which(rownames(oncoprint_matrix) == "ICR cluster"),] == "")
+  transposed = as.data.frame(t(oncoprint_matrix))
+  transposed$Oncogenic_pathways = do.call(paste, c(transposed[colnames(transposed)[2:ncol(transposed)]], sep= ""))
+  ICR_High_OncogenicPathways_UP = nrow(transposed[transposed$`ICR cluster` == "UP" & transposed$Oncogenic_pathways != "", ])
+  ICR_Low_OncogenicPathways_UP = nrow(transposed[transposed$`ICR cluster` == "" & transposed$Oncogenic_pathways != "", ])
+  Percentage_in_ICR_High = round((ICR_High_OncogenicPathways_UP / Total_ICR_High) * 100, 3)
+  Percentage_in_ICR_Low = round((ICR_Low_OncogenicPathways_UP / Total_ICR_Low) * 100, 3)
+  Higher_in_ICR_Low = Percentage_in_ICR_Low > Percentage_in_ICR_High
+  
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "Total_ICR_High"), Cancer] = Total_ICR_High
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "ICR_High_OncogenicPathways_UP"), Cancer] = ICR_High_OncogenicPathways_UP
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "Total_ICR_Low"), Cancer] = Total_ICR_Low
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "ICR_Low_OncogenicPathways_UP"), Cancer] = ICR_Low_OncogenicPathways_UP
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "Percentage_in_ICR_High"), Cancer] = Percentage_in_ICR_High
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "Percentage_in_ICR_Low"), Cancer] = Percentage_in_ICR_Low
+  pancancer_ICR_vs_oncogenic_upregulation_table[which(rownames(pancancer_ICR_vs_oncogenic_upregulation_table) == "Higher_in_ICR_Low"), Cancer] = Higher_in_ICR_Low
+  
+  # ICR annotation bar for plot 1
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata")
+  ICR_order = ICR_cluster_assignment_allcancers$HML_cluster[match(colnames(oncoprint_matrix), rownames(ICR_cluster_assignment_allcancers))]
+  
+  ICR_annotation_bar = as.character(ICR_order)
+  df_Annotation = data.frame(ICR_annotation_bar)
+  colors = c("red", "green", "blue")
+  names(colors) = c("ICR High", "ICR Medium", "ICR Low")
+  
+  
   # Run oncoPrint function for a second time to generate the figure, no algorithm used in this function: 
-  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+  png(paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
              "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, "_", Cancer, ".png"),res=600,height= 9,width= 18,unit="in")
   
   #col_fun_oncoprint = colorRamp2(c("UP", ""), c("red", "grey"))
@@ -235,9 +274,12 @@ for (i in 1:N.sets){
                     column_order = NULL,
                     #heatmap_legend_param = list(title= "", at = c("UP"),
                     #labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
+                    top_annotation = HeatmapAnnotation(df = df_Annotation,
+                                                       col = list(ICR_annotation_bar = colors),
+                                                       annotation_height = unit(0.50, "cm"), 
+                                                       show_legend = FALSE),
                     show_row_barplot = FALSE,
                     show_heatmap_legend = FALSE,
-                    top_annotation = NULL,
                     width = unit(8, "in"),
                     show_pct = FALSE,
                     row_order = 1:nrow(oncoprint_matrix),
@@ -249,6 +291,10 @@ for (i in 1:N.sets){
                   show_row_dend = FALSE,  show_column_dend = FALSE,
                   column_order = 1:ncol(matrix_heatmap_oncoprint), row_order = 1:nrow(matrix_heatmap_oncoprint),
                   col = col_fun_heatmap,
+                  top_annotation = HeatmapAnnotation(df = df_Annotation,
+                                                     col = list(ICR_annotation_bar = colors),
+                                                     annotation_height = unit(0.50, "cm"),
+                                                     show_legend = FALSE),
                   #row_title = "Hallmark pathways",
                   show_heatmap_legend = FALSE,
                   show_column_names = FALSE,
@@ -275,7 +321,8 @@ for (i in 1:N.sets){
   
   pushViewport(viewport(layout.pos.row = 1, layout.pos.col = 1))
   grid.text(paste0(Cancer, " RNASeq expression (OncoPrint)", "\n N patients = ", number_of_patients, "\n",
-                   ICR_medium_excluded), x = unit(3, "in"), gp = gpar(fontface = "bold"))
+                   ICR_medium_excluded, ", cor cutoff for pathways is < ", cor_cutoff, ", Percentage in ICR High vs Low= ",
+                   Percentage_in_ICR_High, "/ ", Percentage_in_ICR_Low), x = unit(3, "in"), gp = gpar(fontface = "bold"))
   upViewport()
   
   dev.off()
@@ -288,12 +335,15 @@ for (i in 1:N.sets){
 StringsToSelect = "_oncoprint_matrix|_matrix_heatmap_oncoprint"
 AlloncoPrintMatrixes = grep(pattern = StringsToSelect, ls(), value = TRUE)
 
-save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+save(pancancer_ICR_vs_oncogenic_upregulation_table, file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+     "/Table_Pancancer_ICR_vs_oncogenic_pathway_upregultion_Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))
+
+save(list = c(AlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                  "/Hallmark_OncoPrint_", expression_units, "_", z_score_upregulation, "_", subset, "_", cor_cutoff, "_", ICR_medium_excluded, ".Rdata"))
 
 StringsToSelect2 = "_all_pathways_onco_matrix"
 AllPathwaysAlloncoPrintMatrixes = grep(pattern = StringsToSelect2, ls(), value = TRUE)
-save(list = c(AllPathwaysAlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v4/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
+save(list = c(AllPathwaysAlloncoPrintMatrixes), file = paste0("./5_Figures/OncoPrints/Hallmark_OncoPrints_v5/", download.method, "/", expression_units,"_", z_score_upregulation, "_", subset, "_", cor_cutoff,
                                                               "/All_Hallmark_pathways_Oncoprint_matrixes", expression_units, "_", z_score_upregulation, "_", subset, "_",
                                                               cor_cutoff, ".Rdata"))
 

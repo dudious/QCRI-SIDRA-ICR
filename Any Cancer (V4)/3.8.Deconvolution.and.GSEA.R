@@ -23,8 +23,6 @@ code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"  
 #code_path = "~/Dropbox (Personal)/R-projects/QCRI-SIDRA-ICR/" 
 #code_path = "C:/Users/whendrickx/R/GITHUB/TCGA_Pipeline/"                                                                # Setwd to location were output files have to be saved.
 
-
-
 source(paste0(code_path,"R tools/ipak.function.R"))
 source(paste0(code_path,"R tools/heatmap.3.R"))
 
@@ -60,6 +58,8 @@ dir.create(paste0("./5_Figures/"),showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/"),showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/Bindea_Heatmaps"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/Bindea_Heatmaps/", download.method),showWarnings = FALSE)
+dir.create(paste0("./5_Figures/Heatmaps/bindea_patrick_Heatmaps"), showWarnings = FALSE)
+dir.create(paste0("./5_Figures/Heatmaps/bindea_patrick_Heatmaps/", download.method),showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/xCell_Heatmaps/"), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/xCell_Heatmaps/", download.method), showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Heatmaps/Hallmark_Heatmaps"), showWarnings = FALSE)
@@ -99,7 +99,8 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-for (i in 1:N.sets) {
+
+for (i in 20:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]
   if (Cancer %in% Cancer_skip) {next}
@@ -140,11 +141,11 @@ for (i in 1:N.sets) {
   for(j in 1: nrow(Bindea.enrichment.z.score))  {
     Bindea.enrichment.z.score[j,] = (Bindea.enrichment.score[j,]-mean(Bindea.enrichment.score[j,]))/sd(Bindea.enrichment.score[j,]) # z-score the enrichment matrix
   }
-  Bindea.enrichment.ordered = Bindea.enrichment.z.score
-  Bindea.enrichment.ordered = rbind(Bindea.enrichment.ordered, colMeans(Bindea.enrichment.ordered))
-  rownames(Bindea.enrichment.ordered)[25] = "Bindea_enrichment_score"
-  Bindea.enrichment.ordered = Bindea.enrichment.ordered[, order(Bindea.enrichment.ordered[which(rownames(Bindea.enrichment.ordered) == "Bindea_enrichment_score"),])]
-  Bindea.enrichment.z.score = Bindea.enrichment.z.score[,colnames(Bindea.enrichment.ordered)]
+  #Bindea.enrichment.ordered = Bindea.enrichment.z.score
+  #Bindea.enrichment.ordered = rbind(Bindea.enrichment.ordered, colMeans(Bindea.enrichment.ordered))
+  #rownames(Bindea.enrichment.ordered)[25] = "Bindea_enrichment_score"
+  #Bindea.enrichment.ordered = Bindea.enrichment.ordered[, order(Bindea.enrichment.ordered[which(rownames(Bindea.enrichment.ordered) == "Bindea_enrichment_score"),])]
+  #Bindea.enrichment.z.score = Bindea.enrichment.z.score[,colnames(Bindea.enrichment.ordered)]
   
   ## Bindea cluster (hierarchical)
   sHc = hclust(ddist <- dist(t(Bindea.enrichment.z.score)), method = "ward.D2")
@@ -197,20 +198,17 @@ for (i in 1:N.sets) {
   
   dev.off()
   
-  
-  
-  
   ## Patrick bindea_patrick ssGSEA
   bindea_patrick.enrichment.score = gsva(Expression.data,Bindea_PATRICK,method="ssgsea")
   bindea_patrick.enrichment.z.score = bindea_patrick.enrichment.score 
   for(j in 1: nrow(bindea_patrick.enrichment.z.score))  {
     bindea_patrick.enrichment.z.score[j,] = (bindea_patrick.enrichment.score[j,]-mean(bindea_patrick.enrichment.score[j,]))/sd(bindea_patrick.enrichment.score[j,]) # z-score the enrichment matrix
   }
-  bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.z.score
-  bindea_patrick.enrichment.ordered = rbind(bindea_patrick.enrichment.ordered, colMeans(bindea_patrick.enrichment.ordered))
-  rownames(bindea_patrick.enrichment.ordered)[25] = "bindea_patrick_enrichment_score"
-  bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.ordered[, order(bindea_patrick.enrichment.ordered[which(rownames(bindea_patrick.enrichment.ordered) == "bindea_patrick_enrichment_score"),])]
-  bindea_patrick.enrichment.z.score = bindea_patrick.enrichment.z.score[,colnames(bindea_patrick.enrichment.ordered)]
+  #bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.z.score
+  #bindea_patrick.enrichment.ordered = rbind(bindea_patrick.enrichment.ordered, colMeans(bindea_patrick.enrichment.ordered))
+  #rownames(bindea_patrick.enrichment.ordered)[15] = "bindea_patrick_enrichment_score"
+  #bindea_patrick.enrichment.ordered = bindea_patrick.enrichment.ordered[, order(bindea_patrick.enrichment.ordered[which(rownames(bindea_patrick.enrichment.ordered) == "bindea_patrick_enrichment_score"),])]
+  #bindea_patrick.enrichment.z.score = bindea_patrick.enrichment.z.score[,colnames(bindea_patrick.enrichment.ordered)]
   
   ## bindea_patrick cluster (hierarchical)
   sHc = hclust(ddist <- dist(t(bindea_patrick.enrichment.z.score)), method = "ward.D2")
@@ -225,28 +223,28 @@ for (i in 1:N.sets) {
   annotation$bindea_patrick_score = colMeans(bindea_patrick.enrichment.score)
   bindea_patrick_cluster_means = aggregate(bindea_patrick_score~bindea_patrick_cluster,data=annotation,FUN=mean)
   bindea_patrick_cluster_means = bindea_patrick_cluster_means[order(bindea_patrick_cluster_means$bindea_patrick_score),]
-  bindea_patrick_cluster_means$bindea_patrick_cluster_name = c("Bindea Low","Bindea High")
+  bindea_patrick_cluster_means$bindea_patrick_cluster_name = c("Bindea Patrick Low","Bindea Patrick High")
   annotation$bindea_patrick_cluster_name = bindea_patrick_cluster_means$bindea_patrick_cluster_name[match(annotation$bindea_patrick_cluster,bindea_patrick_cluster_means$bindea_patrick_cluster)]
   
   annotation$HML_cluster.col[annotation$HML_cluster=="ICR High"] = "red"
   annotation$HML_cluster.col[annotation$HML_cluster=="ICR Medium"] = "green"
   annotation$HML_cluster.col[annotation$HML_cluster=="ICR Low"] = "blue"
-  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea Low"] = "pink"
-  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea High"] = "purple"
-  bindea_patrick_order = c("Bindea Low", "Bindea High")
+  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea Patrick Low"] = "pink"
+  annotation$bindea_patrick_cluster.col[annotation$bindea_patrick_cluster_name=="Bindea Patrick High"] = "purple"
+  bindea_patrick_order = c("Bindea Patrick Low", "Bindea Patrick High")
   ICR_order = c("ICR Low","ICR Medium","ICR High")
   annotation = annotation[, -which(colnames(annotation) %in% c("bindea_patrick_cluster", "bindea_patrick_score"))]
   annotation = annotation[order(match(annotation$HML_cluster,ICR_order), match(annotation$bindea_patrick_cluster_name, bindea_patrick_order)),]
-  annotation.blot = as.matrix(annotation[,c("HML_cluster.col","bindea_patrick_cluster.col"), drop= FALSE])
-  annotation.blot = annotation.blot[colnames(Expression.data),]                                                                                        # The sample order in annotation.blot needs to be the same as in Expression.data
+  annotation.blot2 = as.matrix(annotation[,c("HML_cluster.col","bindea_patrick_cluster.col"), drop= FALSE])
+  annotation.blot2 = annotation.blot[colnames(Expression.data),]                                                                                        # The sample order in annotation.blot needs to be the same as in Expression.data
   
   ### bindea_patrick plotting
   png(paste0("./5_Figures/Heatmaps/bindea_patrick_Heatmaps/", download.method, "/bindea_patrick_Patrick_Heatmap.3_RNASeq_",Cancer,".png"),res=600,height=9,width=9,unit="in")
-  bindea_patrick.enrichment.z.score <- bindea_patrick.enrichment.z.score[,rownames(annotation.blot)]
+  bindea_patrick.enrichment.z.score <- bindea_patrick.enrichment.z.score[,rownames(annotation.blot2)]
   heatmap.3((as.matrix(bindea_patrick.enrichment.z.score)),
-            main= paste0(Cancer, "\nssGSEA/ Bindea signatures selected according to Patrick Danaher et al (2017)"),
+            main= paste0(Cancer, "\nssGSEA/ Bindea signatures by Patrick Danaher et al (2017)"),
             col=my.palette,
-            ColSideColors=annotation.blot,
+            ColSideColors=annotation.blot2,
             font_size_col_Labs = 1.5,
             cex.main = 10,
             ColSideLabs = ColsideLabels,
@@ -376,7 +374,9 @@ for (i in 1:N.sets) {
   dir.create(paste0("./4_Analysis/",download.method, "/", Cancer),showWarnings = FALSE)
   dir.create(paste0("./4_Analysis/",download.method, "/", Cancer, "/Signature_Enrichment"))
   
-  save(Bindea.enrichment.score, Bindea.enrichment.z.score, xCell.matrix, Hallmark.enrichment.score, Hallmark.enrichment.z.score, 
+  save(Bindea.enrichment.score, Bindea.enrichment.z.score, bindea_patrick.enrichment.score, bindea_patrick.enrichment.z.score,
+       xCell.matrix, Hallmark.enrichment.score, Hallmark.enrichment.z.score, 
        Hallmark.col.means, annotation, file = paste0("./4_Analysis/",download.method, "/", Cancer, "/Signature_Enrichment/GSEA_", Cancer, 
                                          "_Bindea_xCell_HallmarkPathways.Rdata"))
 }
+
