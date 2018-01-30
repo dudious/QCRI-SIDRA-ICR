@@ -23,19 +23,25 @@ code_path = "~/Dropbox (Personal)/Jessica PhD Project/QCRI-SIDRA-ICR-Jessica/"  
 
 source(paste0(code_path, "R tools/ipak.function.R"))
 
-required.bioconductor.packages = c("ComplexHeatmap", "circlize", "gridExtra", "rlist")
+required.bioconductor.packages = c("ComplexHeatmap", "circlize", "gridExtra", "rlist", "reshape2", "ggplot2")
 ibiopak(required.bioconductor.packages)
 
 source(paste0(code_path, "R tools/oncoPrint.R"))                                                                        # source adapted version of oncoPrint version (Other functions of ComplexHeatmap packages are still required still required)
 source(paste0(code_path, "R tools/heatmap.3.R"))
 
 # Previously used parameters
-Group_yellow = c("UCS", "OV", "SARC", "THYM", "GBM", "LGG")
-Group_red = c("UCEC", "MESO", "LUAD", "LUSC", "LIHC", "KIRC", "STAD", "HNSC", "ESCA", "SKCM",
-              "CHOL", "CESC")
-Group_red_yellow_blue = c("UCEC", "MESO", "LUAD", "LUSC", "LIHC", "KIRC", "STAD", "HNSC", "ESCA", "SKCM",
-                          "CHOL", "CESC", "UCS", "OV", "SARC", "THYM", "GBM", "LGG", "TGCT") 
-Group_test = c("SARC", "GBM")
+Group_yellow = c("GBM", "LGG","OV", "SARC", "THYM","UCS")
+Group_red = c("LUAD", "LUSC","MESO","STAD", "UCEC")
+Group_blue = c("CESC", "ESCA", "HNSC","SKCM")
+Group_green = c("BLCA", "COAD", "KICH", "KIRC", "KIRP",
+                "LIHC", "PAAD", "PCPG", "READ", "THCA",
+                "UVM")
+
+Pathway_set_in_plot = c("[HM] KRAS SIGNALING DN", "[HM] HEDGEHOG SIGNALING", "[HM] NOTCH SIGNALING", "[HM] WNT BETA CATENIN SIGNALING",
+                        "[TBI] BARRIER GENES", "[HM] GLYCOLYSIS", "[HM] ESTROGEN RESPONSE", "[TPW] Mesenchymal Transition",
+                        "[HM] TGF BETA SIGNALING", "[HM] UV RESPONSE DN", "[TBI] MAPK UP GENES", "[HM] MITOTIC SPINDLE",
+                        "[TBI] PHOSPHOLIPASE", "[TPW] NOS1 Signature", "[HM] E2F TARGETS", "[HM] G2M CHECKPOINT",
+                        "[HM] OXIDATIVE PHOSPHORYLATION", "[HM] MYC TARGETS", "[HM] DNA REPAIR")
 
 Pathway_set1 = c("BARRIER GENES", "[HM] GLYCOLYSIS", "[HM] ESTROGEN RESPONSE LATE", "[HM] ESTROGEN RESPONSE EARLY",
                  "[HM] KRAS SIGNALING DN", "[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING", "[HM] HEDGEHOG SIGNALING")
@@ -45,7 +51,7 @@ Pathway_set2 = c("[HM] ESTROGEN RESPONSE EARLY",
 
 
 # Set Parameters
-CancerTYPES = Group_test                                                                                    # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = Group_yellow                                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
@@ -55,7 +61,8 @@ download.method = "TCGA_Assembler"
 Log_file = paste0("./1_Log_Files/5.4_OncoPrint_Combining_Cancers_RNASeq/3.12_OncoPrint_RNASeq_Log_File_",               # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
-subset = "COR_COEF"                                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
+subset = "<0.1_for_at_least_one_third_of_cancers"                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
+minimum_number_of_cancers = length(CancerTYPES)/3
 cor_cutoff = -0.1                                                                                                        # Cor-cutoff to define which pathways are selected for each cancer
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"
@@ -124,6 +131,18 @@ if(subset == "COR_COEF"){
   cor_pathways = subset
 }
 
+if(subset == "<0.1_for_at_least_one_third_of_cancers"){
+  load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Correlation/Correlation_Bindea_xCell_Hallmark_irrespective_of_significance_IPA_excluded.Rdata")
+  other_pathways = setdiff(rownames(pancancer_Hallmark_GSEA_correlation_table), Pathway_set_in_plot)
+  pancancer_Hallmark_GSEA_correlation_table = pancancer_Hallmark_GSEA_correlation_table[match(c(Pathway_set_in_plot, other_pathways), rownames(pancancer_Hallmark_GSEA_correlation_table)),]
+  pancancer_Hallmark_GSEA_correlation_table_subset = pancancer_Hallmark_GSEA_correlation_table[,which(colnames(pancancer_Hallmark_GSEA_correlation_table) %in% CancerTYPES)]
+  test_pcor = pancancer_Hallmark_GSEA_correlation_table_subset < cor_cutoff
+  test_pcor = as.data.frame(test_pcor)
+  test_pcor$rowsums = rowSums(test_pcor)
+  pathways_to_exclude = rownames(test_pcor)[which(test_pcor$rowsums <= (minimum_number_of_cancers-1))]                                                                                                              
+  cor_pathways = setdiff(rownames(pancancer_Hallmark_GSEA_correlation_table_subset), pathways_to_exclude)
+}
+
 if(IPA_excluded == "IPA_excluded"){
   cor_pathways = cor_pathways[grep(pattern = "IPA", cor_pathways, invert = TRUE)]
 }
@@ -178,26 +197,28 @@ oncoPrint(matrix_oncoprint_input,
 
 load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata")
 matrix_oncoprint_input = matrix_oncoprint_input[,column_order_oncoprint]
+matrix_oncoprint_input = matrix_oncoprint_input[match(pathway_order, rownames(matrix_oncoprint_input)),]
 cancer_order = ICR_cluster_assignment_allcancers$Cancer[match(colnames(matrix_oncoprint_input), rownames(ICR_cluster_assignment_allcancers))]
 
 cancer_annotation_bar = as.character(cancer_order)
 df_Annotation = data.frame(cancer_annotation_bar)
 colors = Cancer_color_table$color
 colors = setNames(colors, Cancer_color_table$Group.1)
+colors = colors[order(names(colors))]
 
 #subset, "_cor_cutoff_", cor_cutoff, 
 #"_Pathway_set_2"
-
+#dev.new()
 png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
-           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_2", "_", ICR_medium_excluded, "_",
-           IPA_excluded, ".png"),res=600,height= 9,width= 18,unit="in")
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_from_plot", "_", ICR_medium_excluded, "_",
+           IPA_excluded, "_", subset, ".png"),res=600,height= 9,width= 18,unit="in")
 oncoPrint(matrix_oncoprint_input,
           alter_fun = alter_fun,
           col = col,
           heatmap_legend_param = list(title= "", at = c("UP"),
                                       labels = c("Upregulation"), nrow = 1, title_position = "leftcenter"),
           column_title = paste0("OncoPrint: ", paste(CancerTYPES, collapse = " "), " RNASeq expression", "\n N patients = ", number_of_patients,
-                                ", Pathway set 2"),
+                                ", Pathways <-0.1 for at least one third of the cancers"),
                                 #"\n cor cutoff for all cancers: < ", cor_cutoff, " pathways included: ", pathway_selection, " of all cancers"),
           row_order = pathway_order,
           show_row_barplot = FALSE,
@@ -209,3 +230,73 @@ oncoPrint(matrix_oncoprint_input,
           row_title = "Hallmark pathways",
           column_title_gp = gpar(fontface = 2, fontsize = 16))
 dev.off()
+
+#### Extra part of the script: create a bar graph corresponding with the oncoprint
+load("./4_Analysis/TCGA_Assembler/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata")
+matrix_oncoprint_input_t = t(matrix_oncoprint_input) 
+oncoprint_df = as.data.frame(matrix_oncoprint_input_t)
+oncoprint_df$Oncogenic_pathways = do.call(paste, c(oncoprint_df[2:ncol(oncoprint_df)], sep = ""))
+oncoprint_df$Cancer = ICR_cluster_assignment_allcancers$Cancer[match(rownames(oncoprint_df), rownames(ICR_cluster_assignment_allcancers))]
+
+ICR_High_Onco_High = oncoprint_df[oncoprint_df$`ICR cluster`=="UP" & oncoprint_df$Oncogenic_pathways != "",]
+ICR_High_Onco_Low = oncoprint_df[oncoprint_df$`ICR cluster`=="UP" & oncoprint_df$Oncogenic_pathways == "",]
+ICR_Low_Onco_High = oncoprint_df[oncoprint_df$`ICR cluster`=="" & oncoprint_df$Oncogenic_pathways != "",]
+ICR_Low_Onco_Low = oncoprint_df[oncoprint_df$`ICR cluster`=="" & oncoprint_df$Oncogenic_pathways == "",]
+
+png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_from_plot", "_", ICR_medium_excluded, "_",
+           IPA_excluded, "_", subset, "_boxplot_IHOH", ".png"),res=600,height= 5,width= 9,unit="in")
+IHOH = table(ICR_High_Onco_High$Cancer)
+IHOH = IHOH[which(names(IHOH) %in% CancerTYPES)]
+IHOH = IHOH[order(names(IHOH))]
+colors_barplot = colors[names(IHOH)]
+barplot(IHOH, ylab = "Number of patients", col = colors_barplot, cex.axis = 1, cex.names = 1, cex.lab = 1, ylim = c(0, 180))
+dev.off()
+
+png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_from_plot", "_", ICR_medium_excluded, "_",
+           IPA_excluded, "_", subset, "_boxplot_IHOL", ".png"),res=600,height= 5,width= 9,unit="in")
+IHOL = table(ICR_High_Onco_Low$Cancer)
+IHOL = IHOL[which(names(IHOL) %in% CancerTYPES)]
+IHOL = IHOL[order(names(IHOL))]
+colors_barplot = colors[names(IHOL)]
+barplot(IHOL, ylab = "Number of patients", col = colors_barplot, cex.axis = 1, cex.names = 1, cex.lab = 1, ylim = c(0, 180))
+dev.off()
+
+png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_from_plot", "_", ICR_medium_excluded, "_",
+           IPA_excluded, "_", subset, "_boxplot_ILOH", ".png"),res=600,height= 5,width= 9,unit="in")
+ILOH = table(ICR_Low_Onco_High$Cancer)
+ILOH = ILOH[which(names(ILOH) %in% CancerTYPES)]
+ILOH = ILOH[order(names(ILOH))]
+colors_barplot = colors[names(ILOH)]
+barplot(ILOH, ylab = "Number of patients", col = colors_barplot, cex.axis = 1, cex.names = 1, cex.lab = 1, ylim = c(0, 180))
+dev.off()
+
+png(paste0("./5_Figures/Pancancer_plots/OncoPrints/", paste(CancerTYPES, collapse = "_"),
+           "/Hallmark_OncoPrint_", paste(CancerTYPES, collapse = "_"), "_", pathway_selection, "_Pathway_set_from_plot", "_", ICR_medium_excluded, "_",
+           IPA_excluded, "_", subset, "_boxplot_ILOL", ".png"),res=600,height= 5,width= 9,unit="in")
+ILOL = table(ICR_Low_Onco_Low$Cancer)
+ILOL = ILOL[which(names(ILOL) %in% CancerTYPES)]
+ILOL = ILOL[order(names(ILOL))]
+colors_barplot = colors[names(ILOL)]
+barplot(ILOL, ylab = "Number of patients", col = colors_barplot, cex.axis = 1, cex.names = 1, cex.lab = 1, ylim = c(0, 180))
+dev.off()
+
+### Relevant percentages graph
+
+ICR_High = IHOH + IHOL
+ICR_Low = ILOH + ILOL
+
+Percentages_Onco_High_in_ICR_High = IHOH/ICR_High * 100
+Percentages_Onco_High_in_ICR_Low = ILOH/ICR_Low * 100
+
+Plot_df = data.frame(Percentages_Onco_High_in_ICR_High, Percentages_Onco_High_in_ICR_Low)
+Plot_df = Plot_df[,c(1,2,4)]
+colnames(Plot_df) = c("Cancer", "Percentage Onco High in ICR High", "Percentage Onco High in ICR Low")
+Plot_df_long = melt(Plot_df)
+
+dev.new()
+ggplot(Plot_df_long, aes(Cancer, value, fill = variable)) + geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + ylab("Percentage") +
+  xlab("Cancer")
