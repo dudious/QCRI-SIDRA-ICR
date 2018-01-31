@@ -51,7 +51,7 @@ Pathway_set2 = c("[HM] ESTROGEN RESPONSE EARLY",
 
 
 # Set Parameters
-CancerTYPES = Group_yellow                                                                                                 # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
+CancerTYPES = Group_yellow                                                                                                # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
@@ -62,7 +62,7 @@ Log_file = paste0("./1_Log_Files/5.4_OncoPrint_Combining_Cancers_RNASeq/3.12_Onc
                   gsub(":",".",gsub(" ","_",date())),".txt")
 assay.platform = "gene_RNAseq"
 subset = "<0.1_for_at_least_one_third_of_cancers"                                                                                   # Options: "COR_COEF" or c("[HM] WNT BETA CATENIN SIGNALING", "[HM] NOTCH SIGNALING"..etc)
-minimum_number_of_cancers = length(CancerTYPES)/3
+minimum_number_of_cancers = ceiling(length(CancerTYPES)/3)
 cor_cutoff = -0.1                                                                                                        # Cor-cutoff to define which pathways are selected for each cancer
 ICR_medium_excluded = "ICR_medium_excluded"                                                                              # Options: "ICR_medium_excluded" or "all_included"
 IPA_excluded = "IPA_excluded"
