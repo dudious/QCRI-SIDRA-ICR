@@ -38,4 +38,27 @@ for (i in 1:N.sets) {
   save(clinical.matched, RNAseq.matrix, file = paste0("./3_DataProcessing/",download.method, "/", Cancer, "/RNASeqData/",
                                                       Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))
 }
+
+## Transform the data in the Rdata files to match the Assembler version
+i=1
+for(i in 2:N.sets){
+  Cancer = CancerTYPES[i]
+  if(Cancer == "SKCM"){
+    Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
+    load(paste0(Cancer_path, "/", Cancer, "_gene_RNAseq_normalized_TPandTM_filtered.Rdata"))
+  } else{
+    if(!file.exists(paste0("./3_DataProcessing/", download.method, "/", Cancer, "/RNASeqData/", Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))) {next}
+    Cancer_path = paste0 ("./3_DataProcessing/",download.method,"/",Cancer,"/RNASeqData")
+    load(paste0(Cancer_path, "/", Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))
+  }
+ RNAseq.matrix = t(RNAseq.matrix)
+ filtered.norm.RNAseqData = RNAseq.matrix
+ if(Cancer == "SKCM"){
+   save(filtered.norm.RNAseqData, clinical.matched, file = paste0("./3_DataProcessing/", download.method,
+                                                                  "/", Cancer, "/RNASeqData/", Cancer, "_gene_RNAseq_normalized_TPandTM_filtered.Rdata"))
+ } else{
+   save(filtered.norm.RNAseqData, clinical.matched, file = paste0("./3_DataProcessing/", download.method, 
+                                                                  "/", Cancer, "/RNASeqData/", Cancer, "_gene_RNAseq_normalized_TP_filtered.Rdata"))
+ }
+}
   

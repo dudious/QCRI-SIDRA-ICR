@@ -32,11 +32,12 @@ CancerTYPES = "ALL"                                                             
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
 download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"                                                                                          # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
+pw_selection_version = "3.2"
 my.palette <- colorRampPalette(c("blue", "white", "red"))(n = 297)
 ColsideLabels = c("HML ICR clusters", "Bindea clusters")
 Legend = c("ICR Low","ICR Med","ICR High", "Bindea Low", "Bindea High")
 Legend_colors = c("blue","green","red", "pink", "purple")
-Log_file = paste0("./1_Log_Files/3.8_Deconvolution_Bindea/3.8_Available_Unavailable_genes_",                          # Specify complete name of the logfile that will be saved during this script
+Log_file = paste0("./1_Log_Files/", download.method, "/3.8_Deconvolution_Bindea/3.8_Available_Unavailable_genes_",                          # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 
 cat("This is a log file for Deconvolution using Bindeas gene signatures, xCell and Hallmark pathways on RNASeq data",   # Set-up logfile
@@ -61,7 +62,7 @@ cat("This is a log file for Deconvolution using Bindeas gene signatures, xCell a
 
 # Load data and R scripts
 TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stringsAsFactors = FALSE)                   # TCGA.datasets.csv is created from Table 1. (Cancer Types Abbreviations) 
-load(paste0(code_path, "Datalists/Gene_Lists.Rdata"))
+load(paste0(code_path, "Datalists/Selected.pathways.",pw_selection_version,".Rdata"))
 load(paste0(code_path, "Datalists/marker_list_bindea2.RData"))
 
 
@@ -96,11 +97,11 @@ cat(paste0("\nAvailable bindea genes = "), file = Log_file, append = TRUE, sep =
 cat(paste0(toString(available_bindea_genes)), file = Log_file, append = TRUE, sep = "\n")
 cat(paste0("\nUnavailable bindea genes = \n", toString(unavailable_bindea_genes_RNAseq)), file = Log_file, append = TRUE, sep = "\n")
   
-available_Hallmark_genes_RNAseq = unlist(Gene_Lists)[which(unlist(Gene_Lists) %in% rownames(Expression.data))]
-unavailable_Hallmark_genes_RNAseq = unlist(Gene_Lists)[-which(unlist(Gene_Lists) %in% rownames(Expression.data))]
+available_Hallmark_genes_RNAseq = unlist(Selected.pathways)[which(unlist(Selected.pathways) %in% rownames(Expression.data))]
+unavailable_Hallmark_genes_RNAseq = unlist(Selected.pathways)[-which(unlist(Selected.pathways) %in% rownames(Expression.data))]
   
-cat(paste0("Total number of hallmark genes is ", length(unlist(Gene_Lists)), ".",
-             " Of which ", length(unlist(Gene_Lists)[unlist(Gene_Lists) %in% available_genes]), 
+cat(paste0("Total number of hallmark genes is ", length(unlist(Selected.pathways)), ".",
+             " Of which ", length(unlist(Selected.pathways)[unlist(Selected.pathways) %in% available_genes]), 
              " genes are available in expression data.\n"), file = Log_file, append = TRUE, sep = "\n")
 cat(paste0("\nAvailable Hallmark genes = \n", toString(available_Hallmark_genes_RNAseq)), file = Log_file, append = TRUE, sep = "\n")
 cat(paste0("\nUnavailable Hallmark genes = \n", toString(unavailable_Hallmark_genes_RNAseq)), file = Log_file, append = TRUE, sep = "\n")

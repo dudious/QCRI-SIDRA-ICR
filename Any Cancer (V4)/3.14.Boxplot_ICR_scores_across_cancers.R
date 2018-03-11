@@ -18,7 +18,7 @@ ipak(required.packages)
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-download.method = "TCGA_Assembler"                                                                                      # Specify download method (this information to be used when saving the file)
+download.method = "Pancancer_matrix"                                                                                      # Specify download method "TCGA_Assembler", "Pancancer_matrix" (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/3.14_Boxplot_ICR/3.14_Boxplot_ICR",                                                    # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
@@ -86,7 +86,7 @@ for (i in 1:N.sets) {
   cat(paste0("Making boxplot for ", Cancer), file = Log_file, sep = "\n", append = TRUE)
   
   ## load cluster data
-  Cluster_file = paste0("./4_Analysis/", download.method, "/", Cancer, "/clustering/", Cancer, ".", download.method, ".EDASeq.ICR.reps5000/",
+  Cluster_file = paste0("./4_Analysis/TCGA_Assembler/", Cancer, "/clustering/", Cancer, ".", download.method, ".EDASeq.ICR.reps5000/",
                         Cancer, "_ICR_cluster_assignment_k2-6.Rdata")
   load(Cluster_file)
   

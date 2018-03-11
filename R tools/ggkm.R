@@ -154,21 +154,22 @@ ggkm <- function(sfit,
   #cbPalette <- c("#0000FF","#00FF00","#FFA500","#FF0000", "#800080")
   # 4 colors (blue,green,orange,red)
   #cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080")
-  # 5 colors (red, blue, green, yellow, purple)
-  cbPalette <- c("#FF0000", "#0000FF", "#00FF00", "#EDEB02", "#800080")
+  # 5 colors (red, green, blue, yellow, purple)
+  cbPalette <- c("#FF0000", "#00FF00", "#0000FF", "#EDEB02", "#800080")
   # 2 colors (red,black)
   #cbPalette <- c("#FF0000","#000000")
   p <- ggplot( .df, aes(time, surv)) +
     geom_step(aes(colour = strata), size = 0.7) +
 	scale_colour_manual(values=cbPalette) +
     theme_bw() +
-    theme(axis.title.x = element_text(vjust = 0.5),axis.text.x = element_text(size=6)) +    # x-axis label font size
+    theme(axis.title.x = element_text(vjust = 0.5, size = 15, face = "bold"), axis.text = element_text(size = 15, colour = "black"),  # x-axis and y-axis label font size
+          axis.title.y = element_text(size = 15, face = "bold")) +    # y-axis label font size
     scale_x_continuous(xlabs, breaks = times, limits = xlims) +
     scale_y_continuous(ylabs, limits = ylims) +
-    theme(panel.grid.minor = element_blank()) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major = element_blank()) +
     # MOVE LEGEND HERE BELOW [first is x dim, second is y dim]
     theme(legend.position = c(ifelse(m < 8, .10, .15),ifelse(d < 4, .15, .15))) +
-    theme(legend.key = element_rect(colour = NA)) +
+    theme(legend.key = element_rect(colour = NA), legend.text = element_text(size = 18), legend.title = element_blank()) +
     labs(linetype = ystrataname) +
     theme(plot.margin = unit(c(0, 1, .5,ifelse(m < 10, 1.5, 2.5)),"lines")) +
     ggtitle(main)
@@ -199,7 +200,7 @@ ggkm <- function(sfit,
     pvaltxt <- paste("HR = ", PLOT_HR ,"p =", PLOT_P, "\n CI = ", PLOT_CI1, "-", PLOT_CI2)
     # MOVE P-VALUE LEGEND HERE BELOW [set x and y]
     #p <- p + annotate("text",x = 150, y = 0.1,label = pvaltxt)
-    p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt)
+    p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt, size = 5.5)
   }}
   
   
@@ -232,32 +233,34 @@ ggkm <- function(sfit,
     risk.data$strata <- factor(risk.data$strata, levels=rev(levels(risk.data$strata)))
     
     data.table <- ggplot(risk.data,aes(x = time, y = strata, label = format(n.risk, nsmall = 0))) +
-      geom_text(size = 2.5) + theme_bw() +                                                           # tabel font size
+      geom_text(size = 5) + theme_bw() +                                                           # tabel font size
       scale_y_discrete(breaks = as.character(levels(risk.data$strata)),
                        labels = rev(ystratalabs)) +
       scale_x_continuous("Numbers at risk", limits = xlims) +
-      theme(axis.title.x = element_text(size = 10, vjust = 1),
+      theme(axis.title.x = element_text(size = 15, vjust = 1, colour = "black"),
+            axis.title.y = element_text(size = 15, colour = "black"),
+            legend.text = element_text(size = 15, colour = "black"),
             panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            panel.border = element_blank(),axis.text.x = element_blank(),
-            axis.ticks = element_blank(),axis.text.y = element_text(face = "bold",hjust = 1))
+            panel.border = element_blank(), axis.text.x = element_blank(),
+            axis.ticks = element_blank(), axis.text.y = element_text(face = "bold",hjust = 1, colour = "black", size = 10))
     
     data.table <- data.table +
       theme(legend.position = "none") + xlab(NULL) + ylab(NULL)
     
     # ADJUST POSITION OF TABLE FOR AT RISK
     data.table <- data.table +
-      theme(plot.margin = unit(c(-1.5, 1, 0.1, ifelse(m < 10, 2.5, 3.5) - 0.15 * m), "lines"))
+      theme(plot.margin = unit(c(0.2, 1, 0.2, ifelse(m < 10, 2.5, 3.5) - 0.15 * m), "lines"))
     
     #######################
     # Plotting the graphs #
     #######################
     
     grid.arrange(p, blank.pic, data.table, clip = FALSE, nrow = 3,
-                 ncol = 1, heights = unit(c(2, .1, .25),c("null", "null", "null")))
+                 ncol = 1, heights = unit(c(2, 0, 0.5),c("null", "null", "null")))
     
     if(returns) {
       a <- arrangeGrob(p, blank.pic, data.table, clip = FALSE, nrow = 3,
-                       ncol = 1, heights = unit(c(2, .1, .25), c("null", "null", "null")))
+                       ncol = 1, heights = unit(c(2, 0, 0.5), c("null", "null", "null")))
       return(a)
     }#if
   } else {

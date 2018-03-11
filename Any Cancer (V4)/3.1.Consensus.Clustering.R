@@ -44,7 +44,8 @@ TCGA.cancersets = read.csv(paste0(code_path, "Datalists/TCGA.datasets.csv"),stri
 dir.create("./4_Analysis/",showWarnings = FALSE)                                                                        # Create folder to save processed data (by Assembler module B)
 dir.create(paste0("./4_Analysis/",download.method),showWarnings = FALSE)
 dir.create(paste0("./1_Log_Files/"), showWarnings = FALSE)                                                              # Create folder to save logfile
-dir.create(paste0("./1_Log_Files/3.1_Consensus_Clustering/"), showWarnings = FALSE)
+dir.create(paste0("./1_Log_Files/", download.method), showWarnings = FALSE)
+dir.create(paste0("./1_Log_Files/", download.method, "/3.1_Consensus_Clustering"), showWarnings = FALSE)
 cat("This is a log file for Consensus Clustering of RNASeq data",                                                       # Set-up logfile
     "__________________________________________",
     "",

@@ -79,6 +79,8 @@ if (CancerTYPES == "ALL") {
 N.sets = length(CancerTYPES)
 
 start.time.all <- Sys.time()
+
+i=1
 # Normalization
 for (i in 1:N.sets) {
   start.time.cancer = Sys.time()
@@ -142,7 +144,7 @@ for (i in 1:N.sets) {
   
   
   RNASeq.expr.set = newSeqExpressionSet(RNAseqData.to.normalize, featureData = geneInfo)                                    # Create a new SeqExpressionSet object.
-  fData(RNASeq.expr.set)[, "gcContent"] = as.numeric(geneInfo[, "gcContent"])                                               # Make sure gcContenet is numeric
+  fData(RNASeq.expr.set)[, "gcContent"] = as.numeric(geneInfo[, "gcContent"])                                               # Make sure gcContent is numeric
   RNASeq.expr.set = withinLaneNormalization(RNASeq.expr.set, "gcContent", which = "upper", offset = TRUE)                   # Removes lane gene specific effects, for example effects related to gene length or GC content
   RNASeq.expr.set = betweenLaneNormalization(RNASeq.expr.set, which = "upper", offset = TRUE)                               # Removes effect related to in between lane distributional differences, as sequencing depth
   RNASeq.NORM = log(RNAseqData.to.normalize + .1) + offst(RNASeq.expr.set)                                                  # Apply the Edaseq Ofset
