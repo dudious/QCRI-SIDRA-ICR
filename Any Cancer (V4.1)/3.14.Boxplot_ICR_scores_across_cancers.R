@@ -18,12 +18,12 @@ ipak(required.packages)
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-download.method = "Pancancer_matrix"                                                                                      # Specify download method "TCGA_Assembler", "Pancancer_matrix" (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                      # Specify download method "TCGA_Assembler", "Pancancer_matrix" (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"
 Log_file = paste0("./1_Log_Files/", download.method, "/3.14_Boxplot_ICR/3.14_Boxplot_ICR",                                                    # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
 ICR_classification_k = "HML_classification"
-basis_ordering = "Mean ICR"
+basis_ordering = "Mean ICR High"
 subset = "all"                                                                                                          # Subset can be "ICR High", "ICR Low", "All"
 my.palette = colorRampPalette(c("#BEB9DA", "#FFD82F", "#BC7FBC", "#666666", "#387EB7", 
                                 "#FEB462", "#E72A89", "#F781BF", "#B3B3B3", "#396BAF", 
@@ -137,14 +137,62 @@ ICR_cluster_assignment_allcancers$Cancer = factor(ICR_cluster_assignment_allcanc
 Cancer_color_table = Cancer_color_table[order(match(Cancer_color_table$Group.1, Cancer_order)),]
 
 png(paste0("./5_Figures/ICR_distribution_plots/ICR_boxplot_across_cancers/", 
-           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering, "_", ICR_classification_k,"_across_cancers.png"), res=600,height=6,width=15,unit="in")
+           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering, "_", ICR_classification_k,
+           "_colour_by_cancer_across_cancers.png"), res=600,height=6,width=15,unit="in")
 boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= HML_cluster, y= ICRscore, fill = Cancer)) +
   geom_boxplot(outlier.colour = NA) +
   scale_fill_manual(values = Cancer_color_table$color) +
   scale_y_continuous("ICR score") +
   facet_grid(. ~ Cancer) +
   ggtitle(paste0("ICR scores in ", subset, " according to ", ICR_classification_k, " across cancers ordered by ", basis_ordering)) +
-  theme(plot.title = element_text(size=14, face = "bold")) + theme(axis.title = element_text(size = 13)) + 
+  theme(plot.title = element_text(size=14, face = "bold")) + theme(axis.title = element_text(size = 15, face = "bold", colour = "black")) + 
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(colour = "grey", size = 0.2),
+        panel.grid.minor.y = element_line(colour = "grey", size = 0.2),
+        axis.text.x = element_text(angle = 90, colour = "black"),
+        strip.text.x = element_text(colour = "black")) +
+  theme(axis.line = element_line(color= "black", size = 0.4)) +
+  guides(fill=FALSE)
+print(boxplot_ICR)
+dev.off()
+
+png(paste0("./5_Figures/ICR_distribution_plots/ICR_boxplot_across_cancers/", 
+           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering, "_", ICR_classification_k,
+           "_colour_by_ICR_cluster_across_cancers.png"), res=600,height=6,width=15,unit="in")
+boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= HML_cluster, y= ICRscore, fill = HML_cluster)) +
+  geom_boxplot(outlier.colour = NA) +
+  scale_fill_manual(values = c("blue", "green", "red")) +
+  scale_y_continuous("ICR score") +
+  facet_grid(. ~ Cancer, switch = "x") +
+  ggtitle(paste0("ICR scores in ", subset, " according to ", ICR_classification_k, " across cancers ordered by ", basis_ordering)) +
+  xlab("Cancer types") +
+  theme(plot.title = element_text(size=14, face = "bold")) + theme(axis.title = element_text(size = 15, face = "bold", colour = "black")) + 
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(colour = "grey", size = 0.2),
+        panel.grid.minor.y = element_line(colour = "grey", size = 0.2),
+        axis.text.x = element_blank(),
+        strip.text.x = element_text(colour = "black", size = 10),
+        strip.placement = "outside",
+        strip.background = element_blank()) +
+  theme(axis.line = element_line(color= "black")) +
+  guides(fill=FALSE)
+print(boxplot_ICR)
+dev.off()
+
+save(ICR_cluster_assignment_allcancers, Cancer_color_table, file =paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))
+
+
+## Extra plot
+
+png(paste0("./5_Figures/ICR_distribution_plots/ICR_boxplot_across_cancers/", 
+           download.method, "/ICR_distribution_boxplot_ordered_by_", basis_ordering, "_Mean_ICR",
+           "_colour_by_cancer_across_cancers.png"), res=600,height=6,width=15,unit="in")
+boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= Cancer, y= ICRscore, fill = Cancer)) +
+  geom_boxplot(outlier.colour = NA) +
+  scale_fill_manual(values = Cancer_color_table$color) +
+  scale_y_continuous("ICR score") +
+  ggtitle(paste0("Mean ICR scores in ", subset, " across cancers ordered by ", basis_ordering)) +
+  theme(plot.title = element_text(size=14, face = "bold")) + theme(axis.title = element_text(size = 15, face = "bold", colour = "black")) + 
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "grey", size = 0.2),
         panel.grid.minor.y = element_line(colour = "grey", size = 0.2),
@@ -153,5 +201,3 @@ boxplot_ICR = ggplot(data = ICR_cluster_assignment_allcancers, aes(x= HML_cluste
   guides(fill=FALSE)
 print(boxplot_ICR)
 dev.off()
-
-save(ICR_cluster_assignment_allcancers, Cancer_color_table, file =paste0("./4_Analysis/", download.method, "/Pan_Cancer/Clustering/ICR_cluster_assignment_allcancers.Rdata"))

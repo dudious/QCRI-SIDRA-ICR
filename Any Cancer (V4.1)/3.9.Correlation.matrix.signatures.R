@@ -29,7 +29,7 @@ ipak(required.packages)                                                         
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
-download.method = "Pancancer_matrix"                                                                                       # Specify download method (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                       # Specify download method (this information to be used when saving the file)
 colpattern = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 200)                                                 # Specify which genes will be correlated
 Log_file = paste0("./1_Log_Files/", download.method,"/3.9_Correlation_matrix_Signatures/3.9_Correlation_matrix_signatures", 
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
@@ -87,7 +87,6 @@ start.time <- Sys.time ()
 
 mean_correlation_table = data.frame(Cancertype = CancerTYPES, Mean.correlation.Bindea = 0, Mean.correlation.xCell = 0, Mean.correlation.Hallmark.CM = 0,
                                     Mean.correlation.Hallmark.GSEA = 0, Mean.correlation.bindea.xCell.Hallmark = 0)
-
 i=1
 for (i in 1:N.sets) {
   Cancer = CancerTYPES[i]

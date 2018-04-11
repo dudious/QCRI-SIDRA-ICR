@@ -35,7 +35,7 @@ source(paste0(code_path, "R tools/heatmap.3.R"))
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-download.method = "Pancancer_matrix"
+download.method = "Assembler_Panca_Normalized"
 #ColsideLabels = c("HML ICR clusters", "Bindea clusters")
 #Legend = c("ICR Low","ICR Med","ICR High", "Bindea Low", "Bindea High")
 #Legend_colors = c("blue","green","red", "pink", "purple")

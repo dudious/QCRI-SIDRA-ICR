@@ -30,7 +30,7 @@ ipak(required.packages)
 ## Set Parameters
 CancerTYPES = c("ALL")                                                                                                   # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
-download.method = "Pancancer_matrix"                                                                                       # Specify download method (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                       # Specify download method (this information to be used when saving the file)
 my.palette = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 297)                                                 # Specify which genes will be correlated
 Log_file = paste0("./1_Log_Files/", download.method, "/5.1_Pancancer_Correlation_matrix_Signatures/5.1_Pancancer_Correlation_matrix_signatures", 
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
@@ -53,7 +53,7 @@ if (CancerTYPES == "ALL") {
 
 # Remove LAML and TGCT(has zero and inf values)
 All_survival_analysis_data = All_survival_analysis_data[-which(All_survival_analysis_data$Cancertype == "LAML"),]
-All_survival_analysis_data = All_survival_analysis_data[-which(All_survival_analysis_data$Cancertype == "PCPG"),]
+All_survival_analysis_data = All_survival_analysis_data[-which(All_survival_analysis_data$Cancertype == "THYM"),]
 All_survival_analysis_data = All_survival_analysis_data[-which(All_survival_analysis_data$Cancertype == "TGCT"),]
 All_survival_analysis_data$p_value = round(All_survival_analysis_data$p_value, digits = 3)
 HR.table = All_survival_analysis_data
@@ -90,5 +90,6 @@ forestplot(tabletext,
            xlog=TRUE,
            boxsize = .25,
            vertices = TRUE,
-           col=fpColors(box="royalblue",line="darkblue", summary="royalblue"))
+           col=fpColors(box="royalblue",line="darkblue", summary="royalblue"),
+           txt_gp = fpTxtGp(label = gpar(fontsize = 10), xlab = gpar(fontsize = 10), cex = 1))
 

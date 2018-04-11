@@ -200,7 +200,7 @@ ggkm <- function(sfit,
     pvaltxt <- paste("HR = ", PLOT_HR ,"p =", PLOT_P, "\n CI = ", PLOT_CI1, "-", PLOT_CI2)
     # MOVE P-VALUE LEGEND HERE BELOW [set x and y]
     #p <- p + annotate("text",x = 150, y = 0.1,label = pvaltxt)
-    p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt, size = 5.5)
+    p <- p + annotate("text",x = 0.6 * max(sfit$time), y = 0.95,label = pvaltxt, size = 8)
   }}
   
   

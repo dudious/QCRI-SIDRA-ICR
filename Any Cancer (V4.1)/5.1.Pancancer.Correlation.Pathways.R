@@ -28,7 +28,7 @@ ipak(required.packages)                                                         
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                      # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                      # If CancerTYPES = "ALL", specify cancertypes that you do not want to download
-download.method = "Pancancer_matrix"                                                                                       # Specify download method (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                       # Specify download method (this information to be used when saving the file)
 my.palette = colorRampPalette(c("#152B7E", "white", "#1B7E09"))(n = 297)                                                 # Specify which genes will be correlated
 Log_file = paste0("./1_Log_Files/", download.method, "/5.1_Pancancer_Correlation_matrix_Signatures/5.1_Pancancer_Correlation_matrix_signatures", 
                   "_Bindea_xCell_Hallmark", "_Log_File_", gsub(":",".",gsub(" ","_",date())),".txt")
@@ -49,6 +49,7 @@ if (CancerTYPES == "ALL") {
 # Create folders
 dir.create("./5_Figures/",showWarnings = FALSE)
 dir.create(paste0("./5_Figures/Pancancer_plots"), showWarnings = FALSE)
+dir.create(paste0("./5_Figures/Pancancer_plots/", download.method), showWarnings = FALSE)
 
 dir.create(paste0("./1_Log_Files/"), showWarnings = FALSE)
 dir.create(paste0("./1_Log_Files/", download.method), showWarnings = FALSE)

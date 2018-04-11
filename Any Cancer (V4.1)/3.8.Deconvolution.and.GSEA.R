@@ -38,7 +38,7 @@ library ("xCell")
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = ""                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-download.method = "Pancancer_matrix_NA_genes_excl"                                                                                      # Specify download method (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq"                                                                                          # Specify to which location TCGA-Assembler_v2.0.3 was downloaded
 pw_selection_version = "3.2"
 Log_file = paste0("./1_Log_Files/", download.method ,"/3.8_Deconvolution_Bindea/3.8_Deconvolution_Bindea_Log_File_",                          # Specify complete name of the logfile that will be saved during this script
@@ -100,7 +100,7 @@ start.time.process.all = Sys.time()
 msg = paste0("Calculating deconvolution scores and generating heatmaps", "\n")
 cat(msg)
 
-i=1
+i=26
 for (i in 1:N.sets) {
   start.time.process.cancer = Sys.time()
   Cancer = CancerTYPES[i]

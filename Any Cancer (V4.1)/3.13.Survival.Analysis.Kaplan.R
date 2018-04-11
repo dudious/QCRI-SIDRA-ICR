@@ -27,7 +27,7 @@ source(paste0(code_path, "R tools/ggkm.R"))
 # Set Parameters
 CancerTYPES = "ALL"                                                                                                     # Specify the cancertypes that you want to download or process, c("...","...") or "ALL"
 Cancer_skip = c("")                                                                                                        # If CancerTYPES = "ALL", specify here if you want to skip cancertypes
-download.method = "Pancancer_matrix"                                                                                      # Specify download method (this information to be used when saving the file)
+download.method = "Assembler_Panca_Normalized"                                                                                      # Specify download method (this information to be used when saving the file)
 assay.platform = "gene_RNAseq" 
 Log_file = paste0("./1_Log_Files/", download.method ,"/3.13_Survival_Analysis/3.13_Survival_Analysis_Log_File_",                              # Specify complete name of the logfile that will be saved during this script
                   gsub(":",".",gsub(" ","_",date())),".txt")
@@ -100,8 +100,8 @@ for (i in 1:N.sets) {
                         Cancer, "_ICR_cluster_assignment_k2-6.Rdata")
   load(Cluster_file)
   
-  if(download.method == "TCGA_Assembler"){
-    Survival_data = read.csv(paste0("./3_DataProcessing/",download.method,"/",Cancer,"/SurvivalData/updatedsurvivaldata.csv"))
+  if(download.method == "TCGA_Assembler" | download.method == "Assembler_Panca_Normalized"){
+    Survival_data = read.csv(paste0("./3_DataProcessing/TCGA_Assembler/",Cancer,"/SurvivalData/updatedsurvivaldata.csv"))
   }
   if(download.method == "Pancancer_matrix"){
     if(Cancer == "SKCM"){
